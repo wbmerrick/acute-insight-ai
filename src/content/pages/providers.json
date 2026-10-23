@@ -1,0 +1,171 @@
+{
+  "hero": {
+    "eyebrow": "For providers & clinics",
+    "heading": "Walk into every visit already briefed.",
+    "subheading": "Acute Insight AI gathers, structures, and summarizes your patients' histories before the visit — adaptive AI intake for them, a flagged clinical brief for you. Now enrolling early-access practices in our clinical beta.",
+    "primaryButton": "Request early access",
+    "secondaryButton": "Learn how it works"
+  },
+  "stats": [
+    {
+      "id": "st1",
+      "value": "Minutes",
+      "label": "Patient intake, by design"
+    },
+    {
+      "id": "st2",
+      "value": "Instant",
+      "label": "AI brief on submission"
+    },
+    {
+      "id": "st3",
+      "value": "Flagged",
+      "label": "Red flags surfaced up front"
+    },
+    {
+      "id": "st4",
+      "value": "Beta",
+      "label": "Early access now open"
+    }
+  ],
+  "benefits": {
+    "eyebrow": "Why providers choose us",
+    "heading": "Everything you need. Nothing you don't.",
+    "items": [
+      {
+        "id": "b1",
+        "title": "AI-prepared patient briefs",
+        "body": "Every patient arrives with a structured clinical summary generated from their adaptive intake. You know the chief complaint, severity, duration, medications, allergies, and relevant history before you open the chart."
+      },
+      {
+        "id": "b2",
+        "title": "Clinical flags up front",
+        "body": "High severity ratings, red-flag symptoms, and chronic patterns are extracted automatically and surfaced at the top of each brief — a deterministic safety layer plus AI review on every intake."
+      },
+      {
+        "id": "b3",
+        "title": "Emergency screening built in",
+        "body": "Patients describing emergency-level symptoms are immediately directed to 911/ER guidance during intake — before the case ever sits in your queue."
+      },
+      {
+        "id": "b4",
+        "title": "Works in any browser",
+        "body": "The provider dashboard is web-based with nothing to install and no EHR integration required to start. Review briefs from the clinic, the hospital, or home."
+      },
+      {
+        "id": "b5",
+        "title": "Built by a practicing hospitalist",
+        "body": "Acute Insight AI is physician-founded. The intake protocol, the flags, and the brief format are designed around how clinicians actually think — and refined in real clinical work."
+      },
+      {
+        "id": "b6",
+        "title": "Free during the beta",
+        "body": "Early-access practices use Acute Insight AI at no cost during the clinical beta, and get a direct line to the founder to shape what gets built next."
+      }
+    ]
+  },
+  "howItWorks": {
+    "eyebrow": "How it works for providers",
+    "heading": "From request to first brief in days",
+    "steps": [
+      {
+        "id": "p1",
+        "number": "01",
+        "title": "Request early access",
+        "body": "Tell us about your practice. We'll set up your provider account and walk you through the dashboard — setup takes minutes, not weeks."
+      },
+      {
+        "id": "p2",
+        "number": "02",
+        "title": "Patients complete their intake",
+        "body": "Invite patients to complete their intake before the visit — from any device, at their own pace, with emergency screening built in."
+      },
+      {
+        "id": "p3",
+        "number": "03",
+        "title": "Review AI-prepared briefs",
+        "body": "Each completed intake lands in your queue as a structured brief: chief complaint, HPI, medications, allergies, history, and clinical flags. Search and filter to what needs attention."
+      },
+      {
+        "id": "p4",
+        "number": "04",
+        "title": "Walk in prepared",
+        "body": "Start the visit at the real conversation. Your patients stop repeating themselves, and you stop excavating the story from scratch."
+      }
+    ]
+  },
+  "earnings": {
+    "eyebrow": "The clinical beta",
+    "heading": "Built with early practices, not just for them",
+    "body": "We're enrolling a small group of practices and independent clinicians to use Acute Insight AI in real workflows and shape its roadmap. Beta participants pay nothing and get direct access to the founding team.",
+    "details": [
+      {
+        "id": "e1",
+        "label": "Free during beta",
+        "detail": "No cost for early-access practices"
+      },
+      {
+        "id": "e2",
+        "label": "Fast setup",
+        "detail": "Web-based — no installation, no integration required"
+      },
+      {
+        "id": "e3",
+        "label": "Direct founder access",
+        "detail": "Feedback goes straight to the physician building it"
+      },
+      {
+        "id": "e4",
+        "label": "Shape the roadmap",
+        "detail": "Early practices drive what gets built next"
+      },
+      {
+        "id": "e5",
+        "label": "No lock-in",
+        "detail": "Leave the beta at any time"
+      },
+      {
+        "id": "e6",
+        "label": "Your patients, your data",
+        "detail": "Export your data whenever you want"
+      }
+    ]
+  },
+  "testimonials": [],
+  "requirements": {
+    "eyebrow": "Who it's for",
+    "heading": "A good fit for the beta if you are…",
+    "items": [
+      {
+        "id": "r1",
+        "text": "A practicing physician, NP, or PA who wants visits to start informed"
+      },
+      {
+        "id": "r2",
+        "text": "A clinic or group tired of paper intake and portal forms patients abandon"
+      },
+      {
+        "id": "r3",
+        "text": "A telehealth or direct-care practice that needs structured pre-visit histories"
+      },
+      {
+        "id": "r4",
+        "text": "A post-acute or long-term-care group coordinating care across settings"
+      },
+      {
+        "id": "r5",
+        "text": "Comfortable using a web dashboard alongside your existing EHR"
+      },
+      {
+        "id": "r6",
+        "text": "Willing to share feedback that shapes the product"
+      }
+    ]
+  },
+  "cta": {
+    "heading": "Ready to see your patients' stories before the visit?",
+    "subheading": "Request early access and we'll reach out personally — the beta is small by design.",
+    "primaryButton": "Request early access",
+    "secondaryButton": "Have questions? Contact us"
+  }
+}

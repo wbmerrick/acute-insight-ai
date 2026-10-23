@@ -1,0 +1,83 @@
+{
+  "pages/about/hero": {
+    "requestedSize": {
+      "width": 1200,
+      "height": 600,
+      "fit": "cover"
+    },
+    "orientations": "horizontal",
+    "graphicalStyles": "photography",
+    "minimumSize": "large",
+    "mediaType": "image",
+    "currentUrl": "https://img1.wsimg.com/isteam/getty/2217159776",
+    "searchQuery": "modern telehealth doctor patient video consultation technology",
+    "alternatives": [
+      "https://img1.wsimg.com/isteam/getty/2189887556",
+      "https://img1.wsimg.com/isteam/getty/2262026681",
+      "https://img1.wsimg.com/isteam/getty/1283344373"
+    ],
+    "userModified": false,
+    "createdAt": "2026-10-23T09:54:22.675Z",
+    "lastUpdated": "2026-10-23T09:54:22.675Z",
+    "gettyId": "2217159776",
+    "alternativeGettyIds": [
+      "2189887556",
+      "2262026681",
+      "1283344373"
+    ]
+  },
+  "pages/providers/hero": {
+    "requestedSize": {
+      "width": 1200,
+      "height": 600,
+      "fit": "cover"
+    },
+    "orientations": "horizontal",
+    "graphicalStyles": "photography",
+    "minimumSize": "large",
+    "mediaType": "image",
+    "currentUrl": "https://img1.wsimg.com/isteam/getty/2277928446",
+    "searchQuery": "doctor working on laptop telehealth remote medicine professional",
+    "alternatives": [
+      "https://img1.wsimg.com/isteam/getty/2248729317",
+      "https://img1.wsimg.com/isteam/getty/1370517491",
+      "https://img1.wsimg.com/isteam/getty/2271320931"
+    ],
+    "userModified": false,
+    "createdAt": "2026-10-23T10:02:09.958Z",
+    "lastUpdated": "2026-10-23T10:02:09.958Z",
+    "gettyId": "2277928446",
+    "alternativeGettyIds": [
+      "2248729317",
+      "1370517491",
+      "2271320931"
+    ]
+  },
+  "pages/patients/hero": {
+    "requestedSize": {
+      "width": 1200,
+      "height": 600,
+      "fit": "cover"
+    },
+    "orientations": "horizontal",
+    "graphicalStyles": "photography",
+    "minimumSize": "large",
+    "mediaType": "image",
+    "currentUrl": "https://img1.wsimg.com/isteam/getty/2283148045",
+    "searchQuery": "patient using smartphone telehealth app at home relaxed",
+    "alternatives": [
+      "https://img1.wsimg.com/isteam/getty/2116655955",
+      "https://img1.wsimg.com/isteam/getty/1394549786",
+      "https://img1.wsimg.com/isteam/getty/2241570371"
+    ],
+    "userModified": false,
+    "createdAt": "2026-10-23T10:10:04.395Z",
+    "lastUpdated": "2026-10-23T10:10:04.395Z",
+    "gettyId": "2283148045",
+    "alternativeGettyIds": [
+      "2116655955",
+      "1394549786",
+      "2241570371"
+    ]
+  }
+}

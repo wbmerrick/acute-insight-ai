@@ -1,0 +1,11 @@
+{
+  "brandName": "Acute Insight AI",
+  "heading": "Create your account",
+  "subheading": "Start your first AI-powered intake in minutes",
+  "nameLabel": "Full name",
+  "emailLabel": "Email address",
+  "passwordLabel": "Password",
+  "submitButton": "Create Account",
+  "hasAccountText": "Already have an account?",
+  "hasAccountLink": "Sign in"
+}

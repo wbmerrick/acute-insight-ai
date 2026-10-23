@@ -1,0 +1,135 @@
+{
+  "meta": {
+    "title": "How It Works — Acute Insight AI",
+    "description": "See how Acute Insight AI guides patients through AI-powered intake and gives providers instant clinical summaries, flags, and structured data."
+  },
+  "hero": {
+    "eyebrow": "The full picture",
+    "heading": "From first symptom to clinical insight",
+    "subheading": "Acute Insight AI connects patients and providers through an intelligent intake layer — structured questionnaires, conversational AI, and real-time clinical analysis."
+  },
+  "patientSection": {
+    "eyebrow": "Patient workflow",
+    "heading": "Start your intake in minutes",
+    "subheading": "No waiting rooms. No paper forms. Our AI guides you through a clinical intake that captures everything your provider needs.",
+    "steps": [
+      {
+        "id": "step-patient-1",
+        "number": "01",
+        "title": "Create your account",
+        "body": "Sign up in seconds with your email. Your health information stays private — visible only to you and your care team, and never sold or shared."
+      },
+      {
+        "id": "step-patient-2",
+        "number": "02",
+        "title": "Choose your intake mode",
+        "body": "Pick the guided questionnaire for a structured step-by-step experience, or chat naturally with our AI — it adapts to how you communicate."
+      },
+      {
+        "id": "step-patient-3",
+        "number": "03",
+        "title": "Describe your symptoms",
+        "body": "Answer questions about your chief complaint, duration, severity, medications, allergies, and medical history at your own pace."
+      },
+      {
+        "id": "step-patient-4",
+        "number": "04",
+        "title": "Submit to your provider",
+        "body": "Your intake is instantly analyzed and delivered to your care team with an AI-generated summary and clinical flags highlighted."
+      }
+    ],
+    "cta": {
+      "label": "Start your intake",
+      "href": "/patients"
+    }
+  },
+  "providerSection": {
+    "eyebrow": "Provider workflow",
+    "heading": "Every patient, fully prepared",
+    "subheading": "Your dashboard surfaces what matters — AI summaries, clinical flags, and complete intake histories — so you can focus on care.",
+    "steps": [
+      {
+        "id": "step-provider-1",
+        "number": "01",
+        "title": "Review your patient queue",
+        "body": "See all incoming intakes in a scrollable queue. Search by name, email, or chief complaint. Filter to flagged cases that need immediate attention."
+      },
+      {
+        "id": "step-provider-2",
+        "number": "02",
+        "title": "Read the AI summary",
+        "body": "Each intake includes a structured AI-generated clinical summary covering chief complaint, symptom timeline, severity, medications, and relevant history."
+      },
+      {
+        "id": "step-provider-3",
+        "number": "03",
+        "title": "Act on clinical flags",
+        "body": "Our model automatically surfaces high-priority signals — potential drug interactions, red-flag symptoms, and emergency indicators — so nothing slips through."
+      },
+      {
+        "id": "step-provider-4",
+        "number": "04",
+        "title": "Access the full transcript",
+        "body": "Drill into the complete Q&A transcript or chat history alongside the patient's health profile, demographics, and prior intake history."
+      }
+    ],
+    "cta": {
+      "label": "Explore provider tools",
+      "href": "/providers"
+    }
+  },
+  "featuresSection": {
+    "eyebrow": "Key features",
+    "heading": "Built for clinical confidence",
+    "features": [
+      {
+        "id": "feat-1",
+        "icon": "ai",
+        "title": "AI-powered analysis",
+        "body": "Every intake is processed by a frontier large language model guided by a physician-written clinical protocol. Summaries are structured, consistent, and ready for provider review."
+      },
+      {
+        "id": "feat-2",
+        "icon": "emergency",
+        "title": "Emergency detection",
+        "body": "Real-time keyword and pattern analysis flags emergency-level symptoms mid-intake. Patients are immediately shown a 911 prompt and can continue or exit safely."
+      },
+      {
+        "id": "feat-3",
+        "icon": "hipaa",
+        "title": "Privacy first",
+        "body": "Patient data is encrypted in transit with role-based access controls, and never sold or shared. Full HIPAA-ready infrastructure — encryption at rest, audit logging, BAAs — is on our checklist before general availability."
+      },
+      {
+        "id": "feat-4",
+        "icon": "modes",
+        "title": "Dual intake modes",
+        "body": "Patients choose between a structured 8-step questionnaire or a free-form AI chat. Both paths produce the same structured clinical output."
+      },
+      {
+        "id": "feat-5",
+        "icon": "flags",
+        "title": "Clinical flag extraction",
+        "body": "High severity ratings, red-flag symptoms, and chronic patterns are automatically extracted and surfaced as actionable flags in the provider dashboard."
+      },
+      {
+        "id": "feat-6",
+        "icon": "history",
+        "title": "Full intake history",
+        "body": "Patients and providers can access a chronological log of all past intakes, enabling longitudinal care tracking and trend identification over time."
+      }
+    ]
+  },
+  "ctaSection": {
+    "heading": "Ready to experience it?",
+    "subheading": "Whether you're a patient looking for faster care or a provider seeking better intake data, Acute Insight AI is built for you.",
+    "patientCta": {
+      "label": "I'm a patient",
+      "href": "/patients"
+    },
+    "providerCta": {
+      "label": "I'm a provider",
+      "href": "/providers"
+    }
+  }
+}

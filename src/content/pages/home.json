@@ -1,0 +1,128 @@
+{
+  "hero": {
+    "badge": "Now in clinical beta",
+    "headline1": "Healthcare",
+    "headline2": "That",
+    "headlineAccent": "Thinks",
+    "headline3": "Ahead.",
+    "subhead": "Acute Insight AI replaces paper forms and clunky portals with an intelligent intake that adapts to each patient — tap-based, conversational, and clinically structured.",
+    "ctaPrimary": "Start Your Intake",
+    "ctaSecondary": "For Providers",
+    "stats": [
+      {
+        "id": "stat-1",
+        "value": "Minutes",
+        "label": "to complete, by design"
+      },
+      {
+        "id": "stat-2",
+        "value": "Adaptive",
+        "label": "questions that follow your answers"
+      },
+      {
+        "id": "stat-3",
+        "value": "Instant",
+        "label": "provider brief on submit"
+      }
+    ]
+  },
+  "howItWorks": {
+    "eyebrow": "How It Works",
+    "headline": "Ask. Understand. Inform.",
+    "subhead": "Three intelligent steps that transform patient history into clinical clarity — before the appointment begins.",
+    "steps": [
+      {
+        "id": "step-1",
+        "step": "01",
+        "title": "Ask",
+        "subtitle": "Tap, don't type",
+        "description": "Adaptive multiple-choice questions guide patients through their history. The AI branches intelligently based on each answer — no irrelevant questions, no dead ends."
+      },
+      {
+        "id": "step-2",
+        "step": "02",
+        "title": "Understand",
+        "subtitle": "AI pattern recognition",
+        "description": "Responses are analyzed in real-time against clinical frameworks. The system identifies patterns, flags risk factors, and builds a structured medical history automatically."
+      },
+      {
+        "id": "step-3",
+        "step": "03",
+        "title": "Inform",
+        "subtitle": "Instant provider brief",
+        "description": "Providers receive a concise, structured summary before the visit — chief complaint, relevant history, medications, and AI-flagged considerations. Walk in prepared."
+      }
+    ]
+  },
+  "features": {
+    "eyebrow": "Built Different",
+    "headline": "Precision at every step.",
+    "rows": [
+      {
+        "id": "feat-1",
+        "stat": "Adaptive",
+        "title": "AI-Adaptive Questioning",
+        "description": "The intake follows your answers the way a good triage conversation would. Chronic condition history triggers targeted follow-ups; straightforward concerns move quickly. No one answers questions that don't apply to them."
+      },
+      {
+        "id": "feat-2",
+        "stat": "Tap-first",
+        "title": "Built for Completion",
+        "description": "Tap-based selection eliminates typing fatigue. Clear progress keeps patients oriented. And the intake knows when it has enough — it stops asking instead of burning patients out."
+      },
+      {
+        "id": "feat-3",
+        "stat": "Instant",
+        "title": "Instant Provider Briefing",
+        "description": "The moment a patient submits their intake, a structured clinical summary with flagged considerations is waiting in the provider dashboard. No chart-digging, no surprises — just focused, informed care from the first hello."
+      },
+      {
+        "id": "feat-4",
+        "stat": "Private",
+        "title": "Private by Design",
+        "description": "Patient data is encrypted in transit, protected by role-based access, and never sold or shared. We're building toward full HIPAA-ready infrastructure ahead of general availability — and we'll tell you exactly where we stand."
+      }
+    ]
+  },
+  "providers": {
+    "eyebrow": "For Clinicians",
+    "headline1": "Walk in knowing",
+    "headlineAccent": "everything.",
+    "subhead": "Before you enter the room, Acute Insight has already gathered, structured, and summarized your patient's history. Spend your time on care — not data collection.",
+    "benefits": [
+      {
+        "id": "ben-1",
+        "text": "Structured patient summary delivered pre-visit"
+      },
+      {
+        "id": "ben-2",
+        "text": "AI-flagged red-flag symptoms and severity escalations"
+      },
+      {
+        "id": "ben-3",
+        "text": "Complete intake history for every patient"
+      },
+      {
+        "id": "ben-4",
+        "text": "Emergency screening before cases reach your queue"
+      }
+    ],
+    "cta": "Request Provider Access"
+  },
+  "ctaSection": {
+    "patients": {
+      "eyebrow": "For Patients",
+      "headline1": "Ready to transform",
+      "headline2": "your intake?",
+      "body": "Complete your medical history in minutes — no typing marathon, no paper, no waiting room clipboard.",
+      "cta": "Start Your Intake"
+    },
+    "clinicians": {
+      "eyebrow": "For Clinicians",
+      "headline1": "Built for",
+      "headline2": "clinicians.",
+      "body": "Structured summaries, flagged risks, and a dashboard that runs in any browser. No integration required to start.",
+      "cta": "Request Provider Access"
+    }
+  }
+}

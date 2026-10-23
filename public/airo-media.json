@@ -1,0 +1,29 @@
+{
+  "pages/about/hero": {
+    "mediaType": "image",
+    "currentUrl": "https://img1.wsimg.com/isteam/getty/2217159776",
+    "requestedSize": {
+      "width": 1200,
+      "height": 600,
+      "fit": "cover"
+    }
+  },
+  "pages/providers/hero": {
+    "mediaType": "image",
+    "currentUrl": "https://img1.wsimg.com/isteam/getty/2277928446",
+    "requestedSize": {
+      "width": 1200,
+      "height": 600,
+      "fit": "cover"
+    }
+  },
+  "pages/patients/hero": {
+    "mediaType": "image",
+    "currentUrl": "https://img1.wsimg.com/isteam/getty/2283148045",
+    "requestedSize": {
+      "width": 1200,
+      "height": 600,
+      "fit": "cover"
+    }
+  }
+}

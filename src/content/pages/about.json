@@ -1,0 +1,140 @@
+{
+  "hero": {
+    "eyebrow": "Our mission",
+    "heading": "Healthcare that meets you where you are",
+    "subheading": "Acute Insight AI was built on a simple belief: the first minutes of a medical visit shouldn't be spent re-collecting what a patient could have told you already. We pair patients' own words with AI-powered intake so every visit starts informed."
+  },
+  "mission": {
+    "heading": "Why we built this",
+    "body": [
+      {
+        "id": "m1",
+        "text": "The average in-person visit starts with a clipboard, a repeated medication list, and questions the patient has answered a dozen times before. Most of that effort never makes it into a form the clinician can actually use."
+      },
+      {
+        "id": "m2",
+        "text": "Acute Insight AI closes that gap. Patients complete an adaptive, conversational intake from any device — and their provider receives a structured clinical brief with flagged considerations before the visit begins."
+      },
+      {
+        "id": "m3",
+        "text": "By letting AI handle the data collection, clinicians spend their time on what matters: listening, examining, and treating."
+      }
+    ],
+    "stat1Value": "Minutes",
+    "stat1Label": "intake, by design",
+    "stat2Value": "Physician",
+    "stat2Label": "founded and clinically led",
+    "stat3Value": "Beta",
+    "stat3Label": "now enrolling early users"
+  },
+  "howItWorks": {
+    "eyebrow": "How it works",
+    "heading": "From first symptom to an informed visit",
+    "steps": [
+      {
+        "id": "s1",
+        "number": "01",
+        "title": "Complete your AI intake",
+        "body": "An adaptive questionnaire — or a natural conversation with our AI assistant — captures your story in minutes: what's going on, how severe, your medications, allergies, and history. No generic forms."
+      },
+      {
+        "id": "s2",
+        "number": "02",
+        "title": "AI structures your story",
+        "body": "Your responses are organized into a concise clinical brief. Red-flag symptoms, high severity, and chronic patterns are surfaced as flags so nothing important gets buried."
+      },
+      {
+        "id": "s3",
+        "number": "03",
+        "title": "Your provider walks in prepared",
+        "body": "Your clinician reviews the brief before your visit — so the appointment starts at the real conversation, not the clipboard."
+      }
+    ]
+  },
+  "ai": {
+    "eyebrow": "The technology",
+    "heading": "AI that thinks like a clinician",
+    "body": [
+      {
+        "id": "a1",
+        "text": "Our intake runs on a frontier large language model, guided by a physician-written clinical protocol: it asks one question at a time, follows the thread of your complaint the way an experienced triage nurse would, and never diagnoses or prescribes."
+      },
+      {
+        "id": "a2",
+        "text": "When you describe chest pain, it asks about what matters for chest pain. When you report a headache, it screens for red-flag features. A deterministic safety layer runs alongside the AI on every single message — emergency symptoms trigger an immediate 911 prompt, no model judgment required."
+      },
+      {
+        "id": "a3",
+        "text": "Critically, the system knows its limits. It gathers and organizes your history for your clinician — the diagnosis and the plan stay where they belong, with a human who knows you."
+      }
+    ],
+    "capabilities": [
+      {
+        "id": "c1",
+        "label": "Adaptive questioning",
+        "detail": "Follow-ups change based on your answers"
+      },
+      {
+        "id": "c2",
+        "label": "Clinical flag detection",
+        "detail": "High severity and red flags surfaced automatically"
+      },
+      {
+        "id": "c3",
+        "label": "Emergency routing",
+        "detail": "Life-threatening symptoms prompt 911 guidance instantly"
+      },
+      {
+        "id": "c4",
+        "label": "Structured AI briefs",
+        "detail": "Providers receive a concise clinical summary"
+      }
+    ]
+  },
+  "hipaa": {
+    "eyebrow": "Privacy & security",
+    "heading": "Your data, handled like it matters",
+    "body": "Acute Insight AI was founded by a physician who works with protected health information every day. Patient data is encrypted in transit, access is role-based (your intake is visible only to you and your care team), and we never sell, share, or advertise with health information. Before general availability, our launch checklist includes the full set of HIPAA safeguards: encryption at rest, audit logging, and business associate agreements across our infrastructure.",
+    "badges": [
+      {
+        "id": "hb1",
+        "label": "Never sold or shared",
+        "detail": "Health data is never monetized"
+      },
+      {
+        "id": "hb2",
+        "label": "Encrypted in transit",
+        "detail": "TLS on every connection"
+      },
+      {
+        "id": "hb3",
+        "label": "Role-based access",
+        "detail": "Visible only to you and your care team"
+      },
+      {
+        "id": "hb4",
+        "label": "Physician-led",
+        "detail": "Built by a clinician who handles PHI daily"
+      }
+    ]
+  },
+  "team": {
+    "eyebrow": "Who's behind this",
+    "heading": "Physician-founded, clinically led",
+    "subheading": "Acute Insight AI is built by a clinician who still practices — not a committee.",
+    "members": [
+      {
+        "id": "t1",
+        "name": "William B. Merrick, DO",
+        "role": "Founder",
+        "bio": "Practicing hospitalist in rural West Tennessee and hospice medical director. Acute Insight AI grew out of years on the front lines of inpatient, post-acute, and long-term care — and the conviction that patients deserve better than clipboard medicine."
+      }
+    ]
+  },
+  "cta": {
+    "heading": "Ready to experience it yourself?",
+    "subheading": "Create a free account and complete your first intake in minutes.",
+    "primaryButton": "Get started",
+    "secondaryButton": "Learn how it works"
+  }
+}

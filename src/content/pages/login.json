@@ -1,0 +1,10 @@
+{
+  "brandName": "Acute Insight AI",
+  "heading": "Welcome back",
+  "subheading": "Sign in to your patient portal",
+  "emailLabel": "Email address",
+  "passwordLabel": "Password",
+  "submitButton": "Sign In",
+  "noAccountText": "New patient?",
+  "noAccountLink": "Create an account"
+}

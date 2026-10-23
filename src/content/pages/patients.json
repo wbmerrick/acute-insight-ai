@@ -1,0 +1,315 @@
+{
+  "hero": {
+    "eyebrow": "For patients",
+    "heading": "Your next visit, already prepared.",
+    "subheading": "Tell your story once — from your phone, in minutes. Acute Insight AI turns it into a clinical brief your provider reviews before your visit, so your appointment starts at the conversation that matters.",
+    "primaryButton": "Start your intake",
+    "secondaryButton": "See how it works"
+  },
+  "stats": [
+    {
+      "id": "st1",
+      "value": "Minutes",
+      "label": "Tap-first adaptive intake"
+    },
+    {
+      "id": "st2",
+      "value": "Anytime",
+      "label": "Complete from any device"
+    },
+    {
+      "id": "st3",
+      "value": "Once",
+      "label": "Never repeat your story"
+    },
+    {
+      "id": "st4",
+      "value": "Free",
+      "label": "During the clinical beta"
+    }
+  ],
+  "conditions": {
+    "eyebrow": "What the intake covers",
+    "heading": "Built for the concerns that fill real clinics.",
+    "subheading": "The adaptive intake handles everyday complaints, chronic condition check-ins, and mental health concerns. Emergency-level symptoms are flagged immediately with guidance to call 911 or go to the ER.",
+    "categories": [
+      {
+        "id": "cat1",
+        "label": "Illness & Infections",
+        "items": [
+          {
+            "id": "c1",
+            "name": "Cold & flu"
+          },
+          {
+            "id": "c2",
+            "name": "Sinus infections"
+          },
+          {
+            "id": "c3",
+            "name": "Strep throat"
+          },
+          {
+            "id": "c4",
+            "name": "UTIs"
+          },
+          {
+            "id": "c5",
+            "name": "Ear infections"
+          },
+          {
+            "id": "c6",
+            "name": "Pink eye"
+          }
+        ]
+      },
+      {
+        "id": "cat2",
+        "label": "Chronic Conditions",
+        "items": [
+          {
+            "id": "c7",
+            "name": "Hypertension check-ins"
+          },
+          {
+            "id": "c8",
+            "name": "Diabetes management"
+          },
+          {
+            "id": "c9",
+            "name": "Asthma follow-ups"
+          },
+          {
+            "id": "c10",
+            "name": "Thyroid monitoring"
+          },
+          {
+            "id": "c11",
+            "name": "High cholesterol"
+          },
+          {
+            "id": "c12",
+            "name": "Migraine management"
+          }
+        ]
+      },
+      {
+        "id": "cat3",
+        "label": "Mental Health",
+        "items": [
+          {
+            "id": "c13",
+            "name": "Anxiety"
+          },
+          {
+            "id": "c14",
+            "name": "Depression"
+          },
+          {
+            "id": "c15",
+            "name": "Stress & burnout"
+          },
+          {
+            "id": "c16",
+            "name": "Sleep issues"
+          },
+          {
+            "id": "c17",
+            "name": "ADHD follow-ups"
+          },
+          {
+            "id": "c18",
+            "name": "Medication management"
+          }
+        ]
+      },
+      {
+        "id": "cat4",
+        "label": "Skin & Allergies",
+        "items": [
+          {
+            "id": "c19",
+            "name": "Rashes & eczema"
+          },
+          {
+            "id": "c20",
+            "name": "Acne"
+          },
+          {
+            "id": "c21",
+            "name": "Seasonal allergies"
+          },
+          {
+            "id": "c22",
+            "name": "Hives"
+          },
+          {
+            "id": "c23",
+            "name": "Minor skin infections"
+          },
+          {
+            "id": "c24",
+            "name": "Insect bites"
+          }
+        ]
+      }
+    ]
+  },
+  "benefits": {
+    "eyebrow": "Why patients choose us",
+    "heading": "Healthcare that fits your life",
+    "items": [
+      {
+        "id": "b1",
+        "title": "No clipboard, no repetition",
+        "body": "Complete your intake from your phone, couch, or office before you ever set foot in the clinic. Your provider gets your full story without you filling out the same form again."
+      },
+      {
+        "id": "b2",
+        "title": "AI intake that actually listens",
+        "body": "Our adaptive assistant asks follow-up questions based on your answers — not a generic form. Your provider receives a structured clinical brief built from what you actually said."
+      },
+      {
+        "id": "b3",
+        "title": "Built by a practicing physician",
+        "body": "Acute Insight AI was designed by a hospitalist who lives the intake problem every day. The questions, the flags, and the provider brief are shaped by real clinical work — not a product committee."
+      },
+      {
+        "id": "b4",
+        "title": "Emergency-aware by design",
+        "body": "A safety layer screens every answer for emergency-level symptoms. If something sounds dangerous, you're told immediately to call 911 or get to an ER — before anything else."
+      },
+      {
+        "id": "b5",
+        "title": "Your health history, always with you",
+        "body": "Your profile stores your medications, allergies, and chronic conditions. Every intake builds on the last — no repeating yourself."
+      },
+      {
+        "id": "b6",
+        "title": "Private to you and your care team",
+        "body": "Your health data is encrypted in transit, visible only to you and your provider, and never sold or shared. Full HIPAA-grade infrastructure is on our checklist before general availability."
+      }
+    ]
+  },
+  "howItWorks": {
+    "eyebrow": "How it works",
+    "heading": "From symptoms to an informed visit in three steps",
+    "steps": [
+      {
+        "id": "s1",
+        "number": "01",
+        "title": "Create your account",
+        "body": "Sign up in under a minute. Add your health profile — medications, allergies, chronic conditions — so your provider has the full picture from the start."
+      },
+      {
+        "id": "s2",
+        "number": "02",
+        "title": "Complete your AI intake",
+        "body": "Describe what's going on through an adaptive questionnaire or a natural conversation. It takes minutes and asks the right follow-up questions based on what you tell it."
+      },
+      {
+        "id": "s3",
+        "number": "03",
+        "title": "Your provider walks in prepared",
+        "body": "Your clinician reviews your AI-structured brief — chief complaint, history, medications, and flagged concerns — before your visit begins."
+      }
+    ]
+  },
+  "cost": {
+    "eyebrow": "Cost",
+    "heading": "Free for patients during the clinical beta.",
+    "body": "Acute Insight AI is currently in clinical beta with participating providers. There is no charge to patients for completing an intake, nothing is billed to insurance, and there are no hidden fees — your medical visit itself remains between you and your provider as it always has.",
+    "details": [
+      {
+        "id": "p1",
+        "label": "No cost to patients",
+        "detail": "Intake is free during the beta"
+      },
+      {
+        "id": "p2",
+        "label": "Nothing billed to insurance",
+        "detail": "The intake is not a medical claim"
+      },
+      {
+        "id": "p3",
+        "label": "No surprise fees",
+        "detail": "Your visit stays between you and your provider"
+      },
+      {
+        "id": "p4",
+        "label": "Cancel anytime",
+        "detail": "Delete your account and data on request"
+      }
+    ]
+  },
+  "testimonials": [],
+  "privacy": {
+    "eyebrow": "Privacy & security",
+    "heading": "Your health data belongs to you",
+    "body": "Built by a physician who handles protected health information every day. Your information is encrypted in transit, visible only to you and your care team, and never sold, shared, or used for advertising — ever. Before general availability, we're completing the full set of HIPAA safeguards: encryption at rest, audit logging, and signed BAAs across our infrastructure. You can request an export or deletion of your data at any time.",
+    "badges": [
+      {
+        "id": "pr1",
+        "label": "Never sold or shared",
+        "detail": "Your data is never monetized"
+      },
+      {
+        "id": "pr2",
+        "label": "Encrypted in transit",
+        "detail": "TLS on every connection"
+      },
+      {
+        "id": "pr3",
+        "label": "Role-based access",
+        "detail": "Only you and your care team see your intake"
+      },
+      {
+        "id": "pr4",
+        "label": "Data portability",
+        "detail": "Export or delete your data anytime"
+      }
+    ]
+  },
+  "faq": {
+    "eyebrow": "Common questions",
+    "heading": "Frequently asked questions",
+    "items": [
+      {
+        "id": "fq1",
+        "question": "What exactly does Acute Insight AI do?",
+        "answer": "It's an intelligent pre-visit intake. You describe what's going on — by tapping through adaptive questions or chatting naturally with the AI assistant — and your provider receives a structured clinical summary with flagged concerns before your visit. It does not diagnose, treat, or prescribe."
+      },
+      {
+        "id": "fq2",
+        "question": "Does the AI give me medical advice?",
+        "answer": "No. The assistant gathers and organizes your history for your clinician. Diagnosis and treatment decisions stay with your provider. The one exception: if your answers suggest an emergency, it will tell you immediately to call 911 or go to the ER."
+      },
+      {
+        "id": "fq3",
+        "question": "What happens after I submit my intake?",
+        "answer": "Your responses are structured into a clinical brief — chief complaint, history, severity, medications, allergies, and flagged considerations — that appears in your provider's dashboard for review before your appointment."
+      },
+      {
+        "id": "fq4",
+        "question": "What if my symptoms are an emergency?",
+        "answer": "The intake screens every answer for emergency-level symptoms. If something sounds dangerous — chest pain, trouble breathing, stroke signs, thoughts of self-harm — you're immediately shown guidance to call 911 or go to the nearest ER. Online intake is never a substitute for emergency care."
+      },
+      {
+        "id": "fq5",
+        "question": "Is my information private?",
+        "answer": "Your health data is encrypted in transit, visible only to you and your care team, and never sold or shared. We're in clinical beta: before general availability, we're completing the full set of HIPAA safeguards, including encryption at rest, audit logging, and BAAs across our infrastructure. You can request export or deletion of your data at any time."
+      },
+      {
+        "id": "fq6",
+        "question": "How much does it cost?",
+        "answer": "Nothing, for patients, during the clinical beta. Nothing is billed to insurance — your visit itself remains between you and your provider as it always has."
+      }
+    ]
+  },
+  "cta": {
+    "heading": "Be part of the clinical beta.",
+    "subheading": "Create a free account and complete your first intake in minutes.",
+    "primaryButton": "Start your intake",
+    "secondaryButton": "Have questions? Read the FAQ"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "portalLabel": "Patient Portal",
+  "welcomeHeading": "Good morning",
+  "welcomeSubheading": "Your health dashboard — all your intake history and records in one place.",
+  "startIntakeHeading": "Start a new intake",
+  "startIntakeSubheading": "Complete your pre-visit health history in just a few minutes.",
+  "startIntakeButton": "Begin Intake",
+  "recentIntakesHeading": "Recent intakes",
+  "noIntakesText": "No intakes yet. Start your first one above.",
+  "historyHeading": "Intake history",
+  "profileHeading": "Health profile",
+  "accountLabel": "Patient account",
+  "signOutButton": "Sign out",
+  "overviewTab": "Overview",
+  "historyTab": "History",
+  "profileTab": "Profile"
+}
