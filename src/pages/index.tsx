@@ -1,54 +1,111 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { Helmet } from '@dr.pogodin/react-helmet';
-import { motion, useInView } from 'motion/react';
 import { home } from 'virtual:content';
+import HomepageSameAsJsonLd from '@/components/HomepageSameAsJsonLd';
 
-// ─── Animated grid background ───────────────────────────────────────────────
-function GridBackground() {
+/* ────────────────────────────────────────────────────────────────────────────
+   Home — "Telemetry"
+   One orchestrated moment: the lead-II trace draws itself across the strip,
+   rises where the AI flags, and settles. Everything else holds still.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+// ─── The signature: an EKG strip that tells the product story ───────────────
+function EkgStrip() {
+  // Lead II rhythm, 1440×170 viewBox. Five normal complexes; the fourth runs
+  // tall under an amber flag — the moment the AI catches what matters.
+  const baseline = 104;
+  const complex = (x: number, r = 44) =>
+    `L${x} ${baseline} ` + // approach
+    `L${x + 10} ${baseline - 7} L${x + 18} ${baseline} ` + // P
+    `L${x + 30} ${baseline} L${x + 36} ${baseline + 10} ` + // Q
+    `L${x + 44} ${baseline - r} L${x + 52} ${baseline + 16} ` + // R/S
+    `L${x + 58} ${baseline} ` +
+    `L${x + 78} ${baseline} L${x + 92} ${baseline - 12} L${x + 106} ${baseline} `; // T
+
+  const d =
+    `M-10 ${baseline} ` +
+    complex(90) +
+    complex(330) +
+    complex(570) +
+    complex(810, 76) + // flagged beat
+    complex(1070) +
+    `L1300 ${baseline} L1450 ${baseline}`;
+
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <div
+      aria-hidden="true"
+      className="relative w-full overflow-hidden bg-telemetry"
+      style={{
+        background: `hsl(var(--surface-deeper))`,
+        borderTop: `1px solid hsl(var(--border-subtle) / 0.6)`,
+        borderBottom: `1px solid hsl(var(--border-subtle) / 0.6)`,
+      }}
+    >
+      <div className="bg-telemetry absolute inset-0" style={{ opacity: 0.5 }} />
       <svg
-        className="absolute inset-0 w-full h-full"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ opacity: 0.15 }}
+        viewBox="0 0 1440 170"
+        preserveAspectRatio="none"
+        className="relative block w-full"
+        style={{ height: 'clamp(120px, 14vw, 180px)' }}
       >
-        <defs>
-          <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="hsl(var(--primary))" strokeWidth="0.5"/>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
+        <path
+          d={d}
+          fill="none"
+          stroke="hsl(var(--primary))"
+          strokeWidth="2.25"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          pathLength={3200}
+          strokeDasharray={3200}
+          className="animate-trace trace-glow"
+          style={{ ['--trace-length' as string]: 3200 }}
+        />
+        {/* Flag annotation over the tall complex */}
+        <g className="fade-in animate-in" style={{ animationDelay: '2.3s', animationDuration: '0.5s' }}>
+          <line
+            x1={854}
+            y1={baseline - 76}
+            x2={854}
+            y2={34}
+            stroke="hsl(var(--accent) / 0.75)"
+            strokeWidth="1"
+            strokeDasharray="3 3"
+          />
+          <rect
+            x={866}
+            y={16}
+            rx={6}
+            width={212}
+            height={30}
+            fill="hsl(var(--surface-deeper) / 0.95)"
+            stroke="hsl(var(--accent) / 0.8)"
+            strokeWidth="1"
+          />
+          <text
+            x={880}
+            y={36}
+            fill="hsl(var(--accent))"
+            fontSize="14"
+            fontFamily="var(--font-mono)"
+          >
+            flagged · severity 8/10
+          </text>
+        </g>
       </svg>
-      <motion.div
-        className="absolute rounded-full"
-        style={{
-          width: 600,
-          height: 600,
-          top: '-20%',
-          right: '-10%',
-          background: `radial-gradient(circle, hsl(var(--primary) / 0.12) 0%, transparent 70%)`,
-        }}
-        animate={{ scale: [1, 1.08, 1], opacity: [0.6, 1, 0.6] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="absolute rounded-full"
-        style={{
-          width: 400,
-          height: 400,
-          bottom: '10%',
-          left: '-5%',
-          background: `radial-gradient(circle, hsl(var(--primary) / 0.07) 0%, transparent 70%)`,
-        }}
-        animate={{ scale: [1, 1.12, 1], opacity: [0.4, 0.8, 0.4] }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-      />
+
+      {/* Strip annotations */}
+      <div className="absolute left-4 md:left-8 top-3 vitals text-xs" style={{ color: 'hsl(var(--text-dimmer))' }}>
+        lead II — intake in progress
+      </div>
+      <div className="absolute right-4 md:right-8 bottom-3 vitals text-xs" style={{ color: 'hsl(var(--primary) / 0.8)' }}>
+        brief ready
+      </div>
     </div>
   );
 }
 
-// ─── AI Intake Mockup ────────────────────────────────────────────────────────
+// ─── Interactive intake monitor (hero, right) ────────────────────────────────
 const DEMO_QUESTIONS = [
   {
     question: 'What brings you in today?',
@@ -59,693 +116,507 @@ const DEMO_QUESTIONS = [
     chips: ['Less than 24 hours', '1–3 days', '1–2 weeks', 'More than a month'],
   },
   {
-    question: 'Rate your discomfort level:',
-    chips: ['Mild (1–3)', 'Moderate (4–6)', 'Severe (7–9)', 'Emergency (10)'],
+    question: 'How severe is it right now, 1–10?',
+    chips: ['Mild (1–3)', 'Moderate (4–6)', 'Severe (7–9)', 'Worst ever (10)'],
   },
 ];
 
-function IntakeMockup() {
+function IntakeMonitor() {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedChip, setSelectedChip] = useState<string | null>(null);
   const [displayedText, setDisplayedText] = useState(DEMO_QUESTIONS[0].question);
   const [chipsVisible, setChipsVisible] = useState(true);
-  const [progress, setProgress] = useState(33);
+  const [briefReady, setBriefReady] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
   const current = DEMO_QUESTIONS[questionIndex];
 
+  function typeQuestion(next: number) {
+    let i = 0;
+    const q = DEMO_QUESTIONS[next].question;
+    const interval = setInterval(() => {
+      i++;
+      setDisplayedText(q.slice(0, i));
+      if (i >= q.length) {
+        clearInterval(interval);
+        setTimeout(() => setChipsVisible(true), 150);
+      }
+    }, 28);
+  }
+
   function handleChipSelect(chip: string) {
-    if (selectedChip) return;
+    if (selectedChip || briefReady) return;
     setSelectedChip(chip);
-    if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      const next = (questionIndex + 1) % DEMO_QUESTIONS.length;
+      if (questionIndex === DEMO_QUESTIONS.length - 1) {
+        setBriefReady(true);
+        timerRef.current = setTimeout(() => {
+          setBriefReady(false);
+          setSelectedChip(null);
+          setChipsVisible(false);
+          setDisplayedText('');
+          setQuestionIndex(0);
+          typeQuestion(0);
+        }, 3600);
+        return;
+      }
+      const next = questionIndex + 1;
       setChipsVisible(false);
       setDisplayedText('');
       setSelectedChip(null);
-      setProgress(((next + 1) / DEMO_QUESTIONS.length) * 100);
       setQuestionIndex(next);
-      // Typewriter for next question
-      let i = 0;
-      const q = DEMO_QUESTIONS[next].question;
-      const interval = setInterval(() => {
-        i++;
-        setDisplayedText(q.slice(0, i));
-        if (i >= q.length) {
-          clearInterval(interval);
-          setTimeout(() => setChipsVisible(true), 200);
-        }
-      }, 40);
-    }, 800);
+      typeQuestion(next);
+    }, 650);
   }
 
   return (
     <div
-      className="relative rounded-2xl overflow-hidden"
+      className="relative rounded-2xl overflow-hidden w-full"
       style={{
         background: `hsl(var(--card))`,
-        border: `1px solid hsl(var(--primary) / 0.25)`,
-        boxShadow: `0 0 40px hsl(var(--primary) / 0.12), 0 20px 60px hsl(var(--background) / 0.8)`,
-        maxWidth: 440,
-        width: '100%',
+        border: `1px solid hsl(var(--primary) / 0.3)`,
+        boxShadow: `0 0 44px hsl(var(--primary) / 0.14), var(--shadow-xl)`,
+        maxWidth: 460,
       }}
     >
-      {/* Header bar */}
+      {/* Channel header */}
       <div
         className="flex items-center justify-between px-5 py-3"
-        style={{ borderBottom: `1px solid hsl(var(--border-subtle) / 0.5)` }}
+        style={{ borderBottom: `1px solid hsl(var(--border-subtle) / 0.6)`, background: `hsl(var(--surface-deeper) / 0.6)` }}
       >
-        <div className="flex items-center gap-2">
-          <div
+        <div className="flex items-center gap-2.5">
+          <span
             className="w-2 h-2 rounded-full bg-primary"
-            style={{ boxShadow: `0 0 6px hsl(var(--primary))` }}
+            style={{ boxShadow: '0 0 8px hsl(var(--primary))', animation: 'fadeIn 1s ease-in-out infinite alternate' }}
           />
-          <span className="text-xs font-medium text-primary" style={{ fontFamily: 'var(--font-sans)' }}>
-            AI Intake — Active
+          <span className="vitals text-xs" style={{ color: 'hsl(var(--primary))' }}>
+            intake · live demo
           </span>
         </div>
-        <span className="text-xs text-muted-foreground" style={{ fontFamily: 'var(--font-sans)' }}>
-          <span>Step </span>
-          <span>{questionIndex + 1}</span>
-          <span> of </span>
-          <span>{DEMO_QUESTIONS.length}</span>
+        <span className="vitals text-xs" style={{ color: 'hsl(var(--text-dimmer))' }}>
+          {briefReady ? '3 / 3' : `${questionIndex + 1} / ${DEMO_QUESTIONS.length}`}
         </span>
       </div>
 
-      {/* Progress bar */}
-      <div className="px-5 pt-4">
-        <div className="h-1 rounded-full" style={{ background: `hsl(var(--border-subtle))` }}>
-          <motion.div
-            className="h-1 rounded-full bg-primary"
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-          />
-        </div>
-      </div>
-
-      {/* Question */}
-      <div className="px-5 pt-5 pb-2 min-h-[60px]">
-        <p
-          className="text-base font-semibold text-foreground"
-          style={{ fontFamily: 'var(--font-heading)', minHeight: 28 }}
-        >
-          <span>{displayedText}</span>
-          <motion.span
-            animate={{ opacity: [1, 0] }}
-            transition={{ duration: 0.5, repeat: Infinity }}
-            className="inline-block w-0.5 h-4 ml-0.5 bg-primary align-middle"
-          />
-        </p>
-      </div>
-
-      {/* Chips */}
-      <div className="px-5 pb-6 flex flex-wrap gap-2">
-        {chipsVisible &&
-          current.chips.map((chip, i) => (
-            <motion.button
-              key={chip}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08, duration: 0.25, ease: 'easeOut' }}
-              onClick={() => handleChipSelect(chip)}
-              className="px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer"
+      {/* Body */}
+      <div className="p-5 md:p-6" style={{ minHeight: 240 }}>
+        {briefReady ? (
+          <div className="flex flex-col items-start gap-3 fade-in animate-in">
+            <span
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold"
               style={{
-                fontFamily: 'var(--font-sans)',
-                background:
-                  selectedChip === chip
-                    ? `hsl(var(--primary))`
-                    : `hsl(var(--primary) / 0.08)`,
-                color:
-                  selectedChip === chip
-                    ? `hsl(var(--background))`
-                    : `hsl(var(--primary))`,
-                border: `1px solid hsl(var(--primary) / ${selectedChip === chip ? '1' : '0.3'})`,
+                color: 'hsl(var(--primary))',
+                background: 'hsl(var(--primary) / 0.1)',
+                border: '1px solid hsl(var(--primary) / 0.35)',
               }}
             >
-              {chip}
-            </motion.button>
-          ))}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Brief ready
+            </span>
+            <p className="text-sm leading-relaxed" style={{ color: 'hsl(var(--text-dim))' }}>
+              Structured and sent to your provider: complaint, timeline,
+              severity, meds, allergies, history — with anything serious
+              flagged on top.
+            </p>
+          </div>
+        ) : (
+          <>
+            <p
+              className="text-lg font-semibold mb-5 text-foreground"
+              style={{ fontFamily: 'var(--font-heading)', minHeight: 56 }}
+            >
+              {displayedText}
+              <span className="animate-cursor" style={{ color: 'hsl(var(--primary))' }}>▍</span>
+            </p>
+            <div
+              className="flex flex-wrap gap-2 transition-opacity duration-200"
+              style={{ opacity: chipsVisible ? 1 : 0 }}
+            >
+              {current.chips.map((chip) => {
+                const selected = selectedChip === chip;
+                return (
+                  <button
+                    key={chip}
+                    onClick={() => handleChipSelect(chip)}
+                    className="px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150"
+                    style={{
+                      background: selected ? 'hsl(var(--primary))' : 'hsl(var(--primary) / 0.07)',
+                      color: selected ? 'hsl(var(--primary-foreground))' : 'hsl(var(--foreground))',
+                      border: `1px solid ${selected ? 'hsl(var(--primary))' : 'hsl(var(--primary) / 0.3)'}`,
+                    }}
+                  >
+                    {chip}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Tap hint */}
+      {/* Footer note */}
       <div
-        className="px-5 py-3 flex items-center gap-2"
-        style={{ borderTop: `1px solid hsl(var(--border-subtle) / 0.4)` }}
+        className="px-5 py-2.5 text-xs"
+        style={{
+          borderTop: `1px solid hsl(var(--border-subtle) / 0.5)`,
+          color: 'hsl(var(--text-dimmer))',
+        }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2">
-          <path d="M9 11l3 3L22 4"/>
-          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-        </svg>
-        <span className="text-xs text-muted-foreground" style={{ fontFamily: 'var(--font-sans)' }}>
-          Tap to select — no typing required
-        </span>
+        Tap to answer — it adapts to what you say. Try it.
       </div>
     </div>
   );
 }
 
-// ─── Fade-up section wrapper ─────────────────────────────────────────────────
-function FadeUp({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 32 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.4, delay, ease: 'easeOut' }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-// ─── CTA Button ──────────────────────────────────────────────────────────────
-function CtaButton({ to, variant, children }: { to: string; variant: 'primary' | 'ghost'; children: React.ReactNode }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <Link
-      to={to}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200"
-      style={{
-        fontFamily: 'var(--font-sans)',
-        ...(variant === 'primary'
-          ? {
-              background: `hsl(var(--primary))`,
-              color: `hsl(var(--background))`,
-              boxShadow: hovered ? `0 0 24px hsl(var(--primary) / 0.4)` : `0 0 12px hsl(var(--primary) / 0.2)`,
-              transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
-              filter: hovered ? 'brightness(1.1)' : 'brightness(1)',
-            }
-          : {
-              background: 'transparent',
-              color: hovered ? `hsl(var(--primary))` : `hsl(var(--foreground) / 0.8)`,
-              border: `1px solid ${hovered ? `hsl(var(--primary))` : `hsl(var(--border-subtle))`}`,
-              transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
-            }),
-      }}
-    >
-      {children}
-    </Link>
-  );
-}
-
-// ─── Main page ───────────────────────────────────────────────────────────────
+// ─── Page ────────────────────────────────────────────────────────────────────
 export default function HomePage() {
-  const siteUrl = 'https://acuteinsight.ai';
+  const { hero, howItWorks, features, providers, ctaSection } = home;
 
   return (
     <>
       <Helmet>
-        <title>Acute Insight AI — Healthcare That Thinks Ahead</title>
+        <title>Acute Insight AI — Healthcare that thinks ahead</title>
         <meta
           name="description"
-          content="AI-powered patient intake for telehealth. Smart multiple-choice questions reduce friction, improve compliance, and deliver instant provider briefings."
+          content="AI-guided patient intake, built by a practicing physician. Tell your story once; your provider walks in already briefed."
         />
-        <link rel="canonical" href={siteUrl} />
-        <meta property="og:title" content="Acute Insight AI — Healthcare That Thinks Ahead" />
-        <meta property="og:description" content="AI-powered patient intake for telehealth. Smart multiple-choice questions reduce friction, improve compliance, and deliver instant provider briefings." />
-        <meta property="og:url" content={siteUrl} />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
+      <HomepageSameAsJsonLd />
 
-      <main>
-        {/* ── HERO ──────────────────────────────────────────────────────── */}
-        <section
-          id="hero"
-          className="relative min-h-screen flex items-center pt-20"
-          style={{ background: `hsl(var(--background))` }}
-        >
-          <GridBackground />
-          <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-20 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              {/* Left: copy */}
-              <div>
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: 'easeOut' }}
-                >
-                  <div
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-6"
-                    style={{
-                      background: `hsl(var(--primary) / 0.1)`,
-                      border: `1px solid hsl(var(--primary) / 0.25)`,
-                      color: `hsl(var(--primary))`,
-                      fontFamily: 'var(--font-sans)',
-                    }}
-                  >
+      {/* ── HERO ─────────────────────────────────────────────────────────── */}
+      <section className="relative pt-32 md:pt-40 pb-16 md:pb-20 overflow-hidden">
+        <div className="bg-telemetry absolute inset-0 pointer-events-none" style={{ opacity: 0.35 }} aria-hidden="true" />
+        <div
+          className="absolute pointer-events-none"
+          aria-hidden="true"
+          style={{
+            width: 720,
+            height: 720,
+            top: '-25%',
+            right: '-12%',
+            background: `radial-gradient(circle, hsl(var(--primary) / 0.09) 0%, transparent 68%)`,
+          }}
+        />
+        <div className="relative max-w-content mx-auto px-6 grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-12 lg:gap-10 items-center">
+          <div>
+            <p
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium mb-7"
+              style={{
+                color: 'hsl(var(--primary))',
+                background: `hsl(var(--primary) / 0.08)`,
+                border: `1px solid hsl(var(--primary) / 0.25)`,
+              }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" style={{ boxShadow: '0 0 6px hsl(var(--primary))' }} />
+              {hero.badge}
+            </p>
+
+            <h1
+              className="display text-foreground mb-6"
+              style={{ fontSize: 'clamp(2.9rem, 6.4vw, 5.1rem)' }}
+            >
+              Healthcare that thinks ahead.
+            </h1>
+
+            <p
+              className="text-lg md:text-xl leading-relaxed mb-9 max-w-xl"
+              style={{ color: 'hsl(var(--text-dim))' }}
+            >
+              {hero.subhead}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 mb-10">
+              <Link
+                to="/intake"
+                className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 bg-primary hover:brightness-110"
+                style={{
+                  color: 'hsl(var(--primary-foreground))',
+                  fontFamily: 'var(--font-heading)',
+                  boxShadow: '0 0 28px hsl(var(--primary) / 0.4)',
+                }}
+              >
+                {hero.ctaPrimary}
+              </Link>
+              <Link
+                to="/providers"
+                className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 hover:border-foreground/40"
+                style={{
+                  color: 'hsl(var(--foreground))',
+                  border: `1px solid hsl(var(--border-subtle))`,
+                  fontFamily: 'var(--font-heading)',
+                }}
+              >
+                {hero.ctaSecondary}
+              </Link>
+            </div>
+
+            {/* Honest design facts, flowsheet-style */}
+            <dl
+              className="grid grid-cols-3 max-w-md divide-x"
+              style={{ borderColor: 'hsl(var(--border-subtle) / 0.6)' }}
+            >
+              {hero.stats.map((s: { id: string; value: string; label: string }, i: number) => (
+                <div key={s.id} className={i === 0 ? 'pr-4' : 'px-4'}>
+                  <dt className="sr-only">{s.label}</dt>
+                  <dd>
                     <span
-                      className="w-1.5 h-1.5 rounded-full bg-primary"
-                      style={{ boxShadow: `0 0 6px hsl(var(--primary))` }}
-                    />
-                    <span>{home.hero.badge}</span>
-                  </div>
-                </motion.div>
-
-                <motion.h1
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
-                  className="text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.05] text-foreground mb-6"
-                  style={{ fontFamily: 'var(--font-heading)' }}
-                >
-                  <span>{home.hero.headline1}</span>
-                  <br />
-                  <span>{home.hero.headline2} </span>
-                  <span
-                    className="text-primary"
-                    style={{ textShadow: `0 0 30px hsl(var(--primary) / 0.4)` }}
-                  >
-                    {home.hero.headlineAccent}
-                  </span>
-                  <br />
-                  <span>{home.hero.headline3}</span>
-                </motion.h1>
-
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
-                  className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-lg"
-                  style={{ fontFamily: 'var(--font-sans)' }}
-                >
-                  {home.hero.subhead}
-                </motion.p>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.3, ease: 'easeOut' }}
-                  className="flex flex-wrap gap-4"
-                >
-                  <CtaButton to="/intake" variant="primary">
-                    <span>{home.hero.ctaPrimary}</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
-                  </CtaButton>
-                  <CtaButton to="/#providers" variant="ghost">
-                    <span>{home.hero.ctaSecondary}</span>
-                  </CtaButton>
-                </motion.div>
-
-                {/* Stats row */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.5 }}
-                  className="flex flex-wrap gap-8 mt-12 pt-8"
-                  style={{ borderTop: `1px solid hsl(var(--border-subtle) / 0.5)` }}
-                >
-                  {home.hero.stats.map((s) => (
-                    <div key={s.id}>
-                      <div
-                        className="text-2xl font-bold text-primary"
-                        style={{ fontFamily: 'var(--font-heading)' }}
-                      >
-                        {s.value}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-0.5" style={{ fontFamily: 'var(--font-sans)' }}>
-                        {s.label}
-                      </div>
-                    </div>
-                  ))}
-                </motion.div>
-              </div>
-
-              {/* Right: mockup */}
-              <motion.div
-                initial={{ opacity: 0, x: 32 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.25, ease: 'easeOut' }}
-                className="flex justify-center lg:justify-end"
-              >
-                <IntakeMockup />
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── HOW IT WORKS ──────────────────────────────────────────────── */}
-        <section
-          id="how-it-works"
-          className="py-24"
-          style={{ background: `hsl(var(--surface-deeper))` }}
-        >
-          <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <FadeUp>
-              <div className="text-center mb-16">
-                <p
-                  className="text-xs font-semibold uppercase tracking-widest text-primary mb-3"
-                  style={{ fontFamily: 'var(--font-sans)' }}
-                >
-                  {home.howItWorks.eyebrow}
-                </p>
-                <h2
-                  className="text-4xl lg:text-5xl font-bold text-foreground mb-4"
-                  style={{ fontFamily: 'var(--font-heading)' }}
-                >
-                  {home.howItWorks.headline}
-                </h2>
-                <p className="text-muted-foreground max-w-xl mx-auto" style={{ fontFamily: 'var(--font-sans)' }}>
-                  {home.howItWorks.subhead}
-                </p>
-              </div>
-            </FadeUp>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {home.howItWorks.steps.map((card, i) => (
-                <FadeUp key={card.id} delay={i * 0.1}>
-                  <motion.div
-                    className="relative rounded-2xl p-8 h-full"
-                    style={{
-                      background: `hsl(var(--card))`,
-                      border: `1px solid hsl(var(--border-subtle) / 0.6)`,
-                    }}
-                    whileHover={{
-                      y: -4,
-                      boxShadow: `0 12px 40px hsl(var(--primary) / 0.15)`,
-                      borderColor: `hsl(var(--primary) / 0.4)`,
-                    }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div
-                      className="text-5xl font-bold mb-6 leading-none"
-                      style={{
-                        fontFamily: 'var(--font-heading)',
-                        color: `hsl(var(--primary) / 0.2)`,
-                      }}
+                      className="block text-lg font-bold text-foreground"
+                      style={{ fontFamily: 'var(--font-heading)', fontStretch: '108%' }}
                     >
-                      {card.step}
-                    </div>
-                    <h3
-                      className="text-xl font-bold text-foreground mb-1"
-                      style={{ fontFamily: 'var(--font-heading)' }}
-                    >
-                      {card.title}
-                    </h3>
-                    <p
-                      className="text-xs font-semibold text-primary mb-3 uppercase tracking-wider"
-                      style={{ fontFamily: 'var(--font-sans)' }}
-                    >
-                      {card.subtitle}
-                    </p>
-                    <p className="text-sm text-muted-foreground leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>
-                      {card.description}
-                    </p>
-                  </motion.div>
-                </FadeUp>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── FEATURES ──────────────────────────────────────────────────── */}
-        <section
-          id="patients"
-          className="py-24"
-          style={{ background: `hsl(var(--background))` }}
-        >
-          <div className="max-w-5xl mx-auto px-6 lg:px-8">
-            <FadeUp>
-              <p
-                className="text-xs font-semibold uppercase tracking-widest text-primary mb-3"
-                style={{ fontFamily: 'var(--font-sans)' }}
-              >
-                {home.features.eyebrow}
-              </p>
-              <h2
-                className="text-4xl lg:text-5xl font-bold text-foreground mb-16"
-                style={{ fontFamily: 'var(--font-heading)' }}
-              >
-                {home.features.headline}
-              </h2>
-            </FadeUp>
-
-            {home.features.rows.map((row, i) => (
-              <FadeUp key={row.id} delay={0.05}>
-                <div
-                  className={`flex flex-col ${i % 2 !== 0 ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-10 py-12`}
-                  style={{ borderBottom: `1px solid hsl(var(--border-subtle) / 0.4)` }}
-                >
-                  <div className="flex-1 text-center md:text-left">
-                    <div
-                      className="text-6xl lg:text-7xl font-bold leading-none mb-2"
-                      style={{
-                        fontFamily: 'var(--font-heading)',
-                        color: `hsl(var(--primary))`,
-                        textShadow: `0 0 40px hsl(var(--primary) / 0.3)`,
-                      }}
-                    >
-                      {row.stat}
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3
-                      className="text-xl font-bold text-foreground mb-3"
-                      style={{ fontFamily: 'var(--font-heading)' }}
-                    >
-                      {row.title}
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>
-                      {row.description}
-                    </p>
-                  </div>
+                      {s.value}
+                    </span>
+                    <span className="block text-xs mt-0.5 leading-snug" style={{ color: 'hsl(var(--text-dimmer))' }}>
+                      {s.label}
+                    </span>
+                  </dd>
                 </div>
-              </FadeUp>
+              ))}
+            </dl>
+          </div>
+
+          <div className="flex lg:justify-end">
+            <IntakeMonitor />
+          </div>
+        </div>
+      </section>
+
+      {/* ── SIGNATURE STRIP ──────────────────────────────────────────────── */}
+      <EkgStrip />
+
+      {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
+      <section className="py-xxxl">
+        <div className="max-w-content mx-auto px-6">
+          <div className="max-w-2xl mb-14">
+            <h2 className="display text-foreground mb-4" style={{ fontSize: 'clamp(2rem, 3.6vw, 2.9rem)' }}>
+              {howItWorks.headline}
+            </h2>
+            <p className="text-base md:text-lg leading-relaxed" style={{ color: 'hsl(var(--text-dim))' }}>
+              {howItWorks.subhead}
+            </p>
+          </div>
+
+          <ol className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
+            {howItWorks.steps.map((step: { id: string; step: string; title: string; subtitle: string; description: string }) => (
+              <li key={step.id} className="relative pl-5" style={{ borderLeft: `2px solid hsl(var(--primary) / 0.45)` }}>
+                <span className="vitals block text-sm mb-3" style={{ color: 'hsl(var(--primary))' }}>
+                  {step.step}
+                </span>
+                <h3
+                  className="text-xl font-bold text-foreground mb-1"
+                  style={{ fontFamily: 'var(--font-heading)', fontStretch: '108%' }}
+                >
+                  {step.title}
+                </h3>
+                <p className="text-sm font-medium mb-3" style={{ color: 'hsl(var(--text-dimmer))' }}>
+                  {step.subtitle}
+                </p>
+                <p className="text-sm leading-relaxed" style={{ color: 'hsl(var(--text-dim))' }}>
+                  {step.description}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* ── THE BRIEF — EKG paper ────────────────────────────────────────── */}
+      <section className="bg-ekg-paper relative">
+        <div className="max-w-content mx-auto px-6 py-xxxl grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-12 lg:gap-16 items-start">
+          <div className="lg:sticky lg:top-28">
+            <h2
+              className="display mb-5"
+              style={{ fontSize: 'clamp(2rem, 3.6vw, 2.9rem)', color: 'hsl(var(--paper-ink))' }}
+            >
+              The brief your provider receives.
+            </h2>
+            <p className="text-base md:text-lg leading-relaxed mb-6" style={{ color: 'hsl(var(--paper-muted))' }}>
+              Every intake becomes a structured clinical summary — the story,
+              organized the way clinicians think, with anything serious flagged
+              before the visit starts. No chart-digging. No repeating yourself.
+            </p>
+            <ul className="flex flex-col gap-2.5">
+              {['Chief complaint and history, in clinical order', 'Medications and allergies, captured once', 'Red flags surfaced on top — never buried'].map((item) => (
+                <li key={item} className="flex items-start gap-2.5 text-sm font-medium" style={{ color: 'hsl(var(--paper-ink))' }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--paper-red))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* The printed strip */}
+          <div
+            className="relative rounded-sm px-6 md:px-8 py-7"
+            style={{
+              background: 'hsl(var(--paper) / 0.65)',
+              border: `1px solid hsl(var(--paper-edge))`,
+              boxShadow: '0 10px 30px hsl(201 32% 13% / 0.12)',
+              fontFamily: 'var(--font-mono)',
+              color: 'hsl(var(--paper-ink))',
+            }}
+          >
+            <p
+              className="absolute right-5 top-5 rotate-6 px-2 py-0.5 text-xs font-semibold rounded-sm"
+              style={{ color: 'hsl(var(--paper-red))', border: '1.5px solid hsl(var(--paper-red) / 0.8)' }}
+            >
+              EXAMPLE — demo data
+            </p>
+
+            <p className="text-xs mb-5" style={{ color: 'hsl(var(--paper-muted))' }}>
+              ACUTE INSIGHT · pre-visit brief · patient: T. Sample
+            </p>
+
+            <div className="text-[13px] leading-[1.75] space-y-4">
+              <p>
+                <strong>CC:</strong> Burning with urination × 2 days.
+              </p>
+              <p>
+                <strong>HPI:</strong> Sudden onset dysuria with urinary
+                frequency, severity 5/10. Mild suprapubic discomfort. Denies
+                fever, flank pain, hematuria. No prior episode this year.
+              </p>
+              <p>
+                <strong>Meds:</strong> Lisinopril 20 mg daily · Metformin
+                1000 mg BID
+                <br />
+                <strong>Allergies:</strong> Penicillin (rash)
+                <br />
+                <strong>PMH:</strong> Hypertension · Type 2 diabetes
+              </p>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <strong>Flags:</strong>
+                <span className="px-2 py-0.5 rounded-sm text-xs font-semibold" style={{ border: '1.5px solid hsl(var(--paper-red) / 0.75)', color: 'hsl(var(--paper-red))' }}>
+                  Diabetic — infection risk
+                </span>
+                <span className="px-2 py-0.5 rounded-sm text-xs font-semibold" style={{ border: '1.5px solid hsl(var(--paper-red) / 0.75)', color: 'hsl(var(--paper-red))' }}>
+                  On ACE inhibitor
+                </span>
+              </div>
+            </div>
+
+            <p className="mt-6 pt-4 text-xs" style={{ borderTop: '1px dashed hsl(var(--paper-grid-bold))', color: 'hsl(var(--paper-muted))' }}>
+              Organized by Acute Insight AI. Diagnosis and plan stay with your
+              clinician.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURES — flowsheet rows ────────────────────────────────────── */}
+      <section className="py-xxxl">
+        <div className="max-w-content mx-auto px-6">
+          <h2 className="display text-foreground mb-12 max-w-2xl" style={{ fontSize: 'clamp(2rem, 3.6vw, 2.9rem)' }}>
+            {features.headline}
+          </h2>
+
+          <div style={{ borderTop: `1px solid hsl(var(--border-subtle) / 0.7)` }}>
+            {features.rows.map((row: { id: string; stat: string; title: string; description: string }) => (
+              <div
+                key={row.id}
+                className="grid grid-cols-1 md:grid-cols-[180px_1fr_1.6fr] gap-2 md:gap-8 py-7 items-baseline transition-colors duration-200 hover:bg-card/40"
+                style={{ borderBottom: `1px solid hsl(var(--border-subtle) / 0.7)` }}
+              >
+                <span className="vitals text-sm" style={{ color: 'hsl(var(--primary))' }}>
+                  {row.stat}
+                </span>
+                <h3 className="text-lg md:text-xl font-bold text-foreground" style={{ fontFamily: 'var(--font-heading)', fontStretch: '106%' }}>
+                  {row.title}
+                </h3>
+                <p className="text-sm md:text-[15px] leading-relaxed" style={{ color: 'hsl(var(--text-dim))' }}>
+                  {row.description}
+                </p>
+              </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── TRUST BAR ─────────────────────────────────────────────────── */}
-        <section
-          style={{
-            background: `hsl(var(--card))`,
-            borderTop: `1px solid hsl(var(--border-subtle) / 0.5)`,
-            borderBottom: `1px solid hsl(var(--border-subtle) / 0.5)`,
-          }}
-        >
-          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-            <div className="flex flex-wrap items-center justify-center gap-10">
-              {[
-                { icon: '🩺', label: 'Physician-Founded' },
-                { icon: '🔒', label: 'Encrypted in Transit' },
-                { icon: '🔐', label: 'Never Sold or Shared' },
-                { icon: '⚠️', label: 'Emergency-Aware Intake' },
-                { icon: '⚡', label: 'Instant Provider Briefs' },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-primary" style={{ fontFamily: 'var(--font-sans)' }}>
-                    {item.icon}
-                  </span>
-                  <span className="text-sm font-medium text-muted-foreground" style={{ fontFamily: 'var(--font-sans)' }}>
-                    {item.label}
-                  </span>
-                </div>
-              ))}
-            </div>
+      {/* ── FOR CLINICIANS ───────────────────────────────────────────────── */}
+      <section
+        className="py-xxxl"
+        style={{ background: `hsl(var(--card) / 0.5)`, borderTop: `1px solid hsl(var(--border-subtle) / 0.5)`, borderBottom: `1px solid hsl(var(--border-subtle) / 0.5)` }}
+      >
+        <div className="max-w-content mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="display text-foreground mb-5" style={{ fontSize: 'clamp(2rem, 3.6vw, 2.9rem)' }}>
+              {providers.headline1} {providers.headlineAccent}
+            </h2>
+            <p className="text-base md:text-lg leading-relaxed mb-8" style={{ color: 'hsl(var(--text-dim))' }}>
+              {providers.subhead}
+            </p>
+            <Link
+              to="/providers#early-access"
+              className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 bg-primary hover:brightness-110"
+              style={{ color: 'hsl(var(--primary-foreground))', fontFamily: 'var(--font-heading)', boxShadow: '0 0 24px hsl(var(--primary) / 0.35)' }}
+            >
+              {providers.cta}
+            </Link>
           </div>
-        </section>
 
-        {/* ── PROVIDERS ─────────────────────────────────────────────────── */}
-        <section
-          id="providers"
-          className="py-24"
-          style={{ background: `hsl(var(--surface-deeper))` }}
-        >
-          <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              <FadeUp>
-                <p
-                  className="text-xs font-semibold uppercase tracking-widest text-primary mb-3"
-                  style={{ fontFamily: 'var(--font-sans)' }}
-                >
-                  {home.providers.eyebrow}
-                </p>
-                <h2
-                  className="text-4xl lg:text-5xl font-bold text-foreground mb-6"
-                  style={{ fontFamily: 'var(--font-heading)' }}
-                >
-                  <span>{home.providers.headline1}</span>
-                  <br />
-                  <span className="text-primary">{home.providers.headlineAccent}</span>
-                </h2>
-                <p className="text-muted-foreground leading-relaxed mb-8 max-w-lg" style={{ fontFamily: 'var(--font-sans)' }}>
-                  {home.providers.subhead}
-                </p>
-                <ul className="flex flex-col gap-4 mb-8">
-                  {home.providers.benefits.map((item) => (
-                    <li key={item.id} className="flex items-start gap-3">
-                      <div
-                        className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                        style={{ background: `hsl(var(--primary) / 0.15)` }}
-                      >
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="3">
-                          <path d="M20 6L9 17l-5-5"/>
-                        </svg>
-                      </div>
-                      <span className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-sans)' }}>
-                        {item.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <CtaButton to="/providers" variant="primary">
-                  <span>{home.providers.cta}</span>
-                </CtaButton>
-              </FadeUp>
+          <ul className="flex flex-col gap-4">
+            {providers.benefits.map((b: { id: string; text: string }) => (
+              <li
+                key={b.id}
+                className="flex items-start gap-3 rounded-xl px-5 py-4"
+                style={{ background: `hsl(var(--card))`, border: `1px solid hsl(var(--border-subtle) / 0.6)` }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span className="text-sm md:text-[15px] font-medium text-foreground">{b.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
-              {/* Provider summary card */}
-              <FadeUp delay={0.15}>
-                <motion.div
-                  className="rounded-2xl p-6"
-                  style={{
-                    background: `hsl(var(--card))`,
-                    border: `1px solid hsl(var(--primary) / 0.2)`,
-                    boxShadow: `0 0 40px hsl(var(--primary) / 0.08)`,
-                  }}
-                  whileHover={{ boxShadow: `0 0 60px hsl(var(--primary) / 0.15)` }}
-                >
-                  <div
-                    className="flex items-center justify-between mb-4 pb-4"
-                    style={{ borderBottom: `1px solid hsl(var(--border-subtle) / 0.5)` }}
-                  >
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-0.5" style={{ fontFamily: 'var(--font-sans)' }}>
-                        Patient Summary
-                      </p>
-                      <p className="text-sm font-semibold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>
-                        J. Martinez, 54 — Intake Complete
-                      </p>
-                    </div>
-                    <div
-                      className="px-2 py-1 rounded-md text-xs font-medium text-primary"
-                      style={{ background: `hsl(var(--primary) / 0.1)` }}
-                    >
-                      Ready
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    {[
-                      { label: 'Chief Complaint', value: 'Chest tightness × 3 days', highlight: false },
-                      { label: 'Relevant History', value: 'HTN, T2DM, former smoker', highlight: false },
-                      { label: 'Current Medications', value: 'Metformin 1000mg, Lisinopril 10mg', highlight: false },
-                      { label: 'AI Flag', value: '⚠ Possible cardiac — prioritize ECG', highlight: true },
-                    ].map((row) => (
-                      <div key={row.label} className="flex flex-col gap-0.5">
-                        <span className="text-xs text-muted-foreground" style={{ fontFamily: 'var(--font-sans)' }}>
-                          {row.label}
-                        </span>
-                        <span
-                          className="text-sm font-medium"
-                          style={{
-                            fontFamily: 'var(--font-sans)',
-                            color: row.highlight ? `hsl(var(--primary))` : `hsl(var(--foreground))`,
-                          }}
-                        >
-                          {row.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              </FadeUp>
-            </div>
+      {/* ── FINAL CTA ────────────────────────────────────────────────────── */}
+      <section className="py-xxxl">
+        <div className="max-w-content mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-0 md:divide-x" style={{ borderColor: 'hsl(var(--border-subtle) / 0.6)' }}>
+          <div className="md:pr-12">
+            <p className="vitals text-xs mb-4" style={{ color: 'hsl(var(--text-dimmer))' }}>
+              {ctaSection.patients.eyebrow}
+            </p>
+            <h2 className="display text-foreground mb-4" style={{ fontSize: 'clamp(1.7rem, 2.8vw, 2.3rem)' }}>
+              {ctaSection.patients.headline1} {ctaSection.patients.headline2}
+            </h2>
+            <p className="text-sm md:text-base leading-relaxed mb-6" style={{ color: 'hsl(var(--text-dim))' }}>
+              {ctaSection.patients.body}
+            </p>
+            <Link
+              to="/intake"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 bg-primary hover:brightness-110"
+              style={{ color: 'hsl(var(--primary-foreground))', fontFamily: 'var(--font-heading)' }}
+            >
+              {ctaSection.patients.cta}
+            </Link>
           </div>
-        </section>
-
-        {/* ── DUAL CTA ──────────────────────────────────────────────────── */}
-        <section
-          className="py-24 relative overflow-hidden"
-          style={{ background: `hsl(var(--background))` }}
-        >
-          <div
-            className="absolute inset-0 pointer-events-none"
-            aria-hidden="true"
-            style={{
-              background: `radial-gradient(ellipse 60% 50% at 50% 50%, hsl(var(--primary) / 0.06) 0%, transparent 70%)`,
-            }}
-          />
-          <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Patient CTA */}
-              <FadeUp>
-                <div
-                  className="rounded-2xl p-10"
-                  style={{
-                    background: `hsl(var(--card))`,
-                    border: `1px solid hsl(var(--primary) / 0.25)`,
-                  }}
-                >
-                  <p
-                    className="text-xs font-semibold uppercase tracking-widest text-primary mb-3"
-                    style={{ fontFamily: 'var(--font-sans)' }}
-                  >
-                    {home.ctaSection.patients.eyebrow}
-                  </p>
-                  <h3
-                    className="text-3xl font-bold text-foreground mb-4"
-                    style={{ fontFamily: 'var(--font-heading)' }}
-                  >
-                    <span>{home.ctaSection.patients.headline1}</span>
-                    <br />
-                    <span>{home.ctaSection.patients.headline2}</span>
-                  </h3>
-                  <p className="text-muted-foreground mb-8 leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>
-                    {home.ctaSection.patients.body}
-                  </p>
-                  <CtaButton to="/intake" variant="primary">
-                    <span>{home.ctaSection.patients.cta}</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
-                  </CtaButton>
-                </div>
-              </FadeUp>
-
-              {/* Provider CTA */}
-              <FadeUp delay={0.1}>
-                <div
-                  className="rounded-2xl p-10"
-                  style={{
-                    background: `hsl(var(--card))`,
-                    border: `1px solid hsl(var(--border-subtle) / 0.6)`,
-                  }}
-                >
-                  <p
-                    className="text-xs font-semibold uppercase tracking-widest mb-3"
-                    style={{ fontFamily: 'var(--font-sans)', color: `hsl(var(--text-dim))` }}
-                  >
-                    {home.ctaSection.clinicians.eyebrow}
-                  </p>
-                  <h3
-                    className="text-3xl font-bold text-foreground mb-4"
-                    style={{ fontFamily: 'var(--font-heading)' }}
-                  >
-                    <span>{home.ctaSection.clinicians.headline1}</span>
-                    <br />
-                    <span>{home.ctaSection.clinicians.headline2}</span>
-                  </h3>
-                  <p className="text-muted-foreground mb-8 leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>
-                    {home.ctaSection.clinicians.body}
-                  </p>
-                  <CtaButton to="/providers" variant="ghost">
-                    <span>{home.ctaSection.clinicians.cta}</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
-                  </CtaButton>
-                </div>
-              </FadeUp>
-            </div>
+          <div className="md:pl-12">
+            <p className="vitals text-xs mb-4" style={{ color: 'hsl(var(--text-dimmer))' }}>
+              {ctaSection.clinicians.eyebrow}
+            </p>
+            <h2 className="display text-foreground mb-4" style={{ fontSize: 'clamp(1.7rem, 2.8vw, 2.3rem)' }}>
+              {ctaSection.clinicians.headline1} {ctaSection.clinicians.headline2}
+            </h2>
+            <p className="text-sm md:text-base leading-relaxed mb-6" style={{ color: 'hsl(var(--text-dim))' }}>
+              {ctaSection.clinicians.body}
+            </p>
+            <Link
+              to="/providers#early-access"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:border-foreground/40"
+              style={{ color: 'hsl(var(--foreground))', border: `1px solid hsl(var(--border-subtle))`, fontFamily: 'var(--font-heading)' }}
+            >
+              {ctaSection.clinicians.cta}
+            </Link>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
     </>
   );
 }

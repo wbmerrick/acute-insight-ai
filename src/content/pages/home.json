@@ -6,8 +6,8 @@
     "headlineAccent": "Thinks",
     "headline3": "Ahead.",
     "subhead": "Acute Insight AI replaces paper forms and clunky portals with an intelligent intake that adapts to each patient — tap-based, conversational, and clinically structured.",
-    "ctaPrimary": "Start Your Intake",
-    "ctaSecondary": "For Providers",
+    "ctaPrimary": "Start your intake",
+    "ctaSecondary": "For providers",
     "stats": [
       {
         "id": "stat-1",
@@ -107,22 +107,22 @@
         "text": "Emergency screening before cases reach your queue"
       }
     ],
-    "cta": "Request Provider Access"
+    "cta": "Request early access"
   },
   "ctaSection": {
     "patients": {
-      "eyebrow": "For Patients",
+      "eyebrow": "For patients",
       "headline1": "Ready to transform",
       "headline2": "your intake?",
       "body": "Complete your medical history in minutes — no typing marathon, no paper, no waiting room clipboard.",
-      "cta": "Start Your Intake"
+      "cta": "Start your intake"
     },
     "clinicians": {
-      "eyebrow": "For Clinicians",
+      "eyebrow": "For clinicians",
       "headline1": "Built for",
       "headline2": "clinicians.",
       "body": "Structured summaries, flagged risks, and a dashboard that runs in any browser. No integration required to start.",
-      "cta": "Request Provider Access"
+      "cta": "Request early access"
     }
   }
 }

@@ -6,15 +6,10 @@ import { patients } from 'virtual:content';
 
 // ─── Animation variants ───────────────────────────────────────────────────────
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: 'easeOut' as const } },
-};
+// Scroll-triggered entrances removed: content renders immediately.
+const fadeUp = { hidden: {}, visible: {} };
 
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
+const stagger = { hidden: {}, visible: {} };
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -78,7 +73,7 @@ export default function PatientsPage() {
             <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-2xl">
               <motion.p
                 variants={fadeUp}
-                className="text-xs font-semibold tracking-widest uppercase mb-3"
+                className="text-xs font-semibold tracking-normal mb-3"
                 style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}
               >
                 {patients.hero.eyebrow}
@@ -151,7 +146,7 @@ export default function PatientsPage() {
         >
           <div className="max-w-content mx-auto px-6">
             <div className="text-center mb-12">
-              <motion.p variants={fadeUp} className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}>
+              <motion.p variants={fadeUp} className="text-xs font-semibold tracking-normal mb-3" style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}>
                 {patients.conditions.eyebrow}
               </motion.p>
               <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold mb-4" style={{ color: `hsl(var(--foreground))`, fontFamily: 'var(--font-heading)' }}>
@@ -221,7 +216,7 @@ export default function PatientsPage() {
         >
           <div className="max-w-content mx-auto px-6">
             <div className="text-center mb-14">
-              <motion.p variants={fadeUp} className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}>
+              <motion.p variants={fadeUp} className="text-xs font-semibold tracking-normal mb-3" style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}>
                 {patients.benefits.eyebrow}
               </motion.p>
               <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold" style={{ color: `hsl(var(--foreground))`, fontFamily: 'var(--font-heading)' }}>
@@ -267,7 +262,7 @@ export default function PatientsPage() {
         >
           <div className="max-w-content mx-auto px-6">
             <div className="text-center mb-14">
-              <motion.p variants={fadeUp} className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}>
+              <motion.p variants={fadeUp} className="text-xs font-semibold tracking-normal mb-3" style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}>
                 {patients.howItWorks.eyebrow}
               </motion.p>
               <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold" style={{ color: `hsl(var(--foreground))`, fontFamily: 'var(--font-heading)' }}>
@@ -312,7 +307,7 @@ export default function PatientsPage() {
           <div className="max-w-content mx-auto px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
               <div>
-                <motion.p variants={fadeUp} className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}>
+                <motion.p variants={fadeUp} className="text-xs font-semibold tracking-normal mb-3" style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}>
                   {patients.cost.eyebrow}
                 </motion.p>
                 <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold mb-5" style={{ color: `hsl(var(--foreground))`, fontFamily: 'var(--font-heading)' }}>
@@ -396,7 +391,7 @@ export default function PatientsPage() {
               style={{ background: `hsl(var(--card))`, border: `1px solid hsl(var(--border-subtle) / 0.3)` }}
             >
               <div className="max-w-2xl mb-10">
-                <motion.p variants={fadeUp} className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}>
+                <motion.p variants={fadeUp} className="text-xs font-semibold tracking-normal mb-3" style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}>
                   {patients.privacy.eyebrow}
                 </motion.p>
                 <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold mb-4" style={{ color: `hsl(var(--foreground))`, fontFamily: 'var(--font-heading)' }}>
@@ -441,7 +436,7 @@ export default function PatientsPage() {
         >
           <div className="max-w-content mx-auto px-6">
             <div className="text-center mb-14">
-              <motion.p variants={fadeUp} className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}>
+              <motion.p variants={fadeUp} className="text-xs font-semibold tracking-normal mb-3" style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}>
                 {patients.faq.eyebrow}
               </motion.p>
               <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold" style={{ color: `hsl(var(--foreground))`, fontFamily: 'var(--font-heading)' }}>

@@ -86,7 +86,7 @@ export default function HowItWorksPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               {/* Left: copy */}
               <motion.div
-                initial={{ opacity: 0, x: -20 }}
+                initial={{}}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.45, ease: 'easeOut' as const }}
@@ -138,7 +138,7 @@ export default function HowItWorksPage() {
                 {how_it_works.patientSection.steps.map((step, i) => (
                   <motion.div
                     key={step.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{}}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: i * 0.08, ease: 'easeOut' as const }}
@@ -194,7 +194,7 @@ export default function HowItWorksPage() {
                 {how_it_works.providerSection.steps.map((step, i) => (
                   <motion.div
                     key={step.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{}}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: i * 0.08, ease: 'easeOut' as const }}
@@ -235,7 +235,7 @@ export default function HowItWorksPage() {
 
               {/* Right: copy */}
               <motion.div
-                initial={{ opacity: 0, x: 20 }}
+                initial={{}}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.45, ease: 'easeOut' as const }}
@@ -291,7 +291,7 @@ export default function HowItWorksPage() {
         >
           <div className="max-w-6xl mx-auto">
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
+              initial={{}}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
@@ -322,7 +322,7 @@ export default function HowItWorksPage() {
               {how_it_works.featuresSection.features.map((feat, i) => (
                 <motion.div
                   key={feat.id}
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={{}}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: i * 0.07, ease: 'easeOut' as const }}
@@ -409,7 +409,7 @@ export default function HowItWorksPage() {
           />
           <div className="relative max-w-2xl mx-auto">
             <motion.h2
-              initial={{ opacity: 0, y: 14 }}
+              initial={{}}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
@@ -419,7 +419,7 @@ export default function HowItWorksPage() {
               {how_it_works.ctaSection.heading}
             </motion.h2>
             <motion.p
-              initial={{ opacity: 0, y: 10 }}
+              initial={{}}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.06 }}
@@ -429,7 +429,7 @@ export default function HowItWorksPage() {
               {how_it_works.ctaSection.subheading}
             </motion.p>
             <motion.div
-              initial={{ opacity: 0, y: 8 }}
+              initial={{}}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.12 }}

@@ -1,133 +1,124 @@
 import { Link } from 'react-router';
+import { LogoMark, Wordmark } from './Header';
+
+const columns: { heading: string; links: { label: string; to: string }[] }[] = [
+  {
+    heading: 'Platform',
+    links: [
+      { label: 'For patients', to: '/patients' },
+      { label: 'For providers', to: '/providers' },
+      { label: 'Start an intake', to: '/intake' },
+      { label: 'Patient portal', to: '/portal' },
+    ],
+  },
+  {
+    heading: 'Company',
+    links: [
+      { label: 'About', to: '/about' },
+      { label: 'How it works', to: '/how-it-works' },
+      { label: 'Request early access', to: '/providers#early-access' },
+    ],
+  },
+  {
+    heading: 'Legal',
+    links: [
+      { label: 'Privacy policy', to: '/privacy' },
+      { label: 'Terms of use', to: '/terms' },
+      { label: 'Security', to: '/security' },
+    ],
+  },
+];
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer
-      style={{
-        background: `hsl(var(--surface-deeper))`,
-        borderTop: `1px solid hsl(var(--border-subtle) / 0.6)`,
-        fontFamily: 'var(--font-sans)',
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+    <footer style={{ background: `hsl(var(--surface-deeper))` }}>
+      {/* Trace divider: flatline that carries one complex, then settles */}
+      <div aria-hidden="true" className="overflow-hidden">
+        <svg
+          viewBox="0 0 1440 40"
+          preserveAspectRatio="none"
+          className="w-full h-10 block"
+        >
+          <path
+            d="M0 20 H600 L615 20 L622 6 L630 34 L638 12 L645 20 H1440"
+            fill="none"
+            stroke="hsl(var(--primary) / 0.5)"
+            strokeWidth="1.5"
+          />
+        </svg>
+      </div>
+
+      <div className="max-w-content mx-auto px-6 pb-10 pt-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-10 md:gap-8 mb-12">
           {/* Brand */}
-          <div className="md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <polygon points="16,2 30,26 2,26" fill="none" stroke="hsl(var(--cyan-glow))" strokeWidth="2" strokeLinejoin="round"/>
-                <line x1="16" y1="10" x2="16" y2="20" stroke="hsl(var(--cyan-glow))" strokeWidth="1.5"/>
-                <circle cx="16" cy="22" r="1.5" fill="hsl(var(--cyan-glow))"/>
-              </svg>
-              <span className="text-lg font-bold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>
-                Acute Insight<span className="text-primary">.ai</span>
-              </span>
+          <div className="md:col-span-2">
+            <Link to="/" className="inline-flex items-center gap-2.5 mb-4">
+              <LogoMark size={26} />
+              <Wordmark />
             </Link>
-            <p className="text-sm leading-relaxed mb-6 text-muted-foreground">
-              AI-powered patient intake that thinks ahead — reducing friction, improving care.
+            <p
+              className="text-sm leading-relaxed max-w-xs"
+              style={{ color: 'hsl(var(--text-dim))' }}
+            >
+              AI-guided intake that lets patients tell their story once — and
+              lets their clinician walk in already briefed.
             </p>
-            {/* Trust badge */}
-            <div
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-primary"
+            <p
+              className="mt-5 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium"
               style={{
+                color: 'hsl(var(--primary))',
                 background: `hsl(var(--primary) / 0.08)`,
-                border: `1px solid hsl(var(--primary) / 0.2)`,
+                border: `1px solid hsl(var(--primary) / 0.22)`,
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-              Physician-Founded · Clinical Beta
+              <span
+                className="w-1.5 h-1.5 rounded-full bg-primary"
+                style={{ boxShadow: '0 0 6px hsl(var(--primary) / 0.9)' }}
+              />
+              Physician-founded · Clinical beta
+            </p>
+          </div>
+
+          {/* Link columns */}
+          {columns.map((col) => (
+            <div key={col.heading}>
+              <h4
+                className="text-sm font-semibold mb-4 text-foreground"
+                style={{ fontFamily: 'var(--font-heading)' }}
+              >
+                {col.heading}
+              </h4>
+              <ul className="flex flex-col gap-2.5">
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      to={link.to}
+                      className="text-sm transition-colors duration-200 hover:text-primary"
+                      style={{ color: 'hsl(var(--text-dim))' }}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-
-          {/* Platform */}
-          <div>
-            <h4
-              className="text-xs font-semibold mb-4 uppercase tracking-widest text-primary"
-            >
-              Platform
-            </h4>
-            <ul className="flex flex-col gap-3">
-              {[
-                { label: 'For Patients', to: '/patients' },
-                { label: 'For Providers', to: '/providers' },
-                { label: 'AI Intake', to: '/#how-it-works' },
-                { label: 'How It Works', to: '/#how-it-works' },
-              ].map((item) => (
-                <li key={item.label}>
-                  <Link
-                    to={item.to}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4 className="text-xs font-semibold mb-4 uppercase tracking-widest text-primary">
-              Company
-            </h4>
-            <ul className="flex flex-col gap-3">
-              {[
-                { label: 'About', to: '/about' },
-                { label: 'Blog', to: '/#' },
-                { label: 'Careers', to: '/#' },
-                { label: 'Contact', to: '/#' },
-              ].map((item) => (
-                <li key={item.label}>
-                  <Link
-                    to={item.to}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4 className="text-xs font-semibold mb-4 uppercase tracking-widest text-primary">
-              Legal
-            </h4>
-            <ul className="flex flex-col gap-3">
-              {['Privacy Policy', 'Terms of Use', 'Security'].map((item) => (
-                <li key={item}>
-                  <Link
-                    to="/#"
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
-                  >
-                    {item}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          ))}
         </div>
 
         {/* Bottom bar */}
         <div
-          className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8"
+          className="flex flex-col md:flex-row items-center justify-between gap-4 pt-7"
           style={{ borderTop: `1px solid hsl(var(--border-subtle) / 0.5)` }}
         >
           <p className="text-xs" style={{ color: `hsl(var(--text-dimmer))` }}>
             © {currentYear} Acute Insight AI. All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
-            {['Encrypted in transit', 'Never sold or shared'].map((badge) => (
-              <span key={badge} className="text-xs" style={{ color: `hsl(var(--text-dimmer))` }}>
-                {badge}
-              </span>
-            ))}
-          </div>
+          <p className="text-xs text-center md:text-right" style={{ color: `hsl(var(--text-dimmer))` }}>
+            Not for emergencies — if this is urgent, call 911. Your data is
+            encrypted in transit and never sold or shared.
+          </p>
         </div>
       </div>
     </footer>

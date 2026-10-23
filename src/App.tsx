@@ -57,6 +57,11 @@ const router = createAiroBrowserRouter(routeTree, { notFoundRouteId: 'airo-not-f
 const _virtualPageState = { lastPath: null as string | null };
 router.subscribe((state) => {
   if (state.navigation.state !== 'idle') return;
+  // Let chrome outside the router tree (e.g. the cookie banner) react to
+  // SPA navigations without a router context of its own.
+  window.dispatchEvent(
+    new CustomEvent('ai-route-changed', { detail: window.location.pathname })
+  );
   if (!window._allowCT) return;
   const { pathname } = state.location;
   if (pathname === _virtualPageState.lastPath) return;

@@ -5,15 +5,10 @@ import { about } from 'virtual:content';
 
 // ─── Animation variants ───────────────────────────────────────────────────────
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: 'easeOut' as const } },
-};
+// Scroll-triggered entrances removed: content renders immediately.
+const fadeUp = { hidden: {}, visible: {} };
 
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
+const stagger = { hidden: {}, visible: {} };
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -73,7 +68,7 @@ export default function AboutPage() {
             <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-2xl">
               <motion.p
                 variants={fadeUp}
-                className="text-xs font-semibold tracking-widest uppercase mb-3"
+                className="text-xs font-semibold tracking-normal mb-3"
                 style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}
               >
                 {about.hero.eyebrow}
@@ -180,7 +175,7 @@ export default function AboutPage() {
             <div className="text-center mb-14">
               <motion.p
                 variants={fadeUp}
-                className="text-xs font-semibold tracking-widest uppercase mb-3"
+                className="text-xs font-semibold tracking-normal mb-3"
                 style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}
               >
                 {about.howItWorks.eyebrow}
@@ -268,7 +263,7 @@ export default function AboutPage() {
               <div className="order-1 lg:order-2">
                 <motion.p
                   variants={fadeUp}
-                  className="text-xs font-semibold tracking-widest uppercase mb-3"
+                  className="text-xs font-semibold tracking-normal mb-3"
                   style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}
                 >
                   {about.ai.eyebrow}
@@ -314,7 +309,7 @@ export default function AboutPage() {
               <div className="max-w-2xl mb-10">
                 <motion.p
                   variants={fadeUp}
-                  className="text-xs font-semibold tracking-widest uppercase mb-3"
+                  className="text-xs font-semibold tracking-normal mb-3"
                   style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}
                 >
                   {about.hipaa.eyebrow}
@@ -376,7 +371,7 @@ export default function AboutPage() {
             <div className="text-center mb-14">
               <motion.p
                 variants={fadeUp}
-                className="text-xs font-semibold tracking-widest uppercase mb-3"
+                className="text-xs font-semibold tracking-normal mb-3"
                 style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}
               >
                 {about.team.eyebrow}

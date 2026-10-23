@@ -1,24 +1,188 @@
+import { useState } from 'react';
 import { Helmet } from '@dr.pogodin/react-helmet';
 import { motion } from 'motion/react';
-import { Link } from 'react-router';
+// Link no longer used after the CTA became the early-access form
 import { providers } from 'virtual:content';
 
 // ─── Animation variants ───────────────────────────────────────────────────────
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: 'easeOut' as const } },
-};
+// Scroll-triggered entrances removed: content renders immediately.
+const fadeUp = { hidden: {}, visible: {} };
 
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
+const stagger = { hidden: {}, visible: {} };
 
 // ─── Shared section wrapper ───────────────────────────────────────────────────
 
 function sectionClass(tinted = false) {
   return `py-xxl${tinted ? ' ' : ''}`;
+}
+
+
+// ─── Early access request form ───────────────────────────────────────────────
+function EarlyAccessSection() {
+  const [form, setForm] = useState({ name: '', email: '', organization: '', message: '' });
+  const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
+  const [error, setError] = useState('');
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (status === 'sending') return;
+    setStatus('sending');
+    setError('');
+    try {
+      const honeypot = (document.getElementById('ea-website') as HTMLInputElement | null)?.value ?? '';
+      const res = await fetch('/api/access-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, website: honeypot }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus('error');
+        setError((data as { error?: string }).error ?? 'Something went wrong — please try again.');
+        return;
+      }
+      setStatus('done');
+    } catch {
+      setStatus('error');
+      setError('Something went wrong — please try again.');
+    }
+  }
+
+  const inputStyle: React.CSSProperties = {
+    background: 'hsl(var(--surface-deeper) / 0.6)',
+    border: '1px solid hsl(var(--border-subtle))',
+    color: 'hsl(var(--foreground))',
+    fontFamily: 'var(--font-sans)',
+  };
+
+  return (
+    <section id="early-access" className="py-xxl scroll-mt-24">
+      <div className="max-w-content mx-auto px-6">
+        <div
+          className="rounded-3xl overflow-hidden grid grid-cols-1 lg:grid-cols-2"
+          style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--primary) / 0.25)' }}
+        >
+          <div className="p-8 md:p-12">
+            <h2
+              className="display mb-4"
+              style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: 'hsl(var(--foreground))' }}
+            >
+              Request early access.
+            </h2>
+            <p className="text-base leading-relaxed mb-6" style={{ color: 'hsl(var(--text-dim))' }}>
+              The beta is small by design. Tell us about your practice and the
+              founder will reach out personally — usually within a couple of
+              days.
+            </p>
+            <ul className="flex flex-col gap-2.5">
+              {['Free during the clinical beta', 'Web-based — nothing to install', 'Your feedback shapes the roadmap'].map((t) => (
+                <li key={t} className="flex items-start gap-2.5 text-sm font-medium" style={{ color: 'hsl(var(--foreground))' }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div
+            className="p-8 md:p-12"
+            style={{ borderTop: '1px solid hsl(var(--border-subtle) / 0.5)' }}
+          >
+            {status === 'done' ? (
+              <div className="h-full flex flex-col justify-center">
+                <span
+                  className="inline-flex self-start items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold mb-3"
+                  style={{ color: 'hsl(var(--primary))', background: 'hsl(var(--primary) / 0.1)', border: '1px solid hsl(var(--primary) / 0.35)' }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  Request received
+                </span>
+                <p className="text-sm leading-relaxed" style={{ color: 'hsl(var(--text-dim))' }}>
+                  Thank you — we have your details and will reach out at the
+                  email you provided.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={submit} className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <label className="flex flex-col gap-1.5 text-sm font-medium" style={{ color: 'hsl(var(--text-dim))' }}>
+                    Your name
+                    <input
+                      required
+                      maxLength={160}
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      className="rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors"
+                      style={inputStyle}
+                      autoComplete="name"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1.5 text-sm font-medium" style={{ color: 'hsl(var(--text-dim))' }}>
+                    Email
+                    <input
+                      required
+                      type="email"
+                      maxLength={255}
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      className="rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors"
+                      style={inputStyle}
+                      autoComplete="email"
+                    />
+                  </label>
+                </div>
+                <label className="flex flex-col gap-1.5 text-sm font-medium" style={{ color: 'hsl(var(--text-dim))' }}>
+                  Practice or organization
+                  <input
+                    maxLength={200}
+                    value={form.organization}
+                    onChange={(e) => setForm({ ...form, organization: e.target.value })}
+                    className="rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors"
+                    style={inputStyle}
+                    autoComplete="organization"
+                  />
+                </label>
+                <label className="flex flex-col gap-1.5 text-sm font-medium" style={{ color: 'hsl(var(--text-dim))' }}>
+                  What would you use it for?
+                  <textarea
+                    rows={3}
+                    maxLength={2000}
+                    value={form.message}
+                    onChange={(e) => setForm({ ...form, message: e.target.value })}
+                    className="rounded-lg px-3.5 py-2.5 text-sm outline-none resize-none focus:border-primary transition-colors"
+                    style={inputStyle}
+                  />
+                </label>
+                {/* Honeypot — humans never see this */}
+                <input
+                  id="ea-website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+                />
+                {status === 'error' && (
+                  <p className="text-sm" style={{ color: 'hsl(var(--destructive))' }}>{error}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={status === 'sending'}
+                  className="mt-1 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 bg-primary hover:brightness-110 disabled:opacity-60 self-start"
+                  style={{ color: 'hsl(var(--primary-foreground))', fontFamily: 'var(--font-heading)' }}
+                >
+                  {status === 'sending' ? 'Sending…' : 'Send request'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -83,7 +247,7 @@ export default function ProvidersPage() {
             <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-2xl">
               <motion.p
                 variants={fadeUp}
-                className="text-xs font-semibold tracking-widest uppercase mb-3"
+                className="text-xs font-semibold tracking-normal mb-3"
                 style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}
               >
                 {providers.hero.eyebrow}
@@ -104,7 +268,7 @@ export default function ProvidersPage() {
               </motion.p>
               <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4">
                 <a
-                  href="#apply"
+                  href="#early-access"
                   className="px-8 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:opacity-90 text-center"
                   style={{
                     background: `hsl(var(--primary))`,
@@ -175,7 +339,7 @@ export default function ProvidersPage() {
             <div className="text-center mb-14">
               <motion.p
                 variants={fadeUp}
-                className="text-xs font-semibold tracking-widest uppercase mb-3"
+                className="text-xs font-semibold tracking-normal mb-3"
                 style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}
               >
                 {providers.benefits.eyebrow}
@@ -239,7 +403,7 @@ export default function ProvidersPage() {
             <div className="text-center mb-14">
               <motion.p
                 variants={fadeUp}
-                className="text-xs font-semibold tracking-widest uppercase mb-3"
+                className="text-xs font-semibold tracking-normal mb-3"
                 style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}
               >
                 {providers.howItWorks.eyebrow}
@@ -306,7 +470,7 @@ export default function ProvidersPage() {
               <div>
                 <motion.p
                   variants={fadeUp}
-                  className="text-xs font-semibold tracking-widest uppercase mb-3"
+                  className="text-xs font-semibold tracking-normal mb-3"
                   style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}
                 >
                   {providers.earnings.eyebrow}
@@ -425,7 +589,7 @@ export default function ProvidersPage() {
               <div>
                 <motion.p
                   variants={fadeUp}
-                  className="text-xs font-semibold tracking-widest uppercase mb-3"
+                  className="text-xs font-semibold tracking-normal mb-3"
                   style={{ color: `hsl(var(--primary))`, fontFamily: 'var(--font-sans)' }}
                 >
                   {providers.requirements.eyebrow}
@@ -466,74 +630,7 @@ export default function ProvidersPage() {
           </div>
         </motion.section>
 
-        {/* ── CTA / Application ────────────────────────────────────────────── */}
-        <motion.section
-          id="apply"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-80px' }}
-          variants={stagger}
-          className={sectionClass()}
-        >
-          <div className="max-w-content mx-auto px-6">
-            <motion.div
-              variants={fadeUp}
-              className="rounded-3xl p-12 md:p-16 text-center relative overflow-hidden"
-              style={{
-                background: `hsl(var(--card))`,
-                border: `1px solid hsl(var(--primary) / 0.2)`,
-              }}
-            >
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: `radial-gradient(ellipse 60% 50% at 50% 100%, hsl(var(--primary) / 0.08), transparent)`,
-                }}
-              />
-              <div className="relative z-10">
-                <h2
-                  className="text-3xl md:text-4xl font-bold mb-4"
-                  style={{ color: `hsl(var(--foreground))`, fontFamily: 'var(--font-heading)' }}
-                >
-                  {providers.cta.heading}
-                </h2>
-                <p
-                  className="text-base mb-8 max-w-md mx-auto"
-                  style={{ color: `hsl(var(--muted-foreground))`, fontFamily: 'var(--font-sans)' }}
-                >
-                  {providers.cta.subheading}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link
-                    to="/signup"
-                    className="px-8 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:opacity-90"
-                    style={{
-                      background: `hsl(var(--primary))`,
-                      color: `hsl(var(--background))`,
-                      fontFamily: 'var(--font-heading)',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    {providers.cta.primaryButton}
-                  </Link>
-                  <Link
-                    to="/about"
-                    className="px-8 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:opacity-80"
-                    style={{
-                      background: 'transparent',
-                      color: `hsl(var(--foreground))`,
-                      border: `1px solid hsl(var(--border-subtle) / 0.5)`,
-                      fontFamily: 'var(--font-heading)',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    {providers.cta.secondaryButton}
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </motion.section>
+        <EarlyAccessSection />
 
       </main>
     </>

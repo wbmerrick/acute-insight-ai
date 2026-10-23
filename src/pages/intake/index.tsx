@@ -1255,6 +1255,8 @@ function ChatFlow({
         setMessages([{ role: 'ai', content: 'Hello! What brings you in today? Please describe your main concern.' }]);
       } finally {
         setAiTyping(false);
+        // Put the cursor where the patient needs it, immediately.
+        setTimeout(() => inputRef.current?.focus(), 80);
       }
     }
     fetchWelcome();
@@ -1342,15 +1344,25 @@ function ChatFlow({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="flex flex-col h-full"
-      style={{ height: 'calc(100vh - 240px)', minHeight: '420px' }}
+      className="flex flex-col w-full rounded-2xl overflow-hidden"
+      style={{
+        height: 'calc(100vh - 128px)',
+        maxHeight: 820,
+        minHeight: 480,
+        background: `hsl(var(--card))`,
+        border: `1px solid hsl(var(--primary) / 0.28)`,
+        boxShadow: `0 0 44px hsl(var(--primary) / 0.1), var(--shadow-lg)`,
+      }}
     >
-      {/* Chat header */}
-      <div className="flex items-center gap-3 mb-4 pb-4" style={{ borderBottom: `1px solid hsl(var(--border-subtle) / 0.3)` }}>
+      {/* Chat header — pinned */}
+      <div
+        className="flex items-center gap-3 px-5 py-3.5 shrink-0"
+        style={{ borderBottom: `1px solid hsl(var(--border-subtle) / 0.5)`, background: `hsl(var(--surface-deeper) / 0.5)` }}
+      >
         <button
           onClick={onBack}
           className="p-2 rounded-xl transition-colors duration-150 hover:opacity-70"
-          style={{ background: `hsl(var(--card))`, border: `1px solid hsl(var(--border-subtle) / 0.4)`, color: `hsl(var(--foreground))` }}
+          style={{ background: `hsl(var(--background))`, border: `1px solid hsl(var(--border-subtle) / 0.5)`, color: `hsl(var(--foreground))` }}
           aria-label="Back to start"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1365,18 +1377,22 @@ function ChatFlow({
             <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
           </svg>
         </div>
-        <div>
-          <p className="text-sm font-semibold" style={{ color: `hsl(var(--foreground))`, fontFamily: 'var(--font-heading)' }}>
-            AI Intake Assistant
+        <div className="flex-1">
+          <p className="text-sm font-semibold leading-tight" style={{ color: `hsl(var(--foreground))`, fontFamily: 'var(--font-heading)' }}>
+            AI intake assistant
           </p>
           <p className="text-xs" style={{ color: `hsl(var(--muted-foreground))`, fontFamily: 'var(--font-sans)' }}>
             Private to you and your care team
           </p>
         </div>
+        <span className="hidden sm:flex items-center gap-1.5 vitals text-xs" style={{ color: 'hsl(var(--primary))' }}>
+          <span className="w-1.5 h-1.5 rounded-full bg-primary" style={{ boxShadow: '0 0 6px hsl(var(--primary))' }} />
+          live
+        </span>
       </div>
 
-      {/* Message list */}
-      <div className="flex-1 overflow-y-auto flex flex-col gap-4 pb-4" style={{ minHeight: '200px' }}>
+      {/* Message list — the only scrolling region */}
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-4 px-5 py-5">
         <AnimatePresence initial={false}>
           {messages.map((msg, i) => (
             <motion.div
@@ -1455,6 +1471,11 @@ function ChatFlow({
         <div ref={bottomRef} />
       </div>
 
+      {/* Footer region — pinned below the transcript */}
+      <div
+        className="shrink-0 px-5 pt-3 pb-4"
+        style={{ borderTop: `1px solid hsl(var(--border-subtle) / 0.5)`, background: `hsl(var(--surface-deeper) / 0.4)` }}
+      >
       {/* Emergency banner */}
       {emergency && (
         <motion.div
@@ -1490,7 +1511,7 @@ function ChatFlow({
       {!done ? (
         <div
           className="flex items-end gap-2 rounded-2xl p-2"
-          style={{ background: `hsl(var(--card))`, border: `1px solid hsl(var(--border-subtle) / 0.4)` }}
+          style={{ background: `hsl(var(--background))`, border: `1px solid hsl(var(--primary) / 0.3)` }}
         >
           <textarea
             ref={inputRef}
@@ -1548,6 +1569,7 @@ function ChatFlow({
           </button>
         </motion.div>
       )}
+      </div>
     </motion.div>
   );
 }
@@ -1787,8 +1809,14 @@ function IntakeFlow() {
       )}
 
       {/* Main content */}
-      <main className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-2xl">
+      <main
+        className={`flex-1 flex px-6 ${
+          phase === 'chat'
+            ? 'items-stretch justify-center py-6'
+            : 'items-center justify-center py-12'
+        }`}
+      >
+        <div className={`w-full ${phase === 'chat' ? 'max-w-3xl flex' : 'max-w-2xl'}`}>
           <AnimatePresence mode="wait" custom={direction}>
             {phase === 'start' && (
               <StartScreen key="start" onStart={handleStart} onStartChat={handleStartChat} loading={submitting} />

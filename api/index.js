@@ -20952,7 +20952,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler15) {
+    Route.prototype.all = function all(handler17) {
       const callbacks = flatten.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -20970,7 +20970,7 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler15) {
+      Route.prototype[method] = function(handler17) {
         const callbacks = flatten.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -21173,17 +21173,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler15) {
+    Router.prototype.use = function use2(handler17) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler15 !== "function") {
-        let arg = handler15;
+      if (typeof handler17 !== "function") {
+        let arg = handler17;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler15;
+          path2 = handler17;
         }
       }
       const callbacks = flatten.call(slice.call(arguments, offset), Infinity);
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler15 = connection.cancelQuery;
-    if (!handler15) {
+    const handler17 = connection.cancelQuery;
+    if (!handler17) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler15.bind(connection);
+    return handler17.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler15 = connection.killSession;
-    if (!handler15) {
+    const handler17 = connection.killSession;
+    if (!handler17) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler15.bind(connection);
+    return handler17.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -65039,7 +65039,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler15 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler17 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65059,7 +65059,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler15(internalContext).catch(async (e) => {
+    const response = await handler17(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65089,20 +65089,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler15) => {
+  return (path2, options, handler17) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler15);
+    }, handler17);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler15) {
+function createMiddleware(optionsOrHandler, handler17) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler15;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler17;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65130,14 +65130,14 @@ function createMiddleware(optionsOrHandler, handler15) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler15) {
+  function fn(optionsOrHandler, handler17) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler15) throw new Error("Middleware handler is required");
+    if (!handler17) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler15);
+    }, handler17);
   }
   return fn;
 };
@@ -65577,16 +65577,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler15 = route.data;
+    const handler17 = route.data;
     try {
-      const allowedMediaTypes = handler15.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler17.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler15.options.disableBody ? void 0 : await getBody(handler15.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler17.options.disableBody ? void 0 : await getBody(handler17.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65601,7 +65601,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler15(context2);
+      return await handler17(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65658,11 +65658,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler15 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler17 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler15(ctx));
+      return await runWithEndpointContext(ctx, () => handler17(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75796,8 +75796,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler15 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler15(request));
+      const { handler: handler17 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler17(request));
     },
     api,
     options,
@@ -83342,6 +83342,7 @@ function getDatabaseCredentials() {
 // src/server/db/schema.ts
 var schema_exports = {};
 __export(schema_exports, {
+  accessRequests: () => accessRequests,
   account: () => account,
   intakeSessions: () => intakeSessions,
   patientProfiles: () => patientProfiles,
@@ -83409,6 +83410,16 @@ var intakeSessions = pgTable("intake_sessions", {
   providerName: varchar("provider_name", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+});
+var accessRequests = pgTable("access_requests", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 160 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  organization: varchar("organization", { length: 200 }),
+  message: text("message"),
+  status: varchar("status", { length: 32 }).default("new"),
+  // 'new' | 'contacted' | 'closed'
+  createdAt: timestamp("created_at").defaultNow()
 });
 var patientProfiles = pgTable("patient_profiles", {
   id: serial("id").primaryKey(),
@@ -84266,6 +84277,77 @@ async function handler14(req, res) {
   }
 }
 
+// src/server/api/access-request/POST.ts
+var MAX = { name: 160, email: 255, organization: 200, message: 2e3 };
+var submissionsThisInstance = 0;
+var INSTANCE_CAP = 200;
+async function handler15(req, res) {
+  try {
+    const { name, email: email3, organization, message: message2, website } = req.body ?? {};
+    if (typeof website === "string" && website.trim() !== "") {
+      return res.status(200).json({ ok: true });
+    }
+    if (submissionsThisInstance >= INSTANCE_CAP) {
+      return res.status(429).json({ error: "Too many requests \u2014 please try again later." });
+    }
+    if (typeof name !== "string" || !name.trim() || name.length > MAX.name) {
+      return res.status(400).json({ error: "Please tell us your name." });
+    }
+    if (typeof email3 !== "string" || email3.length > MAX.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email3)) {
+      return res.status(400).json({ error: "Please enter a valid email address." });
+    }
+    if (organization !== void 0 && (typeof organization !== "string" || organization.length > MAX.organization)) {
+      return res.status(400).json({ error: "Practice or organization is too long." });
+    }
+    if (message2 !== void 0 && (typeof message2 !== "string" || message2.length > MAX.message)) {
+      return res.status(400).json({ error: "Message is too long." });
+    }
+    submissionsThisInstance++;
+    await db.insert(accessRequests).values({
+      name: name.trim(),
+      email: email3.trim().toLowerCase(),
+      organization: typeof organization === "string" && organization.trim() ? organization.trim() : null,
+      message: typeof message2 === "string" && message2.trim() ? message2.trim() : null
+    });
+    res.status(201).json({ ok: true });
+  } catch (error3) {
+    console.error(
+      JSON.stringify({
+        event: "access_request.error",
+        error: error3 instanceof Error ? error3.message : String(error3)
+      })
+    );
+    res.status(500).json({ error: "Something went wrong \u2014 please try again." });
+  }
+}
+
+// src/server/api/admin/access-requests/GET.ts
+async function handler16(req, res) {
+  try {
+    const session2 = await getAuth().api.getSession({
+      headers: new Headers(req.headers)
+    });
+    if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
+    const [requester] = await db.select().from(user).where(eq(user.id, session2.user.id)).limit(1);
+    if (!requester?.isAdmin) return res.status(403).json({ error: "Forbidden \u2014 admin only" });
+    const rows = await db.select().from(accessRequests).orderBy(desc(accessRequests.createdAt)).limit(200);
+    res.json(
+      rows.map((r) => ({
+        ...r,
+        createdAt: r.createdAt ? r.createdAt.toISOString() : null
+      }))
+    );
+  } catch (error3) {
+    console.error(
+      JSON.stringify({
+        event: "admin.access_requests.error",
+        error: error3 instanceof Error ? error3.message : String(error3)
+      })
+    );
+    res.status(500).json({ error: "Failed to fetch access requests" });
+  }
+}
+
 // src/lib/seo-routes.ts
 var seoRoutes = [
   { path: "/", changefreq: "weekly", priority: 1 },
@@ -84425,6 +84507,8 @@ app.post("/api/intake/:id/complete", handler11);
 app.post("/api/intake/chat", handler12);
 app.get("/api/admin/users", handler13);
 app.put("/api/admin/users/:id/role", handler14);
+app.post("/api/access-request", handler15);
+app.get("/api/admin/access-requests", handler16);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;

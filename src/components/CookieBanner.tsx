@@ -97,7 +97,25 @@ function initTracking(): void {
  * preferences in localStorage and gates click event collection via window._allowCT.
  * The SCC script is always loaded; consent only controls what gets collected.
  */
+/** App surfaces where the banner must never cover the working UI (and where
+ *  no third-party analytics should run around health information anyway). */
+const SUPPRESSED_PREFIXES = ['/intake', '/portal', '/provider', '/admin'];
+
 export default function CookieBanner() {
+  const [path, setPath] = useState<string>(() =>
+    typeof window !== 'undefined' ? window.location.pathname : '/'
+  );
+  useEffect(() => {
+    const onRoute = (e: Event) =>
+      setPath((e as CustomEvent<string>).detail ?? window.location.pathname);
+    window.addEventListener('ai-route-changed', onRoute);
+    window.addEventListener('popstate', onRoute);
+    return () => {
+      window.removeEventListener('ai-route-changed', onRoute);
+      window.removeEventListener('popstate', onRoute);
+    };
+  }, []);
+  const suppressed = SUPPRESSED_PREFIXES.some((p) => path.startsWith(p));
   const [showBanner, setShowBanner] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const isEmbedded: boolean = typeof window !== 'undefined' && window.parent !== window;
@@ -193,7 +211,7 @@ export default function CookieBanner() {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  if (hideForBuilderPreview || !isLoaded || !showBanner) return null;
+  if (suppressed || hideForBuilderPreview || !isLoaded || !showBanner) return null;
 
   return (
     <div

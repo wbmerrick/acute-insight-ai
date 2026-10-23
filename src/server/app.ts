@@ -15,6 +15,8 @@ import intake__id__complete__post from "./api/intake/[id]/complete/POST";
 import intake__chat__post from "./api/intake/chat/POST";
 import admin__users__get from "./api/admin/users/GET";
 import admin__users__id__role__put from "./api/admin/users/[id]/role/PUT";
+import access_request__post from "./api/access-request/POST";
+import admin__access_requests__get from "./api/admin/access-requests/GET";
 // </api-imports>
 import { seoRoutes } from "../lib/seo-routes";
 import {
@@ -272,7 +274,10 @@ app.post("/api/intake/start", intake__start__post);
 app.post("/api/intake/:id/complete", intake__id__complete__post);
 app.post("/api/intake/chat", intake__chat__post);
 app.get("/api/admin/users", admin__users__get);
-app.put("/api/admin/users/:id/role", admin__users__id__role__put);// </api-registrations>
+app.put("/api/admin/users/:id/role", admin__users__id__role__put);
+app.post("/api/access-request", access_request__post);
+app.get("/api/admin/access-requests", admin__access_requests__get);
+// </api-registrations>
 
 // Error middleware must be registered AFTER the routes it protects; Express
 // only passes errors to middleware defined later in the stack.

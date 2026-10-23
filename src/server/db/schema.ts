@@ -90,6 +90,18 @@ export const intakeSessions = pgTable('intake_sessions', {
     .$onUpdate(() => new Date()),
 });
 
+// ─── Provider early-access requests ──────────────────────────────────────────
+
+export const accessRequests = pgTable('access_requests', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 160 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
+  organization: varchar('organization', { length: 200 }),
+  message: text('message'),
+  status: varchar('status', { length: 32 }).default('new'), // 'new' | 'contacted' | 'closed'
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 // ─── Patient profile ─────────────────────────────────────────────────────────
 
 export const patientProfiles = pgTable('patient_profiles', {

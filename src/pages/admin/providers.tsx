@@ -240,6 +240,97 @@ function RoleBadge({ role, isAdmin }: { role: string | null; isAdmin: boolean | 
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
+
+// ─── Early-access requests panel ─────────────────────────────────────────────
+interface AccessRequestRow {
+  id: number;
+  name: string;
+  email: string;
+  organization: string | null;
+  message: string | null;
+  status: string | null;
+  createdAt: string | null;
+}
+
+function AccessRequestsPanel() {
+  const [rows, setRows] = useState<AccessRequestRow[] | null>(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/admin/access-requests');
+        if (!res.ok) throw new Error(String(res.status));
+        const data = (await res.json()) as AccessRequestRow[];
+        if (!cancelled) setRows(data);
+      } catch {
+        if (!cancelled) setError('Could not load access requests.');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <section
+      className="mt-10 rounded-2xl overflow-hidden"
+      style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border-subtle) / 0.6)' }}
+    >
+      <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid hsl(var(--border-subtle) / 0.5)' }}>
+        <h2 className="text-lg font-bold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>
+          Early-access requests
+        </h2>
+        <span className="vitals text-xs" style={{ color: 'hsl(var(--text-dimmer))' }}>
+          {rows ? `${rows.length} total` : '—'}
+        </span>
+      </div>
+
+      {error && (
+        <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--destructive))' }}>{error}</p>
+      )}
+      {!error && rows === null && (
+        <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--text-dim))' }}>Loading…</p>
+      )}
+      {!error && rows !== null && rows.length === 0 && (
+        <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--text-dim))' }}>
+          No requests yet. They land here the moment someone submits the form
+          on the providers page.
+        </p>
+      )}
+      {!error && rows !== null && rows.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ borderBottom: '1px solid hsl(var(--border-subtle) / 0.5)' }}>
+                {['Received', 'Name', 'Email', 'Practice', 'Note'].map((h) => (
+                  <th key={h} className="text-left font-semibold px-6 py-3" style={{ color: 'hsl(var(--text-dim))' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.id} style={{ borderBottom: '1px solid hsl(var(--border-subtle) / 0.3)' }}>
+                  <td className="px-6 py-3 whitespace-nowrap vitals text-xs" style={{ color: 'hsl(var(--text-dimmer))' }}>
+                    {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—'}
+                  </td>
+                  <td className="px-6 py-3 font-medium text-foreground">{r.name}</td>
+                  <td className="px-6 py-3" style={{ color: 'hsl(var(--text-dim))' }}>
+                    <a href={'mailto:' + r.email} className="hover:text-primary transition-colors">{r.email}</a>
+                  </td>
+                  <td className="px-6 py-3" style={{ color: 'hsl(var(--text-dim))' }}>{r.organization ?? '—'}</td>
+                  <td className="px-6 py-3 max-w-[320px]" style={{ color: 'hsl(var(--text-dim))' }}>
+                    <span className="line-clamp-2">{r.message ?? '—'}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function AdminProvidersPage() {
   const { session: sessionData, isPending } = useSession();
   const navigate = useNavigate();
@@ -765,6 +856,8 @@ export default function AdminProvidersPage() {
               </div>
             )}
           </motion.div>
+
+          <AccessRequestsPanel />
         </main>
       </div>
 

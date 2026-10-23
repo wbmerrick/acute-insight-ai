@@ -1,76 +1,103 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   ACUTE INSIGHT — "Telemetry" design system
+
+   The visual world of acute care itself: the dark of a patient monitor read
+   across a room at 3 AM, channel colors that mean something (ECG green for
+   action, SpO₂ cyan for information, alarm amber strictly for flags), and the
+   one material every clinician trusts — EKG paper, cream with its pink grid,
+   reserved for "the brief": the thing the provider actually receives.
+
+   Type: Archivo (hospital-wayfinding signage, used wide for display),
+   Public Sans (the U.S. civic/health-communication face) for body,
+   IBM Plex Mono only where vitals belong.
+   ──────────────────────────────────────────────────────────────────────────── */
+
 @layer base {
   :root {
     /* Overlay / shadow tokens */
-    --overlay-backdrop: 223 53% 3%;
-    --shadow-deep: 223 53% 3%;
+    --overlay-backdrop: 199 45% 3%;
+    --shadow-deep: 199 45% 3%;
 
-    /* Core Colors */
-    --background: 223 53% 7%;
-    --foreground: 0 0% 96%;
-    --card: 221 45% 18%;
-    --card-foreground: 0 0% 100%;
-    --popover: 223 53% 7%;
-    --popover-foreground: 0 0% 96%;
-    --primary: 177 100% 42%;
-    --primary-foreground: 0 0% 29%;
-    --secondary: 207 100% 42%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 221 45% 18%;
-    --muted-foreground: 216 35% 66%;
-    --accent: 357 100% 42%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    /* Core surfaces — powered-monitor dark (blue-green cast, never tinted-black) */
+    --background: 197 36% 5%;
+    --foreground: 165 18% 94%;
+    --card: 196 30% 9%;
+    --card-foreground: 165 18% 96%;
+    --popover: 197 34% 6%;
+    --popover-foreground: 165 18% 94%;
+
+    /* Channels. Green is the ECG/action trace; cyan is SpO₂/information;
+       amber is the alarm channel — flags only, never decoration. */
+    --primary: 151 90% 47%;
+    --primary-foreground: 198 42% 5%;
+    --secondary: 192 92% 52%;
+    --secondary-foreground: 198 42% 5%;
+    --accent: 43 100% 52%;
+    --accent-foreground: 198 42% 5%;
+    --destructive: 356 82% 57%;
     --destructive-foreground: 0 0% 100%;
-    --success: 160 84% 39%;
-    --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-    --info: 217 91% 60%;
-    --info-foreground: 0 0% 100%;
-    --border: 220 47% 22%;
-    --input: 220 47% 22%;
-    --ring: 177 100% 42%;
+    --success: 151 90% 40%;
+    --success-foreground: 198 42% 5%;
+    --warning: 43 100% 52%;
+    --warning-foreground: 198 42% 5%;
+    --info: 192 92% 55%;
+    --info-foreground: 198 42% 5%;
 
-    /* Extended Colors */
-    --chart-1: 177 100% 72%;
-    --chart-2: 176 100% 56%;
-    --chart-3: 177 100% 42%;
-    --chart-4: 176 100% 27%;
-    --chart-5: 177 100% 12%;
+    --muted: 196 28% 11%;
+    --muted-foreground: 188 14% 66%;
+    --border: 194 26% 16%;
+    --input: 194 26% 16%;
+    --ring: 151 90% 47%;
 
-    /* Sidebar Colors */
-    --sidebar: 221 45% 18%;
-    --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 177 100% 42%;
-    --sidebar-primary-foreground: 0 0% 29%;
-    --sidebar-accent: 357 100% 42%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 47% 22%;
-    --sidebar-ring: 177 100% 42%;
+    /* Chart channels follow the monitor: ECG, SpO₂, resp/alarm, art-line, EEG */
+    --chart-1: 151 90% 47%;
+    --chart-2: 192 92% 55%;
+    --chart-3: 43 100% 55%;
+    --chart-4: 356 82% 62%;
+    --chart-5: 262 70% 68%;
+
+    /* Sidebar (dashboards) */
+    --sidebar: 196 30% 9%;
+    --sidebar-foreground: 165 18% 94%;
+    --sidebar-primary: 151 90% 47%;
+    --sidebar-primary-foreground: 198 42% 5%;
+    --sidebar-accent: 43 100% 52%;
+    --sidebar-accent-foreground: 198 42% 5%;
+    --sidebar-border: 194 26% 16%;
+    --sidebar-ring: 151 90% 47%;
+
+    /* EKG paper — the brief's material. Cream sheet, pink grid, stamped red. */
+    --paper: 42 64% 96%;
+    --paper-ink: 201 32% 13%;
+    --paper-muted: 201 12% 38%;
+    --paper-grid: 9 72% 90%;
+    --paper-grid-bold: 9 58% 82%;
+    --paper-red: 356 70% 45%;
+    --paper-edge: 40 35% 88%;
 
     /* Typography */
-    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-heading: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: "Public Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-heading: "Archivo", -apple-system, BlinkMacSystemFont, sans-serif;
     --font-serif: ui-serif, Georgia, "Times New Roman", serif;
-    --font-mono: ui-monospace, "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace;
 
-    /* Acute Insight AI custom tokens */
-    --surface-deeper: 222 60% 4%;
-    --surface-header: 223 53% 7%;
-    --cyan-glow: 177 100% 42%;
-    --border-subtle: 220 47% 22%;
-    --text-dim: 216 35% 66%;
-    --text-dimmer: 216 35% 45%;
-    --card-glow: 177 100% 42%;
-    --primary-bg-tint: 177 100% 42%;
+    /* Acute Insight custom tokens (legacy names kept — many call sites) */
+    --surface-deeper: 198 42% 3.5%;
+    --surface-header: 197 36% 5%;
+    --cyan-glow: 151 90% 47%;
+    --border-subtle: 194 26% 16%;
+    --text-dim: 188 14% 66%;
+    --text-dimmer: 192 12% 45%;
+    --card-glow: 151 90% 47%;
+    --primary-bg-tint: 151 90% 47%;
 
-    /* Border Radius */
+    /* Border Radius — equipment corners: soft, not pill */
     --radius: 0.5rem;
     /* Button radius: the kit's radiusButton is written here at install time;
        the default matches shadcn `rounded-md` (calc(var(--radius) - 2px)) so a
@@ -85,42 +112,123 @@
     --space-base: 1.5rem;
     --space-lg: 2rem;
     --space-xl: 3rem;
-    --space-xxl: 4rem;
-    --space-xxxl: 6rem;
+    --space-xxl: 4.5rem;
+    --space-xxxl: 7rem;
 
     /* Content container width (max-w-content) */
     --width-content: 72rem;
 
-    /* Shadows */
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 2px 4px -1px hsl(0 0% 0% / 0.10);
-    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    /* Shadows — deep room, glowing equipment */
+    --shadow-2xs: 0 1px 3px 0px hsl(199 45% 2% / 0.3);
+    --shadow-xs: 0 1px 3px 0px hsl(199 45% 2% / 0.3);
+    --shadow-sm: 0 2px 6px 0px hsl(199 45% 2% / 0.35);
+    --shadow: 0 2px 8px 0px hsl(199 45% 2% / 0.4);
+    --shadow-md: 0 4px 14px -2px hsl(199 45% 2% / 0.45);
+    --shadow-lg: 0 8px 28px -6px hsl(199 45% 2% / 0.55);
+    --shadow-xl: 0 16px 44px -8px hsl(199 45% 2% / 0.6);
+    --shadow-2xl: 0 24px 64px -12px hsl(199 45% 2% / 0.7);
   }
 
   * {
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
-  
     font-family: var(--font-sans);
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    letter-spacing: -0.015em;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.28);
+    color: hsl(var(--foreground));
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Equipment-dark scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 5px;
+    border: 2px solid hsl(var(--background));
+  }
+  *::-webkit-scrollbar-track { background: transparent; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-/* Shared long-form type scale (RUBICON-554). Single source of truth for
-   page titles and rich markdown content; anchored to the site heading range so
-   blog posts match the rest of the customer's site. */
 @layer components {
+  /* Display type: Archivo pushed wide — hospital signage, modernized */
+  .display {
+    font-family: var(--font-heading);
+    font-stretch: 112%;
+    font-weight: 750;
+    letter-spacing: -0.025em;
+    line-height: 0.98;
+  }
+  .display-wide {
+    font-family: var(--font-heading);
+    font-stretch: 122%;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  /* Vitals readout: mono, tabular, used only where a number is a measurement */
+  .vitals {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  /* The monitor room: faint telemetry grid on dark */
+  .bg-telemetry {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.22) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.22) 1px, transparent 1px);
+    background-size: 36px 36px;
+  }
+
+  /* EKG paper: cream sheet, fine 8px grid, bold line every 5th (40px) */
+  .bg-ekg-paper {
+    background-color: hsl(var(--paper));
+    background-image:
+      linear-gradient(hsl(var(--paper-grid-bold) / 0.9) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--paper-grid-bold) / 0.9) 1px, transparent 1px),
+      linear-gradient(hsl(var(--paper-grid) / 0.75) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--paper-grid) / 0.75) 1px, transparent 1px);
+    background-size: 40px 40px, 40px 40px, 8px 8px, 8px 8px;
+  }
+
+  /* Phosphor glow for the trace and live indicators */
+  .trace-glow {
+    filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.65));
+  }
+
   .page-title {
     font-size: clamp(1.875rem, 2vw + 1rem, 2.25rem);
     font-weight: 700;
@@ -237,16 +345,27 @@
   }
 
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
-}
 
-/* Unless told otherwise, keep it for smooth scrolling */
-html {
-  scroll-behavior: smooth;
+  /* The signature: a lead-II trace drawing itself once on page load */
+  @keyframes trace-draw {
+    from { stroke-dashoffset: var(--trace-length, 3200); }
+    to { stroke-dashoffset: 0; }
+  }
+  .animate-trace {
+    animation: trace-draw 3.4s cubic-bezier(0.3, 0, 0.4, 1) 0.3s both;
+  }
+
+  @keyframes blink-cursor {
+    0%, 55% { opacity: 1; }
+    56%, 100% { opacity: 0; }
+  }
+  .animate-cursor { animation: blink-cursor 1.1s steps(1) infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-trace { animation: none; stroke-dashoffset: 0; }
+    .animate-cursor { animation: none; }
+  }
 }
