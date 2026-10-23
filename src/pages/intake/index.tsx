@@ -1343,7 +1343,7 @@ function ChatFlow({
       exit={{ opacity: 0, y: -16 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="flex flex-col h-full"
-      style={{ minHeight: 'calc(100vh - 80px)' }}
+      style={{ height: 'calc(100vh - 240px)', minHeight: '420px' }}
     >
       {/* Chat header */}
       <div className="flex items-center gap-3 mb-4 pb-4" style={{ borderBottom: `1px solid hsl(var(--border-subtle) / 0.3)` }}>
@@ -1376,7 +1376,7 @@ function ChatFlow({
       </div>
 
       {/* Message list */}
-      <div className="flex-1 overflow-y-auto flex flex-col gap-4 pb-4" style={{ maxHeight: 'calc(100vh - 320px)', minHeight: '300px' }}>
+      <div className="flex-1 overflow-y-auto flex flex-col gap-4 pb-4" style={{ minHeight: '200px' }}>
         <AnimatePresence initial={false}>
           {messages.map((msg, i) => (
             <motion.div
