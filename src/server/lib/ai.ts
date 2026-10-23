@@ -47,6 +47,16 @@ function summaryModel(): string {
   return typeof m === 'string' && m.trim() ? m.trim() : DEFAULT_SUMMARY_MODEL;
 }
 
+/**
+ * Optional workspace id. Required only when the API key is an
+ * organization/admin key that isn't scoped to a single workspace; a normal
+ * workspace-scoped key needs nothing here.
+ */
+function workspaceId(): string | null {
+  const w = getSecret('ANTHROPIC_WORKSPACE_ID');
+  return typeof w === 'string' && w.trim() ? w.trim() : null;
+}
+
 // ─── Low-level Messages API call ─────────────────────────────────────────────
 
 interface AnthropicMessage {
@@ -77,6 +87,14 @@ async function callAnthropic(opts: CallOptions): Promise<string> {
 
   let lastError: Error | null = null;
 
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+    'x-api-key': apiKey,
+    'anthropic-version': ANTHROPIC_VERSION,
+  };
+  const ws = workspaceId();
+  if (ws) headers['anthropic-workspace-id'] = ws;
+
   // One retry on transient failures (429 / 5xx / network)
   for (let attempt = 0; attempt < 2; attempt++) {
     const controller = new AbortController();
@@ -84,11 +102,7 @@ async function callAnthropic(opts: CallOptions): Promise<string> {
     try {
       const res = await fetch(ANTHROPIC_API_URL, {
         method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': ANTHROPIC_VERSION,
-        },
+        headers,
         body,
         signal: controller.signal,
       });

@@ -20952,7 +20952,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler18) {
+    Route.prototype.all = function all(handler17) {
       const callbacks = flatten.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -20970,7 +20970,7 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler18) {
+      Route.prototype[method] = function(handler17) {
         const callbacks = flatten.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -21173,17 +21173,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler18) {
+    Router.prototype.use = function use2(handler17) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler18 !== "function") {
-        let arg = handler18;
+      if (typeof handler17 !== "function") {
+        let arg = handler17;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler18;
+          path2 = handler17;
         }
       }
       const callbacks = flatten.call(slice.call(arguments, offset), Infinity);
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler18 = connection.cancelQuery;
-    if (!handler18) {
+    const handler17 = connection.cancelQuery;
+    if (!handler17) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler18.bind(connection);
+    return handler17.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler18 = connection.killSession;
-    if (!handler18) {
+    const handler17 = connection.killSession;
+    if (!handler17) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler18.bind(connection);
+    return handler17.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -65039,7 +65039,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler18 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler17 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65059,7 +65059,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler18(internalContext).catch(async (e) => {
+    const response = await handler17(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65089,20 +65089,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler18) => {
+  return (path2, options, handler17) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler18);
+    }, handler17);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler18) {
+function createMiddleware(optionsOrHandler, handler17) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler18;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler17;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65130,14 +65130,14 @@ function createMiddleware(optionsOrHandler, handler18) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler18) {
+  function fn(optionsOrHandler, handler17) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler18) throw new Error("Middleware handler is required");
+    if (!handler17) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler18);
+    }, handler17);
   }
   return fn;
 };
@@ -65577,16 +65577,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler18 = route.data;
+    const handler17 = route.data;
     try {
-      const allowedMediaTypes = handler18.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler17.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler18.options.disableBody ? void 0 : await getBody(handler18.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler17.options.disableBody ? void 0 : await getBody(handler17.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65601,7 +65601,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler18(context2);
+      return await handler17(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65658,11 +65658,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler18 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler17 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler18(ctx));
+      return await runWithEndpointContext(ctx, () => handler17(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75796,8 +75796,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler18 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler18(request));
+      const { handler: handler17 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler17(request));
     },
     api,
     options,
@@ -83833,6 +83833,10 @@ function summaryModel() {
   const m = getSecret("ANTHROPIC_SUMMARY_MODEL");
   return typeof m === "string" && m.trim() ? m.trim() : DEFAULT_SUMMARY_MODEL;
 }
+function workspaceId() {
+  const w = getSecret("ANTHROPIC_WORKSPACE_ID");
+  return typeof w === "string" && w.trim() ? w.trim() : null;
+}
 async function callAnthropic(opts) {
   const apiKey = getApiKey();
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not configured");
@@ -83844,17 +83848,20 @@ async function callAnthropic(opts) {
     temperature: opts.temperature ?? 0.4
   });
   let lastError = null;
+  const headers = {
+    "content-type": "application/json",
+    "x-api-key": apiKey,
+    "anthropic-version": ANTHROPIC_VERSION
+  };
+  const ws = workspaceId();
+  if (ws) headers["anthropic-workspace-id"] = ws;
   for (let attempt = 0; attempt < 2; attempt++) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), opts.timeoutMs ?? 25e3);
     try {
       const res = await fetch(ANTHROPIC_API_URL, {
         method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": ANTHROPIC_VERSION
-        },
+        headers,
         body,
         signal: controller.signal
       });
@@ -84321,48 +84328,8 @@ async function handler15(req, res) {
   }
 }
 
-// src/server/api/ai-diag/GET.ts
-async function handler16(req, res) {
-  try {
-    const session2 = await getAuth().api.getSession({
-      headers: new Headers(req.headers)
-    });
-    if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
-    const key = getSecret("ANTHROPIC_API_KEY");
-    const keyStr = typeof key === "string" ? key.trim() : "";
-    const out = {
-      keyPresent: keyStr.length > 0,
-      keyLen: keyStr.length,
-      keyPrefix: keyStr.slice(0, 7)
-      // "sk-ant-" if a normal key; not secret
-    };
-    if (keyStr) {
-      for (const model of ["claude-haiku-5-5", "claude-sonnet-5-5"]) {
-        try {
-          const r = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-              "content-type": "application/json",
-              "x-api-key": keyStr,
-              "anthropic-version": "2023-06-01"
-            },
-            body: JSON.stringify({ model, max_tokens: 8, messages: [{ role: "user", content: "hi" }] })
-          });
-          const body = await r.text();
-          out[model] = { status: r.status, detail: r.ok ? "ok" : body.slice(0, 180) };
-        } catch (e) {
-          out[model] = { status: "fetch_failed", detail: e instanceof Error ? e.message : String(e) };
-        }
-      }
-    }
-    res.json(out);
-  } catch (error3) {
-    res.status(500).json({ error: error3 instanceof Error ? error3.message : String(error3) });
-  }
-}
-
 // src/server/api/admin/access-requests/GET.ts
-async function handler17(req, res) {
+async function handler16(req, res) {
   try {
     const session2 = await getAuth().api.getSession({
       headers: new Headers(req.headers)
@@ -84548,8 +84515,7 @@ app.post("/api/intake/chat", handler12);
 app.get("/api/admin/users", handler13);
 app.put("/api/admin/users/:id/role", handler14);
 app.post("/api/access-request", handler15);
-app.get("/api/ai-diag", handler16);
-app.get("/api/admin/access-requests", handler17);
+app.get("/api/admin/access-requests", handler16);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;
