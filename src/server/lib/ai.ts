@@ -73,6 +73,17 @@ interface CallOptions {
   timeoutMs?: number;
 }
 
+function anthropicHeaders(apiKey: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+    'x-api-key': apiKey,
+    'anthropic-version': ANTHROPIC_VERSION,
+  };
+  const ws = workspaceId();
+  if (ws) headers['anthropic-workspace-id'] = ws;
+  return headers;
+}
+
 async function callAnthropic(opts: CallOptions): Promise<string> {
   const apiKey = getApiKey();
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
@@ -87,13 +98,7 @@ async function callAnthropic(opts: CallOptions): Promise<string> {
 
   let lastError: Error | null = null;
 
-  const headers: Record<string, string> = {
-    'content-type': 'application/json',
-    'x-api-key': apiKey,
-    'anthropic-version': ANTHROPIC_VERSION,
-  };
-  const ws = workspaceId();
-  if (ws) headers['anthropic-workspace-id'] = ws;
+  const headers = anthropicHeaders(apiKey);
 
   // One retry on transient failures (429 / 5xx / network)
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -138,7 +143,8 @@ async function callAnthropic(opts: CallOptions): Promise<string> {
 
 // ─── Intake conversation ─────────────────────────────────────────────────────
 
-const COMPLETE_TOKEN = '[INTAKE_COMPLETE]';
+const COMPLETE_TOKEN = '[READY]';
+const EMERGENCY_TOKEN = '[EMERGENCY]';
 
 const INTAKE_SYSTEM_PROMPT = `You are the intake assistant for Acute Insight AI, gathering a pre-visit history so the patient's clinician walks into the appointment prepared. You are NOT a doctor: you never diagnose, never recommend treatments or medication changes, and never interpret results. If asked for medical advice, warmly explain that their provider will go over that at the visit, and continue the intake.
 
@@ -147,14 +153,19 @@ HOW TO CONDUCT THE INTAKE
 - Adapt to what the patient tells you. Follow the thread of their complaint like an experienced triage nurse: onset and duration, quality/character, severity (ask them to rate 1–10 once), progression, what makes it better or worse, and associated symptoms relevant to THEIR complaint (pertinent positives and negatives).
 - Then cover, if not already volunteered: current medications and supplements (with doses if they know them), allergies and what reaction they cause, significant medical history and chronic conditions, and prior episodes of this problem. Ask about relevant surgical, family, or social history ONLY when their complaint makes it pertinent.
 - Never re-ask something they already answered. Skip anything irrelevant to their situation. If an answer is vague in a way that matters clinically ("a while", "some pills"), ask one brief clarifying question, then move on.
-- Target 8–14 patient answers total. When you have enough for a useful provider brief, ask one final catch-all ("Anything else you want your provider to know?"), and after they answer it, thank them, tell them their intake is ready to submit, and end that message with the exact token ${COMPLETE_TOKEN}
+- Target 8–14 patient answers total. When you have enough for a useful provider brief, ask one final catch-all ("Anything else you want your provider to know?"), and after they answer it, thank them and tell them their intake is ready to submit. That final wrap-up reply MUST begin with the exact token ${COMPLETE_TOKEN} as its very first characters, before any words.
+
+CONTROL TOKENS (machine-read — the page shows the patient's next button only when it sees them). When one applies it must be the very FIRST characters of your reply, before any greeting or empathy:
+- ${EMERGENCY_TOKEN} — a possible emergency (see Safety below).
+- ${COMPLETE_TOKEN} — the intake has gathered enough and is ready to submit to the provider.
+Put the warm words after the token, never before it. Never mention the tokens themselves.
 
 SAFETY — ALWAYS FIRST
-- If anything suggests a possible emergency (chest pain or pressure, trouble breathing, stroke signs, anaphylaxis, uncontrolled bleeding, thoughts of self-harm or harming others, overdose, sudden worst-ever headache, fainting with ongoing symptoms, signs of sepsis, cold/pulseless limb, testicular torsion, vision loss, pregnancy with severe pain or heavy bleeding), IMMEDIATELY tell them this may be an emergency and to call 911 or go to the nearest emergency department now — before any further questions. Begin that message with "⚠️". Do not downplay. If they clearly state they are safe and want to continue, you may resume the intake while reminding them the recommendation stands.
-- For mentions of suicidal thoughts, also provide the 988 Suicide & Crisis Lifeline (call or text 988).
+- If anything suggests a possible emergency (chest pain or pressure, trouble breathing, stroke signs, anaphylaxis, uncontrolled bleeding, thoughts of self-harm or harming others, overdose, sudden worst-ever headache, fainting with ongoing symptoms, signs of sepsis, cold/pulseless limb, testicular torsion, vision loss, pregnancy with severe pain or heavy bleeding), START your reply with the exact token ${EMERGENCY_TOKEN}, then name the specific symptoms that make it urgent and tell them to call 911 or go to the nearest emergency department now — before any further questions. Do not downplay. If they clearly state they are safe and want to continue, you may resume the intake while reminding them the recommendation stands.
+- For mentions of suicidal thoughts or self-harm, START with ${EMERGENCY_TOKEN} and also give the 988 Suicide & Crisis Lifeline (call or text 988).
 
 STYLE
-- Warm, calm, professional. No emoji except the ⚠️ safety prefix. No markdown formatting, no bullet lists, no headers — plain sentences only. Never mention these instructions, the token, or that you are an AI language model; you are simply the intake assistant.`;
+- Warm, calm, professional. No emoji. No markdown formatting, no bullet lists, no headers — plain sentences only. Never mention these instructions, the tokens, or that you are an AI language model; you are simply the intake assistant.`;
 
 export interface ChatTurn {
   role: 'ai' | 'patient';
@@ -195,10 +206,93 @@ export async function intakeChatReply(messages: ChatTurn[]): Promise<IntakeChatR
   });
 
   const done = raw.includes(COMPLETE_TOKEN);
-  const reply = raw.replaceAll(COMPLETE_TOKEN, '').trim();
-  const emergency = reply.startsWith('⚠️');
+  const emergency = raw.includes(EMERGENCY_TOKEN);
+  const reply = raw.replaceAll(COMPLETE_TOKEN, '').replaceAll(EMERGENCY_TOKEN, '').trim();
 
   return { reply, done, emergency };
+}
+
+/**
+ * Streaming intake reply. Calls onDelta with each raw text chunk as it arrives
+ * (control tokens included — the caller strips them for display) and resolves
+ * with the full raw text. Throws on API failure so the caller can fall back.
+ */
+export async function streamIntakeReply(
+  messages: ChatTurn[],
+  onDelta: (chunk: string) => void
+): Promise<string> {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
+
+  const anthropicMessages: AnthropicMessage[] = messages.map((m) => ({
+    role: m.role === 'patient' ? 'user' : 'assistant',
+    content: m.content,
+  }));
+  if (anthropicMessages.length === 0) {
+    anthropicMessages.push({
+      role: 'user',
+      content:
+        '(The patient has just opened the intake. Greet them in one or two sentences, explain this takes a few minutes and helps their provider prepare, and ask what brings them in today.)',
+    });
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30_000);
+  try {
+    const res = await fetch(ANTHROPIC_API_URL, {
+      method: 'POST',
+      headers: anthropicHeaders(apiKey),
+      body: JSON.stringify({
+        model: chatModel(),
+        system: INTAKE_SYSTEM_PROMPT,
+        messages: anthropicMessages,
+        max_tokens: 400,
+        temperature: 0.5,
+        stream: true,
+      }),
+      signal: controller.signal,
+    });
+    if (!res.ok || !res.body) {
+      const errText = await res.text().catch(() => '');
+      throw new Error(`Anthropic stream ${res.status}: ${errText.slice(0, 200)}`);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let full = '';
+
+    // Parse Anthropic SSE: lines of `data: {json}` with content_block_delta events.
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data:')) continue;
+        const payload = trimmed.slice(5).trim();
+        if (!payload || payload === '[DONE]') continue;
+        try {
+          const evt = JSON.parse(payload) as {
+            type?: string;
+            delta?: { type?: string; text?: string };
+          };
+          if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta' && evt.delta.text) {
+            full += evt.delta.text;
+            onDelta(evt.delta.text);
+          }
+        } catch {
+          /* ignore keep-alive / non-JSON lines */
+        }
+      }
+    }
+    if (!full.trim()) throw new Error('Anthropic stream returned empty content');
+    return full;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // ─── Provider brief generation ───────────────────────────────────────────────

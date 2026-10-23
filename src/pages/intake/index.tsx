@@ -1,194 +1,445 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Helmet } from '@dr.pogodin/react-helmet';
-import { motion, AnimatePresence } from 'motion/react';
-import { ProtectedRoute } from '@/lib/auth/auth-client';
-import { intake } from 'virtual:content';
+import { useSession } from '@/lib/auth/auth-client';
+import { CHAT_CSS } from './chat.css';
 
-// ─── Complete screen ──────────────────────────────────────────────────────────
+/* ────────────────────────────────────────────────────────────────────────────
+   Acute Insight intake — conversational chat, modeled on iSpry's "Spry" chat:
+   streaming replies, voice (tap-to-talk input + spoken replies), quick-prompt
+   chips, a 2-message guest gate, and control-token cards. Assistant: "Ace".
+   Palette is Acute Insight's; everything else mirrors iSpry.
+   ──────────────────────────────────────────────────────────────────────────── */
 
-function CompleteScreen({ onReset }: { onReset: () => void }) {
+const ASSISTANT = 'Ace';
+const GUEST_TURNS = 2;
+
+const CHIPS = [
+  'Sick — need care today',
+  'A new pain or symptom',
+  'Follow-up on a condition',
+  'Medication refill',
+  'Something feels off',
+];
+
+// Client-side emergency pre-screen (mirrors iSpry) so a dangerous message shows
+// the 911 card instantly, before any network round-trip.
+const MEDICAL_EMERGENCY_RE =
+  /chest (pain|pressure|tight|hurts)|crushing chest|heart attack|can'?t breathe|cannot breathe|trouble breathing|difficulty breathing|hard to breathe|short(ness)? of breath|stroke|face droop|slurred speech|overdose|poison|unconscious|passed out|fainted|fainting|seizure|severe bleeding|coughing up blood|anaphyla|throat (is )?(closing|swelling)|airway/i;
+const CRISIS_RE =
+  /suicid|kill myself|end my life|ending it all|self[- ]?harm|want to die|hurt myself|cut myself|homicid|kill (him|her|them|someone|people)/i;
+
+function isCrisis(t: string) { return CRISIS_RE.test(t); }
+function isEmergency(t: string) { return MEDICAL_EMERGENCY_RE.test(t) || CRISIS_RE.test(t); }
+
+function esc(s: string) {
+  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+}
+// Minimal, safe markdown → HTML (paragraphs, bullet lists, **bold**).
+function fmt(text: string) {
+  const lines = esc(text).split(/\n/);
+  let out = '', inList = false;
+  let para: string[] = [];
+  const flush = () => { if (para.length) { out += '<p>' + para.join('<br>') + '</p>'; para = []; } };
+  lines.forEach((l) => {
+    const t = l.trim();
+    const m = t.match(/^[-*]\s+(.*)/);
+    if (m) { flush(); if (!inList) { out += '<ul>'; inList = true; } out += '<li>' + m[1] + '</li>'; return; }
+    if (inList) { out += '</ul>'; inList = false; }
+    if (!t) { flush(); return; }
+    para.push(t);
+  });
+  flush(); if (inList) out += '</ul>';
+  return out.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+// Spoken form: drop tokens, expand numbers a TTS voice mangles.
+function forSpeech(text: string) {
+  return String(text || '')
+    .replace(/\s*\[(EMERGENCY|READY)\]\s*/gi, ' ')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/[_`#]/g, '')
+    .replace(/^\s*[-*\d]+[.)]\s+/gm, '')
+    .replace(/\b988\b/g, 'nine eight eight')
+    .replace(/\b911\b/g, 'nine one one')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+interface Turn { role: 'user' | 'assistant'; content: string; }
+type SpeechRecognitionLike = {
+  lang: string; interimResults: boolean; continuous: boolean;
+  onresult: ((ev: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onerror: ((ev: { error?: string }) => void) | null;
+  onend: (() => void) | null;
+  start: () => void; stop: () => void;
+};
+
+// ─── Inline account modal (guest → account, better-auth) ──────────────────────
+function AccountModal({ onClose, onAuthed }: { onClose: () => void; onAuthed: () => void }) {
+  const [mode, setMode] = useState<'create' | 'signin'>('create');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true); setError('');
+    try {
+      const url = mode === 'create' ? '/api/auth/sign-up/email' : '/api/auth/sign-in/email';
+      const body = mode === 'create' ? { name, email, password } : { email, password };
+      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error((d as { message?: string }).message || 'That didn’t work. Check your details and try again.');
+      }
+      onAuthed();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const field: React.CSSProperties = {
+    background: 'hsl(var(--background))', border: '1px solid hsl(var(--border-subtle))',
+    color: 'hsl(var(--foreground))', borderRadius: 10, padding: '10px 12px', fontFamily: 'var(--font-sans)', fontSize: 15,
+  };
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="flex flex-col items-center text-center max-w-md mx-auto"
+    <div
+      role="dialog" aria-modal="true" aria-label="Create your account"
+      style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'hsl(var(--surface-deeper) / 0.78)', backdropFilter: 'blur(4px)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.15, type: 'spring', stiffness: 200, damping: 15 }}
-        className="w-20 h-20 rounded-3xl flex items-center justify-center mb-8"
-        style={{
-          background: `hsl(var(--primary) / 0.1)`,
-          border: `1px solid hsl(var(--primary) / 0.3)`,
-          boxShadow: `0 0 40px hsl(var(--primary) / 0.15)`,
-        }}
-      >
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="1.5">
-          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
-        </svg>
-      </motion.div>
-
-      <h2 className="text-3xl font-bold text-foreground mb-3" style={{ fontFamily: 'var(--font-heading)' }}>
-        {intake.completeHeading}
-      </h2>
-      <p className="text-muted-foreground mb-10 leading-relaxed" style={{ fontFamily: 'var(--font-sans)' }}>
-        {intake.completeSubheading}
-      </p>
-
-      <div className="flex flex-col gap-3 w-full">
-        <Link
-          to="/portal"
-          className="w-full py-4 rounded-2xl text-base font-semibold text-center transition-all duration-200"
-          style={{
-            background: `hsl(var(--primary))`,
-            color: `hsl(var(--background))`,
-            fontFamily: 'var(--font-heading)',
-            boxShadow: `0 0 24px hsl(var(--primary) / 0.25)`,
-          }}
-        >
-          {intake.completePortalButton}
-        </Link>
-        <button
-          onClick={onReset}
-          className="w-full py-3 rounded-2xl text-sm font-medium transition-all duration-200"
-          style={{
-            background: `hsl(var(--card))`,
-            color: `hsl(var(--foreground))`,
-            border: `1px solid hsl(var(--border-subtle) / 0.5)`,
-            fontFamily: 'var(--font-sans)',
-          }}
-        >
-          {intake.completeNewButton}
-        </button>
+      <div style={{ width: '100%', maxWidth: 440, background: 'hsl(var(--card))', border: '1px solid hsl(var(--primary) / 0.3)', borderRadius: 20, padding: 28, boxShadow: 'var(--shadow-xl)' }}>
+        <h2 className="display" style={{ fontSize: 24, color: 'hsl(var(--foreground))', marginBottom: 6 }}>
+          {mode === 'create' ? 'Create your free account' : 'Welcome back'}
+        </h2>
+        <p style={{ color: 'hsl(var(--text-dim))', fontSize: 14, lineHeight: 1.6, marginBottom: 18 }}>
+          {mode === 'create'
+            ? 'Your first messages stay in this chat. An account lets you keep going and send your intake to a provider.'
+            : 'Sign in to continue your intake.'}
+        </p>
+        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {mode === 'create' && (
+            <input style={field} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required maxLength={160} autoComplete="name" />
+          )}
+          <input style={field} type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={255} autoComplete="email" />
+          <input style={field} type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} autoComplete={mode === 'create' ? 'new-password' : 'current-password'} />
+          {error && <p style={{ color: 'hsl(var(--destructive))', fontSize: 13 }}>{error}</p>}
+          <button type="submit" disabled={busy} style={{ textAlign: 'center', cursor: busy ? 'not-allowed' : 'pointer', background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))', border: 0, borderRadius: 12, padding: '12px 0', fontFamily: 'var(--font-heading)', fontWeight: 600, opacity: busy ? 0.6 : 1 }}>
+            {busy ? 'One moment…' : mode === 'create' ? 'Create account & continue' : 'Sign in & continue'}
+          </button>
+        </form>
+        <p style={{ marginTop: 14, fontSize: 13, color: 'hsl(var(--text-dimmer))' }}>
+          {mode === 'create' ? 'Already have an account? ' : 'New here? '}
+          <button onClick={() => { setMode(mode === 'create' ? 'signin' : 'create'); setError(''); }} style={{ background: 'none', border: 'none', color: 'hsl(var(--primary))', cursor: 'pointer', padding: 0, font: 'inherit' }}>
+            {mode === 'create' ? 'Sign in' : 'Create one'}
+          </button>
+        </p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
-// ─── Chat message types ───────────────────────────────────────────────────────
-
-interface ChatMessage {
-  role: 'ai' | 'patient';
-  content: string;
+// ─── Complete screen ──────────────────────────────────────────────────────────
+function CompleteScreen({ onReset, onPortal }: { onReset: () => void; onPortal: () => void }) {
+  return (
+    <div className="ace-chat" style={{ maxWidth: 560, textAlign: 'center', margin: '0 auto' }}>
+      <div style={{ width: 56, height: 56, borderRadius: 16, margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'hsl(var(--primary) / 0.12)', border: '1px solid hsl(var(--primary) / 0.3)' }}>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+      </div>
+      <h1 className="display" style={{ fontSize: 'clamp(1.8rem,3.5vw,2.4rem)', color: 'hsl(var(--foreground))', marginBottom: 12 }}>Intake submitted.</h1>
+      <p style={{ color: 'hsl(var(--text-dim))', lineHeight: 1.7, marginBottom: 28, fontFamily: 'var(--font-sans)' }}>
+        Your provider will review your brief before your visit. You can see this intake any time in your portal.
+      </p>
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <button onClick={onPortal} style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))', border: 0, borderRadius: 12, padding: '12px 24px', fontFamily: 'var(--font-heading)', fontWeight: 600, cursor: 'pointer' }}>Go to my portal</button>
+        <button onClick={onReset} style={{ background: 'transparent', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border-subtle))', borderRadius: 12, padding: '12px 24px', fontFamily: 'var(--font-heading)', fontWeight: 600, cursor: 'pointer' }}>Start another intake</button>
+      </div>
+    </div>
+  );
 }
 
-// ─── Chat flow ────────────────────────────────────────────────────────────────
-
-function ChatFlow({
-  intakeId,
-  onComplete,
-  onBack,
-}: {
-  intakeId: number;
+// ─── The chat ─────────────────────────────────────────────────────────────────
+function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal }: {
+  hasAccount: boolean;
+  onNeedAccount: () => void;
+  intakeId: number | null;
   onComplete: () => void;
-  onBack: () => void;
+  onPortal: () => void;
 }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [turns, setTurns] = useState<Turn[]>([]);
+  const [streaming, setStreaming] = useState<string | null>(null); // active assistant text
+  const [typing, setTyping] = useState(false);
   const [input, setInput] = useState('');
-  const [loading] = useState(false);
-  const [aiTyping, setAiTyping] = useState(false);
-  const [done, setDone] = useState(false);
+  const [threadOpen, setThreadOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [locked, setLocked] = useState(false);
+  const [emergency, setEmergency] = useState<{ crisis: boolean } | null>(null);
+  const [ready, setReady] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [emergency, setEmergency] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [voiceReplies, setVoiceReplies] = useState(() => {
+    try { return localStorage.getItem('ace_voice') !== '0'; } catch { return true; }
+  });
+  const [listening, setListening] = useState(false);
+  const [voiceLine, setVoiceLine] = useState<{ mode: string; text: string } | null>(null);
 
-  // Fetch the opening AI message on mount
-  useEffect(() => {
-    async function fetchWelcome() {
-      setAiTyping(true);
-      try {
-        const res = await fetch('/api/intake/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: [], intakeId }),
-        });
-        const data = await res.json() as { reply: string; done: boolean };
-        setMessages([{ role: 'ai', content: data.reply }]);
-      } catch {
-        setMessages([{ role: 'ai', content: 'Hello! What brings you in today? Please describe your main concern.' }]);
-      } finally {
-        setAiTyping(false);
-        // Put the cursor where the patient needs it, immediately.
-        setTimeout(() => inputRef.current?.focus(), 80);
-      }
+  const turnsRef = useRef<Turn[]>([]);
+  const msgsRef = useRef<HTMLDivElement>(null);
+  const taRef = useRef<HTMLTextAreaElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const speakGen = useRef(0);
+  const recRef = useRef<SpeechRecognitionLike | null>(null);
+  const listenActiveRef = useRef(false);
+  const pendingTranscript = useRef('');
+  const hasAccountRef = useRef(hasAccount);
+  hasAccountRef.current = hasAccount;
+  const intakeIdRef = useRef(intakeId);
+  intakeIdRef.current = intakeId;
+  const voiceRepliesRef = useRef(voiceReplies);
+  voiceRepliesRef.current = voiceReplies;
+
+  const SR = typeof window !== 'undefined'
+    ? ((window as unknown as { SpeechRecognition?: new () => SpeechRecognitionLike; webkitSpeechRecognition?: new () => SpeechRecognitionLike }).SpeechRecognition ||
+       (window as unknown as { webkitSpeechRecognition?: new () => SpeechRecognitionLike }).webkitSpeechRecognition)
+    : undefined;
+  const voiceCapable = !!SR;
+
+  const scrollDown = useCallback(() => {
+    const el = msgsRef.current; if (el) el.scrollTop = el.scrollHeight;
+  }, []);
+  useEffect(scrollDown, [turns, streaming, typing, scrollDown]);
+
+  function guestPatientTurns() {
+    return turnsRef.current.filter((m) => m.role === 'user').length;
+  }
+
+  function stopSpeaking() {
+    speakGen.current += 1;
+    if (audioRef.current) { try { audioRef.current.onended = null; audioRef.current.pause(); } catch { /* */ } audioRef.current = null; }
+    if (typeof window !== 'undefined' && window.speechSynthesis) { try { speechSynthesis.cancel(); } catch { /* */ } }
+  }
+
+  function pickBrowserVoice(): SpeechSynthesisVoice | null {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return null;
+    const voices = speechSynthesis.getVoices() || [];
+    const prefer = [/samantha/i, /jenny/i, /aria/i, /natural/i, /google us english/i, /female/i];
+    for (const re of prefer) {
+      const hit = voices.find((v) => re.test(v.name) && /^en/i.test(v.lang || ''));
+      if (hit) return hit;
     }
-    fetchWelcome();
-  }, [intakeId]);
+    return voices.find((v) => /^en(-|_)?US/i.test(v.lang || '')) || null;
+  }
+  function speakBrowser(text: string, gen: number) {
+    return new Promise<boolean>((resolve) => {
+      if (typeof window === 'undefined' || !window.speechSynthesis) { resolve(false); return; }
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US'; u.rate = 1.15; u.pitch = 1.05;
+      const v = pickBrowserVoice(); if (v) u.voice = v;
+      u.onend = () => resolve(gen === speakGen.current);
+      u.onerror = () => resolve(false);
+      try { speechSynthesis.speak(u); } catch { resolve(false); }
+    });
+  }
+  async function speakReply(text: string) {
+    if (!voiceRepliesRef.current) return;
+    const clean = forSpeech(text);
+    if (!clean) return;
+    stopSpeaking();
+    const gen = speakGen.current;
+    setVoiceLine({ mode: 'speaking', text: `${ASSISTANT} is speaking` });
+    try {
+      const r = await fetch('/api/speak', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: clean.slice(0, 700) }) });
+      if (!r.ok) throw new Error('tts');
+      const blob = await r.blob();
+      if (!blob || !blob.size || gen !== speakGen.current) throw new Error('empty');
+      const url = URL.createObjectURL(blob);
+      await new Promise<void>((resolve) => {
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.onended = () => { URL.revokeObjectURL(url); audioRef.current = null; resolve(); };
+        audio.onerror = () => { URL.revokeObjectURL(url); audioRef.current = null; resolve(); };
+        const p = audio.play();
+        if (p && p.catch) p.catch(() => resolve());
+      });
+    } catch {
+      await speakBrowser(clean, gen); // server voice unavailable → browser voice
+    } finally {
+      if (gen === speakGen.current) setVoiceLine(null);
+    }
+  }
 
-  // Scroll to bottom on new messages
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, aiTyping]);
+  function stopListening(sendIt: boolean) {
+    listenActiveRef.current = false;
+    setListening(false);
+    const said = pendingTranscript.current.trim();
+    if (recRef.current) {
+      try { recRef.current.onresult = null; recRef.current.onerror = null; recRef.current.onend = null; recRef.current.stop(); } catch { /* */ }
+      recRef.current = null;
+    }
+    pendingTranscript.current = '';
+    if (sendIt && said) { void ask(said, true); }
+    else if (!sendIt) setVoiceLine(null);
+  }
+  function startListening() {
+    if (!SR || busy || locked) return;
+    stopSpeaking();
+    pendingTranscript.current = '';
+    listenActiveRef.current = true;
+    setListening(true);
+    setThreadOpen(true);
+    setVoiceLine({ mode: 'listening', text: "Listening — tap Send when you're done" });
+    try {
+      const rec = new SR();
+      rec.lang = 'en-US'; rec.interimResults = true; rec.continuous = true;
+      rec.onresult = (ev) => {
+        let t = '';
+        for (let i = 0; i < ev.results.length; i++) t += ev.results[i][0].transcript;
+        pendingTranscript.current = t.trim();
+        setInput(pendingTranscript.current);
+      };
+      rec.onerror = (ev) => {
+        if (ev && (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')) {
+          setVoiceLine(null); setListening(false); listenActiveRef.current = false;
+        }
+      };
+      rec.onend = () => { recRef.current = null; listenActiveRef.current = false; setListening(false); };
+      recRef.current = rec; rec.start();
+    } catch {
+      listenActiveRef.current = false; setListening(false); setVoiceLine(null);
+    }
+  }
+  function toggleTalk() {
+    if (locked) return;
+    if (listenActiveRef.current) { stopListening(true); return; }
+    stopSpeaking();
+    startListening();
+  }
 
-  async function sendMessage() {
-    const text = input.trim();
-    if (!text || loading || aiTyping) return;
+  function toggleSpeaker() {
+    setVoiceReplies((v) => {
+      const next = !v;
+      try { localStorage.setItem('ace_voice', next ? '1' : '0'); } catch { /* */ }
+      if (!next) stopSpeaking();
+      return next;
+    });
+  }
 
-    const newMessages: ChatMessage[] = [...messages, { role: 'patient', content: text }];
-    setMessages(newMessages);
+  function pushTurn(t: Turn) {
+    turnsRef.current = [...turnsRef.current, t];
+    setTurns(turnsRef.current);
+  }
+
+  const ask = useCallback(async function ask(text: string, fromVoice?: boolean) {
+    void fromVoice;
+    text = (text || '').trim();
+    if (!text || busy || locked) return;
+
+    // Instant emergency card, before any network call.
+    if (isEmergency(text)) {
+      if (listenActiveRef.current) stopListening(false);
+      stopSpeaking();
+      setThreadOpen(true);
+      pushTurn({ role: 'user', content: text });
+      const crisis = isCrisis(text);
+      setEmergency({ crisis });
+      setLocked(true);
+      setInput('');
+      const spoken = crisis
+        ? 'Please call or text nine eight eight now. If you are in immediate danger, call nine one one.'
+        : 'What you described may need emergency care now. Please call nine one one or go to the nearest emergency room.';
+      void speakReply(spoken);
+      return;
+    }
+
+    // Guest gate.
+    if (!hasAccountRef.current && guestPatientTurns() >= GUEST_TURNS) {
+      onNeedAccount();
+      return;
+    }
+
+    if (listenActiveRef.current) stopListening(false);
+    stopSpeaking();
+    setThreadOpen(true);
+    pushTurn({ role: 'user', content: text });
     setInput('');
-    setAiTyping(true);
+    setBusy(true);
+    setTyping(true);
     setError('');
 
+    let full = '';
     try {
       const res = await fetch('/api/intake/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newMessages, intakeId }),
+        body: JSON.stringify({ messages: turnsRef.current.map((t) => ({ role: t.role === 'user' ? 'patient' : 'ai', content: t.content })), intakeId: intakeIdRef.current }),
       });
-      const data = await res.json() as { reply: string; done: boolean; emergency?: boolean };
+      if (res.status === 401) { setTyping(false); setBusy(false); turnsRef.current = turnsRef.current.slice(0, -1); setTurns(turnsRef.current); onNeedAccount(); return; }
+      if (res.status === 429) throw new Error('rate');
+      if (!res.ok || !res.body) throw new Error('bad');
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      setTyping(false);
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        full += dec.decode(value, { stream: true });
+        const shown = full.replace(/\s*\[(EMERGENCY|READY)\]\s*/gi, '\n').trim();
+        setStreaming(shown);
+      }
+      if (!full.trim()) throw new Error('empty');
 
-      // Simulate a brief typing delay for realism
-      await new Promise((r) => setTimeout(r, 600));
+      const cleaned = full.replace(/\s*\[(EMERGENCY|READY)\]\s*/gi, '\n').trim();
+      setStreaming(null);
+      pushTurn({ role: 'assistant', content: cleaned });
 
-      setMessages((prev) => [...prev, { role: 'ai', content: data.reply }]);
-      if (data.done) setDone(true);
-      if (data.emergency) setEmergency(true);
-    } catch {
-      setError('Something went wrong. Please try again.');
+      if (/\[EMERGENCY\]/i.test(full)) {
+        const userBlob = turnsRef.current.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
+        setEmergency({ crisis: isCrisis(userBlob) });
+        setLocked(true);
+      } else if (/\[READY\]/i.test(full)) {
+        setReady(true);
+      }
+      void speakReply(full);
+    } catch (e) {
+      setTyping(false);
+      setStreaming(null);
+      const msg = e instanceof Error && e.message === 'rate'
+        ? `${ASSISTANT} is getting a lot of requests right now. Please wait a moment and try again. If this is urgent, call 911.`
+        : `${ASSISTANT} couldn't respond just now. Please try again in a moment. If this is urgent, call 911.`;
+      setError(msg);
+      // roll back the user turn so a retry doesn't double-count
+      turnsRef.current = turnsRef.current.slice(0, -1);
+      setTurns(turnsRef.current);
     } finally {
-      setAiTyping(false);
-      setTimeout(() => inputRef.current?.focus(), 50);
+      setBusy(false);
+      setTimeout(() => taRef.current?.focus(), 50);
     }
-  }
+  }, [busy, locked, onNeedAccount]);
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  }
-
-  async function handleSubmit() {
+  async function submitIntake() {
     if (submitting) return;
-    setSubmitting(true);
-    setError('');
+    const id = intakeIdRef.current;
+    if (!id) { onNeedAccount(); return; }
+    setSubmitting(true); setError('');
     try {
-      // Convert chat transcript to Q&A pairs for the complete endpoint
-      const qaPairs = messages
-        .filter((m) => m.role === 'patient')
-        .map((m, i) => ({
-          questionId: `chat_turn_${i + 1}`,
-          question: messages.filter((msg) => msg.role === 'ai')[i]?.content ?? 'Follow-up',
-          answer: m.content,
-        }));
-
-      // Extract chief complaint from first patient message
-      const firstPatient = messages.find((m) => m.role === 'patient');
-      const chiefComplaint = firstPatient?.content ?? 'General concern (chat intake)';
-
-      const res = await fetch(`/api/intake/${intakeId}/complete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ responses: qaPairs, chiefComplaint }),
+      const patientTurns = turnsRef.current.filter((m) => m.role === 'user');
+      const aiTurns = turnsRef.current.filter((m) => m.role === 'assistant');
+      const responses = patientTurns.map((m, i) => ({
+        questionId: `chat_turn_${i + 1}`,
+        question: aiTurns[i]?.content ?? 'Follow-up',
+        answer: m.content,
+      }));
+      const chiefComplaint = patientTurns[0]?.content ?? 'General concern (chat intake)';
+      const res = await fetch(`/api/intake/${id}/complete`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ responses, chiefComplaint }),
       });
-      if (!res.ok) throw new Error('Submit failed');
+      if (!res.ok) throw new Error('submit');
       onComplete();
     } catch {
       setError('Failed to submit. Please try again.');
@@ -197,382 +448,271 @@ function ChatFlow({
     }
   }
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -16 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="flex flex-col w-full rounded-2xl overflow-hidden"
-      style={{
-        height: 'calc(100vh - 128px)',
-        maxHeight: 820,
-        minHeight: 480,
-        background: `hsl(var(--card))`,
-        border: `1px solid hsl(var(--primary) / 0.28)`,
-        boxShadow: `0 0 44px hsl(var(--primary) / 0.1), var(--shadow-lg)`,
-      }}
-    >
-      {/* Chat header — pinned */}
-      <div
-        className="flex items-center gap-3 px-5 py-3.5 shrink-0"
-        style={{ borderBottom: `1px solid hsl(var(--border-subtle) / 0.5)`, background: `hsl(var(--surface-deeper) / 0.5)` }}
-      >
-        <button
-          onClick={onBack}
-          className="p-2 rounded-xl transition-colors duration-150 hover:opacity-70"
-          style={{ background: `hsl(var(--background))`, border: `1px solid hsl(var(--border-subtle) / 0.5)`, color: `hsl(var(--foreground))` }}
-          aria-label="Back to portal"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-        <div
-          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: `hsl(var(--primary) / 0.12)`, border: `1px solid hsl(var(--primary) / 0.25)` }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-          </svg>
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-semibold leading-tight" style={{ color: `hsl(var(--foreground))`, fontFamily: 'var(--font-heading)' }}>
-            AI intake assistant
-          </p>
-          <p className="text-xs" style={{ color: `hsl(var(--muted-foreground))`, fontFamily: 'var(--font-sans)' }}>
-            Private to you and your care team
-          </p>
-        </div>
-        <span className="hidden sm:flex items-center gap-1.5 vitals text-xs" style={{ color: 'hsl(var(--primary))' }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-primary" style={{ boxShadow: '0 0 6px hsl(var(--primary))' }} />
-          live
-        </span>
-      </div>
+  function startOver() {
+    stopSpeaking(); stopListening(false);
+    turnsRef.current = []; setTurns([]);
+    setStreaming(null); setTyping(false); setInput('');
+    setThreadOpen(false); setBusy(false); setLocked(false);
+    setEmergency(null); setReady(false); setError('');
+    setVoiceLine(null);
+    setTimeout(() => taRef.current?.focus(), 50);
+  }
 
-      {/* Message list — the only scrolling region */}
-      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-4 px-5 py-5">
-        <AnimatePresence initial={false}>
-          {messages.map((msg, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-              className={`flex ${msg.role === 'patient' ? 'justify-end' : 'justify-start'}`}
-            >
-              {msg.role === 'ai' && (
-                <div
-                  className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mr-2 mt-0.5"
-                  style={{ background: `hsl(var(--primary) / 0.12)`, border: `1px solid hsl(var(--primary) / 0.2)` }}
-                >
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2">
-                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                  </svg>
+  function autosize(el: HTMLTextAreaElement | null) {
+    if (!el) return; el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+  }
+  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void ask(input); }
+  }
+
+  const guestLeft = GUEST_TURNS - guestPatientTurns();
+  const hint = hasAccount
+    ? "Tell Ace what's going on — no need to include your name or birthdate here."
+    : guestLeft <= 0
+      ? 'Create an account to keep going — your first messages stay in this chat.'
+      : `${guestLeft === 1 ? 'One more message' : 'Two messages'} before an account. Leave out your name and birthdate.`;
+
+  const MicIcon = (
+    <svg className="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
+  );
+  const SendIcon = (
+    <svg className="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+  );
+
+  return (
+    <div className="ace-chat">
+      <style>{CHAT_CSS}</style>
+
+      {/* Idle hero composer + chips */}
+      {!threadOpen && (
+        <div className="idle-start">
+          <div className="idle-composer">
+            <form className="composer" onSubmit={(e) => { e.preventDefault(); void ask(input); }} autoComplete="off" noValidate>
+              <p className="intake-hint" aria-live="polite">{hint}</p>
+              <label htmlFor="ace-q-idle">Tell {ASSISTANT} what&rsquo;s going on</label>
+              <textarea
+                id="ace-q-idle" ref={taRef} rows={1} maxLength={2000}
+                placeholder="Sore throat since last night"
+                value={input}
+                onChange={(e) => { setInput(e.target.value); autosize(e.target); }}
+                onKeyDown={onKeyDown}
+                disabled={busy}
+                autoFocus
+              />
+              <div className="comp-row">
+                <div className="comp-note">
+                  <svg className="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                  Please don&rsquo;t include your name or birthdate here
+                </div>
+                {voiceCapable && (
+                  <button className={`talk-btn${listening ? ' rec' : ''}`} type="button" onClick={toggleTalk} disabled={busy} aria-label={`Talk to ${ASSISTANT}`} title="Tap to talk, tap again to send">
+                    {MicIcon}<span className="talk-label">{listening ? 'Send' : 'Talk'}</span>
+                  </button>
+                )}
+                <button className="btn" type="submit" disabled={busy || !input.trim()}>Ask {ASSISTANT}{SendIcon}</button>
+              </div>
+            </form>
+          </div>
+          <p className="chip-kicker">Or start with this</p>
+          <div className="chips" aria-label="Quick prompts">
+            {CHIPS.map((c) => (
+              <button key={c} className="chip" type="button" onClick={() => void ask(c)}>{c}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Chat shell */}
+      {threadOpen && (
+        <div className="chat-shell on">
+          <div className="thread">
+            <div className="thread-head">
+              <div className="who">
+                <svg className="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+                {ASSISTANT} | AI intake
+              </div>
+              <button className="btn-ghost" type="button" onClick={startOver} style={{ minHeight: 40, padding: '0 16px', fontSize: 14 }}>Start over</button>
+            </div>
+            <div className="msgs" ref={msgsRef} role="log" aria-live="off" aria-label={`Conversation with ${ASSISTANT}`}>
+              {turns.map((m, i) => (
+                <div key={i} className={`msg ${m.role === 'user' ? 'u' : 'a'}`}>
+                  <span className="sr">{m.role === 'user' ? 'You said: ' : `${ASSISTANT} said: `}</span>
+                  <span dangerouslySetInnerHTML={{ __html: fmt(m.content) }} />
+                </div>
+              ))}
+              {typing && (
+                <div className="msg a"><span className="typing" role="img" aria-label={`${ASSISTANT} is typing`}><i /><i /><i /></span></div>
+              )}
+              {streaming !== null && (
+                <div className="msg a"><span dangerouslySetInnerHTML={{ __html: fmt(streaming) }} /></div>
+              )}
+
+              {emergency && (
+                <div className="emerg" role="alert">
+                  <span className="mono" style={{ color: 'hsl(var(--destructive))' }}>{ASSISTANT} | Safety check</span>
+                  <h2>{emergency.crisis ? 'Please get crisis help now.' : 'This needs emergency care now.'}</h2>
+                  <p style={{ color: 'hsl(var(--text-dim))', margin: 0, lineHeight: 1.6 }}>
+                    {emergency.crisis
+                      ? 'Call or text 988 (Suicide & Crisis Lifeline) now. If you are in immediate danger, call 911. Do not wait for an online visit.'
+                      : 'Please call 911 or go to the nearest emergency room. Do not wait for an online visit.'}
+                  </p>
+                  <div className="row">
+                    {emergency.crisis
+                      ? (<><a className="btn btn-red" href="tel:988">Call or text 988</a><a className="btn btn-ghost" href="tel:911">Call 911</a></>)
+                      : (<a className="btn btn-red" href="tel:911">Call 911</a>)}
+                  </div>
                 </div>
               )}
-              <div
-                className="max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap"
-                style={{
-                  background: msg.role === 'patient'
-                    ? `hsl(var(--primary))`
-                    : `hsl(var(--card))`,
-                  color: msg.role === 'patient'
-                    ? `hsl(var(--background))`
-                    : `hsl(var(--foreground))`,
-                  border: msg.role === 'ai' ? `1px solid hsl(var(--border-subtle) / 0.3)` : 'none',
-                  borderRadius: msg.role === 'patient' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                  fontFamily: 'var(--font-sans)',
-                }}
-              >
-                {msg.content}
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
 
-        {/* Typing indicator */}
-        {aiTyping && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-start items-end gap-2"
-          >
-            <div
-              className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: `hsl(var(--primary) / 0.12)`, border: `1px solid hsl(var(--primary) / 0.2)` }}
-            >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-              </svg>
+              {ready && !emergency && (
+                <div className="ready">
+                  <span className="mono" style={{ color: 'hsl(var(--primary))' }}>Intake ready</span>
+                  <h2>Send this to your provider?</h2>
+                  <p style={{ color: 'hsl(var(--text-dim))', margin: 0, lineHeight: 1.6 }}>
+                    {ASSISTANT} has what it needs. Submit and your provider gets a structured brief with anything important flagged.
+                  </p>
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <button className="btn" type="button" onClick={submitIntake} disabled={submitting}>{submitting ? 'Submitting…' : 'Submit intake'}</button>
+                    <button className="btn-ghost" type="button" onClick={() => setReady(false)}>Add something first</button>
+                  </div>
+                </div>
+              )}
             </div>
-            <div
-              className="rounded-2xl px-4 py-3 flex items-center gap-1"
-              style={{
-                background: `hsl(var(--card))`,
-                border: `1px solid hsl(var(--border-subtle) / 0.3)`,
-                borderRadius: '18px 18px 18px 4px',
-              }}
-            >
-              {[0, 1, 2].map((i) => (
-                <motion.span
-                  key={i}
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{ background: `hsl(var(--muted-foreground))` }}
-                  animate={{ opacity: [0.3, 1, 0.3], y: [0, -3, 0] }}
-                  transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.2 }}
-                />
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        <div ref={bottomRef} />
-      </div>
-
-      {/* Footer region — pinned below the transcript */}
-      <div
-        className="shrink-0 px-5 pt-3 pb-4"
-        style={{ borderTop: `1px solid hsl(var(--border-subtle) / 0.5)`, background: `hsl(var(--surface-deeper) / 0.4)` }}
-      >
-      {/* Emergency banner */}
-      {emergency && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl px-4 py-3 mb-3 flex items-start gap-3"
-          style={{ background: `hsl(var(--destructive) / 0.1)`, border: `1px solid hsl(var(--destructive) / 0.4)` }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--destructive))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-            <line x1="12" y1="9" x2="12" y2="13"/>
-            <line x1="12" y1="17" x2="12.01" y2="17"/>
-          </svg>
-          <div>
-            <p className="text-xs font-semibold mb-0.5" style={{ color: `hsl(var(--destructive))`, fontFamily: 'var(--font-heading)' }}>
-              Possible emergency detected
-            </p>
-            <a href="tel:911" className="text-xs underline" style={{ color: `hsl(var(--destructive))`, fontFamily: 'var(--font-sans)' }}>
-              Call 911 now
-            </a>
           </div>
-        </motion.div>
-      )}
 
-      {/* Error */}
-      {error && (
-        <p className="text-xs mb-2" style={{ color: `hsl(var(--destructive))`, fontFamily: 'var(--font-sans)' }}>
-          {error}
-        </p>
-      )}
-
-      {/* Input area */}
-      {!done ? (
-        <div
-          className="flex items-end gap-2 rounded-2xl p-2"
-          style={{ background: `hsl(var(--background))`, border: `1px solid hsl(var(--primary) / 0.3)` }}
-        >
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message… (Enter to send, Shift+Enter for new line)"
-            rows={2}
-            disabled={loading || aiTyping}
-            className="flex-1 bg-transparent text-sm outline-none resize-none px-2 py-1"
-            style={{ color: `hsl(var(--foreground))`, fontFamily: 'var(--font-sans)' }}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || loading || aiTyping}
-            className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-150 disabled:opacity-40"
-            style={{
-              background: input.trim() ? `hsl(var(--primary))` : `hsl(var(--muted))`,
-              color: input.trim() ? `hsl(var(--background))` : `hsl(var(--muted-foreground))`,
-            }}
-            aria-label="Send message"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-          </button>
-        </div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col gap-3"
-        >
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="w-full py-4 rounded-2xl text-base font-semibold transition-all duration-200 disabled:opacity-60"
-            style={{
-              background: `hsl(var(--primary))`,
-              color: `hsl(var(--background))`,
-              fontFamily: 'var(--font-heading)',
-              boxShadow: `0 0 24px hsl(var(--primary) / 0.3)`,
-            }}
-          >
-            {submitting ? 'Submitting…' : 'Submit intake'}
-          </button>
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || aiTyping}
-            className="text-sm underline underline-offset-2 transition-opacity hover:opacity-70"
-            style={{ color: `hsl(var(--muted-foreground))`, fontFamily: 'var(--font-sans)', background: 'none', border: 'none', cursor: 'pointer' }}
-          >
-            Add something first
-          </button>
-        </motion.div>
-      )}
-      </div>
-    </motion.div>
-  );
-}
-
-// ─── Main flow — conversational, chat-first ────────────────────────────────────
-
-function IntakeFlow() {
-  const navigate = useNavigate();
-  const [phase, setPhase] = useState<'loading' | 'chat' | 'complete'>('loading');
-  const [intakeId, setIntakeId] = useState<number | null>(null);
-  const [error, setError] = useState('');
-
-  const startIntake = useCallback(async () => {
-    setError('');
-    setPhase('loading');
-    try {
-      const res = await fetch('/api/intake/start', { method: 'POST' });
-      if (!res.ok) throw new Error('Failed to start');
-      const data = (await res.json()) as { id: number };
-      setIntakeId(data.id);
-      setPhase('chat');
-    } catch {
-      setError(intake.errorLabel);
-    }
-  }, []);
-
-  useEffect(() => {
-    startIntake();
-  }, [startIntake]);
-
-  return (
-    <div className="min-h-screen flex flex-col" style={{ background: `hsl(var(--background))` }}>
-      {/* Header */}
-      <header
-        className="sticky top-0 z-40 px-6 py-4 shrink-0"
-        style={{
-          background: `hsl(var(--card) / 0.85)`,
-          borderBottom: `1px solid hsl(var(--border-subtle) / 0.4)`,
-          backdropFilter: 'blur(12px)',
-        }}
-      >
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: `hsl(var(--primary) / 0.12)`, border: `1px solid hsl(var(--primary) / 0.3)` }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-              </svg>
-            </div>
-            <span className="text-sm font-semibold text-foreground hidden sm:block" style={{ fontFamily: 'var(--font-heading)' }}>
-              Acute Insight AI
-            </span>
-          </Link>
-          <button
-            onClick={() => navigate('/portal')}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-            style={{ fontFamily: 'var(--font-sans)' }}
-          >
-            My portal
-          </button>
-        </div>
-      </header>
-
-      {/* Main content */}
-      <main
-        className={`flex-1 flex px-6 ${
-          phase === 'chat' ? 'items-stretch justify-center py-6' : 'items-center justify-center py-12'
-        }`}
-      >
-        <div className={`w-full ${phase === 'chat' ? 'max-w-3xl flex' : 'max-w-2xl'}`}>
-          <AnimatePresence mode="wait">
-            {phase === 'loading' && (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center text-center gap-5 mx-auto"
-              >
-                {error ? (
-                  <>
-                    <p className="text-base" style={{ color: `hsl(var(--destructive))`, fontFamily: 'var(--font-sans)' }}>
-                      {error}
-                    </p>
-                    <button
-                      onClick={startIntake}
-                      className="px-6 py-3 rounded-xl text-sm font-semibold bg-primary transition-all duration-200 hover:brightness-110"
-                      style={{ color: `hsl(var(--primary-foreground))`, fontFamily: 'var(--font-heading)' }}
-                    >
-                      Try again
+          {!locked && (
+            <div className="chat-dock">
+              {voiceLine && (
+                <div className={`voice-line on ${voiceLine.mode}`} role="status" aria-live="polite">
+                  <span className="dot" aria-hidden="true" />{voiceLine.text}
+                </div>
+              )}
+              {error && <p style={{ color: 'hsl(var(--destructive))', font: '13px var(--font-sans)', margin: 0 }}>{error}</p>}
+              <form className="composer" onSubmit={(e) => { e.preventDefault(); void ask(input); }} autoComplete="off" noValidate>
+                <label htmlFor="ace-q">Message {ASSISTANT}</label>
+                <textarea
+                  id="ace-q" ref={taRef} rows={1} maxLength={2000}
+                  placeholder={voiceCapable ? 'Tap Talk to speak, or type a reply' : 'Type your reply'}
+                  value={input}
+                  onChange={(e) => { setInput(e.target.value); autosize(e.target); }}
+                  onKeyDown={onKeyDown}
+                  disabled={busy}
+                />
+                <div className="comp-row">
+                  <div className="comp-note">
+                    <svg className="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                    Please don&rsquo;t include your name or birthdate
+                  </div>
+                  <button className={`icon-btn${voiceReplies ? ' speak-on' : ''}`} type="button" onClick={toggleSpeaker} aria-pressed={voiceReplies} aria-label={voiceReplies ? `${ASSISTANT} voice on` : `${ASSISTANT} voice muted`} title={voiceReplies ? `${ASSISTANT} voice on` : `${ASSISTANT} voice muted`}>
+                    {voiceReplies
+                      ? (<svg className="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 10v4h4l5 4V6L8 10H4z" /><path d="M16.5 8.5a5 5 0 0 1 0 7" /><path d="M18.5 6a8 8 0 0 1 0 12" /></svg>)
+                      : (<svg className="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 10v4h4l5 4V6L8 10H4z" /><path d="M16 9l6 6M22 9l-6 6" /></svg>)}
+                  </button>
+                  {voiceCapable && (
+                    <button className={`talk-btn${listening ? ' rec' : ''}`} type="button" onClick={toggleTalk} disabled={busy} aria-label={`Talk to ${ASSISTANT}`} title="Tap to talk, tap again to send">
+                      {MicIcon}<span className="talk-label">{listening ? 'Send' : 'Talk'}</span>
                     </button>
-                  </>
-                ) : (
-                  <>
-                    <div
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                      style={{ background: `hsl(var(--primary) / 0.1)`, border: `1px solid hsl(var(--primary) / 0.25)` }}
-                    >
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="trace-glow">
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                      </svg>
-                    </div>
-                    <p className="text-sm" style={{ color: `hsl(var(--text-dim))`, fontFamily: 'var(--font-sans)' }}>
-                      Starting your intake…
-                    </p>
-                  </>
-                )}
-              </motion.div>
-            )}
+                  )}
+                  <button className="btn" type="submit" disabled={busy || !input.trim()}>Ask {ASSISTANT}{SendIcon}</button>
+                </div>
+              </form>
+            </div>
+          )}
 
-            {phase === 'chat' && intakeId !== null && (
-              <ChatFlow
-                key="chat"
-                intakeId={intakeId}
-                onComplete={() => setPhase('complete')}
-                onBack={() => navigate('/portal')}
-              />
-            )}
-
-            {phase === 'complete' && (
-              <CompleteScreen key="complete" onReset={startIntake} />
-            )}
-          </AnimatePresence>
+          {locked && (
+            <div className="chat-dock">
+              <button className="btn-ghost" type="button" onClick={onPortal}>Go to my portal</button>
+            </div>
+          )}
         </div>
-      </main>
+      )}
     </div>
   );
 }
 
-// ─── Export ───────────────────────────────────────────────────────────────────
+// ─── Page ─────────────────────────────────────────────────────────────────────
+function IntakeFlow() {
+  const navigate = useNavigate();
+  const { user } = useSession();
+  const [phase, setPhase] = useState<'chat' | 'complete'>('chat');
+  const [intakeId, setIntakeId] = useState<number | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
+
+  const startedRef = useRef(false);
+  const startIntake = useCallback(async () => {
+    try {
+      const res = await fetch('/api/intake/start', { method: 'POST' });
+      if (res.ok) { const d = (await res.json()) as { id: number }; setIntakeId(d.id); }
+    } catch { /* guest can still chat; session reserved after account */ }
+  }, []);
+
+  // Signed-in visitors get an intake session reserved up front.
+  useEffect(() => {
+    if (user && !startedRef.current) { startedRef.current = true; void startIntake(); }
+  }, [user, startIntake]);
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: 'hsl(var(--background))' }}>
+      <header className="sticky top-0 z-40 px-6 py-4 shrink-0" style={{ background: 'hsl(var(--card) / 0.85)', borderBottom: '1px solid hsl(var(--border-subtle) / 0.4)', backdropFilter: 'blur(12px)' }}>
+        <div className="max-w-3xl mx-auto flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--primary) / 0.12)', border: '1px solid hsl(var(--primary) / 0.3)' }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+            </div>
+            <span className="text-sm font-semibold text-foreground hidden sm:block" style={{ fontFamily: 'var(--font-heading)' }}>Acute Insight AI</span>
+          </Link>
+          <button onClick={() => navigate('/portal')} className="text-xs text-muted-foreground hover:text-foreground transition-colors" style={{ fontFamily: 'var(--font-sans)' }}>My portal</button>
+        </div>
+      </header>
+
+      <main className="flex-1 flex flex-col items-center px-6 py-10">
+        <div className="w-full max-w-3xl">
+          {phase === 'complete' ? (
+            <CompleteScreen
+              onReset={() => { setPhase('chat'); setResetKey((k) => k + 1); void startIntake(); }}
+              onPortal={() => navigate('/portal')}
+            />
+          ) : (
+            <>
+              <div className="text-center mb-8 max-w-xl mx-auto">
+                <h1 className="display text-foreground mb-3" style={{ fontSize: 'clamp(2.2rem,5vw,3.4rem)' }}>Just ask.</h1>
+                <p className="text-base md:text-lg" style={{ color: 'hsl(var(--text-dim))', lineHeight: 1.6 }}>
+                  Talk or type with Ace, your AI intake assistant. Your provider reviews a structured brief before your visit.
+                </p>
+              </div>
+              <AceChat
+                key={resetKey}
+                hasAccount={!!user}
+                intakeId={intakeId}
+                onNeedAccount={() => setShowModal(true)}
+                onComplete={() => setPhase('complete')}
+                onPortal={() => navigate('/portal')}
+              />
+            </>
+          )}
+        </div>
+      </main>
+
+      {showModal && (
+        <AccountModal
+          onClose={() => setShowModal(false)}
+          onAuthed={async () => { setShowModal(false); await startIntake(); }}
+        />
+      )}
+    </div>
+  );
+}
 
 export default function IntakePage() {
   return (
     <>
       <Helmet>
-        <title>Patient Intake — Acute Insight AI</title>
-        <meta name="description" content="Complete your pre-visit intake questionnaire. AI-guided, private, and done in minutes." />
+        <title>Patient intake — Acute Insight AI</title>
+        <meta name="description" content="Talk or type with Ace, Acute Insight's AI intake assistant. Your provider reviews a structured brief before your visit." />
         <meta name="robots" content="noindex" />
       </Helmet>
-      <ProtectedRoute>
-        <IntakeFlow />
-      </ProtectedRoute>
+      <IntakeFlow />
     </>
   );
 }

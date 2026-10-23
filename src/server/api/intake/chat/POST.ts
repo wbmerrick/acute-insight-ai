@@ -3,7 +3,7 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
 import { intakeSessions } from '../../../db/schema.js';
 import { getAuth } from '../../../../lib/auth/auth.js';
-import { aiAvailable, intakeChatReply, type ChatTurn } from '../../../lib/ai.js';
+import { aiAvailable, streamIntakeReply, type ChatTurn } from '../../../lib/ai.js';
 import {
   detectEmergency,
   buildEmergencyResponse,
@@ -13,18 +13,23 @@ import {
 
 interface ChatRequest {
   messages: ChatTurn[];
-  intakeId: number;
+  intakeId?: number | null;
 }
 
 const MAX_MESSAGES = 80;
 const MAX_MESSAGE_LENGTH = 4000;
+const GUEST_TURNS = 2; // patient messages allowed before an account is required
+
+/** Count patient turns, ignoring the hidden "Visit basics" account preamble. */
+function patientTurns(messages: ChatTurn[]): number {
+  return messages.filter((m) => m.role === 'patient' && !/^Visit basics/i.test(m.content)).length;
+}
 
 export default async function handler(req: Request, res: Response) {
   try {
-    const session = await getAuth().api.getSession({
-      headers: new Headers(req.headers as Record<string, string>),
-    });
-    if (!session?.user) return res.status(401).json({ error: 'Unauthorized' });
+    const session = await getAuth()
+      .api.getSession({ headers: new Headers(req.headers as Record<string, string>) })
+      .catch(() => null);
 
     const { messages, intakeId } = req.body as ChatRequest;
     if (!Array.isArray(messages)) {
@@ -44,53 +49,67 @@ export default async function handler(req: Request, res: Response) {
       }
     }
 
-    // Verify the intake session exists and belongs to this user
-    if (intakeId !== undefined) {
-      const id = Number(intakeId);
-      if (!Number.isInteger(id)) {
-        return res.status(400).json({ error: 'Invalid intake ID' });
+    // ── Guest gate ──
+    // A signed-out visitor may send a few messages, then must create an account.
+    if (!session?.user) {
+      if (patientTurns(messages) > GUEST_TURNS) {
+        return res.status(401).json({ error: 'account_required' });
       }
-      const [intake] = await db
+    } else if (intakeId != null) {
+      // Signed in with a session id: it must belong to them.
+      const id = Number(intakeId);
+      if (!Number.isInteger(id)) return res.status(400).json({ error: 'Invalid intake ID' });
+      const [owned] = await db
         .select({ id: intakeSessions.id })
         .from(intakeSessions)
         .where(and(eq(intakeSessions.id, id), eq(intakeSessions.userId, session.user.id)))
         .limit(1);
-      if (!intake) return res.status(404).json({ error: 'Intake session not found' });
+      if (!owned) return res.status(404).json({ error: 'Intake session not found' });
     }
 
-    // Deterministic emergency screen — always runs, even when the LLM is on,
-    // so a patient describing an emergency is never dependent on model behavior.
+    // ── Stream raw text (control tokens included; the client strips them) ──
+    res.status(200);
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Accel-Buffering', 'no');
+
     const lastPatient = [...messages].reverse().find((m) => m.role === 'patient');
+
+    // Deterministic emergency screen — always runs first, independent of the model.
     if (lastPatient && detectEmergency(lastPatient.content)) {
-      return res.json({ reply: buildEmergencyResponse(), done: false, emergency: true });
+      res.write('[EMERGENCY] ' + buildEmergencyResponse());
+      return res.end();
     }
 
-    // ── AI path ──
+    // AI path (streaming)
     if (aiAvailable()) {
+      let wroteAny = false;
       try {
-        const result = await intakeChatReply(messages);
-        return res.json({
-          reply: result.reply,
-          done: result.done,
-          ...(result.emergency ? { emergency: true } : {}),
+        await streamIntakeReply(messages, (chunk) => {
+          wroteAny = true;
+          res.write(chunk);
         });
+        return res.end();
       } catch (err) {
-        // Fall through to the scripted engine — patient flow must not break.
         console.error(
           JSON.stringify({
             event: 'intake.chat.ai_fallback',
             error: err instanceof Error ? err.message : String(err),
           })
         );
+        if (wroteAny) return res.end(); // partial already sent; don't double-write
+        // else fall through to scripted
       }
     }
 
-    // ── Scripted fallback path ──
+    // Scripted fallback — emit the same control tokens so the client behaves identically.
     if (messages.length === 0 || !lastPatient) {
-      return res.json({ reply: buildWelcome(), done: false });
+      res.write(buildWelcome());
+      return res.end();
     }
-    const fallback = fallbackChatReply(messages);
-    return res.json({ reply: fallback.reply, done: fallback.done });
+    const fb = fallbackChatReply(messages);
+    res.write((fb.done ? '[READY] ' : '') + fb.reply);
+    return res.end();
   } catch (error) {
     console.error(
       JSON.stringify({
@@ -98,6 +117,10 @@ export default async function handler(req: Request, res: Response) {
         error: error instanceof Error ? error.message : String(error),
       })
     );
-    res.status(500).json({ error: 'Chat failed' });
+    if (res.headersSent) {
+      try { res.end(); } catch { /* noop */ }
+    } else {
+      res.status(500).json({ error: 'Chat failed' });
+    }
   }
 }

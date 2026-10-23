@@ -16,6 +16,7 @@ import intake__chat__post from "./api/intake/chat/POST";
 import admin__users__get from "./api/admin/users/GET";
 import admin__users__id__role__put from "./api/admin/users/[id]/role/PUT";
 import access_request__post from "./api/access-request/POST";
+import speak__post from "./api/speak/POST";
 import admin__access_requests__get from "./api/admin/access-requests/GET";
 // </api-imports>
 import { seoRoutes } from "../lib/seo-routes";
@@ -276,6 +277,7 @@ app.post("/api/intake/chat", intake__chat__post);
 app.get("/api/admin/users", admin__users__get);
 app.put("/api/admin/users/:id/role", admin__users__id__role__put);
 app.post("/api/access-request", access_request__post);
+app.post("/api/speak", speak__post);
 app.get("/api/admin/access-requests", admin__access_requests__get);
 // </api-registrations>
 
