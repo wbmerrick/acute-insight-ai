@@ -75,7 +75,7 @@ export default function Header() {
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center gap-3">
             <Link
-              to="/sign-in"
+              to="/login"
               className="text-sm font-medium px-4 py-2 rounded-lg transition-all duration-200 hover:text-primary hover:border-primary"
               style={{
                 color: 'hsl(var(--foreground) / 0.8)',
@@ -134,7 +134,7 @@ export default function Header() {
               style={{ borderColor: `hsl(var(--border-subtle) / 0.6)` }}
             >
               <Link
-                to="/sign-in"
+                to="/login"
                 className="text-sm font-medium py-2 text-center rounded-lg border border-border text-foreground"
                 onClick={() => setMobileOpen(false)}
               >
