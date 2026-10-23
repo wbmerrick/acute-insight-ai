@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { AceHeroComposer } from '@/components/ace-hero-composer';
 import { Helmet } from '@dr.pogodin/react-helmet';
 import { home } from 'virtual:content';
 import HomepageSameAsJsonLd from '@/components/HomepageSameAsJsonLd';
@@ -105,176 +105,10 @@ function EkgStrip() {
   );
 }
 
-// ─── Interactive intake monitor (hero, right) ────────────────────────────────
-const DEMO_QUESTIONS = [
-  {
-    question: 'What brings you in today?',
-    chips: ['Chest pain', 'Shortness of breath', 'Fatigue', 'Routine checkup', 'Medication refill'],
-  },
-  {
-    question: 'How long have you had these symptoms?',
-    chips: ['Less than 24 hours', '1–3 days', '1–2 weeks', 'More than a month'],
-  },
-  {
-    question: 'How severe is it right now, 1–10?',
-    chips: ['Mild (1–3)', 'Moderate (4–6)', 'Severe (7–9)', 'Worst ever (10)'],
-  },
-];
-
-function IntakeMonitor() {
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [selectedChip, setSelectedChip] = useState<string | null>(null);
-  const [displayedText, setDisplayedText] = useState(DEMO_QUESTIONS[0].question);
-  const [chipsVisible, setChipsVisible] = useState(true);
-  const [briefReady, setBriefReady] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
-
-  const current = DEMO_QUESTIONS[questionIndex];
-
-  function typeQuestion(next: number) {
-    let i = 0;
-    const q = DEMO_QUESTIONS[next].question;
-    const interval = setInterval(() => {
-      i++;
-      setDisplayedText(q.slice(0, i));
-      if (i >= q.length) {
-        clearInterval(interval);
-        setTimeout(() => setChipsVisible(true), 150);
-      }
-    }, 28);
-  }
-
-  function handleChipSelect(chip: string) {
-    if (selectedChip || briefReady) return;
-    setSelectedChip(chip);
-    timerRef.current = setTimeout(() => {
-      if (questionIndex === DEMO_QUESTIONS.length - 1) {
-        setBriefReady(true);
-        timerRef.current = setTimeout(() => {
-          setBriefReady(false);
-          setSelectedChip(null);
-          setChipsVisible(false);
-          setDisplayedText('');
-          setQuestionIndex(0);
-          typeQuestion(0);
-        }, 3600);
-        return;
-      }
-      const next = questionIndex + 1;
-      setChipsVisible(false);
-      setDisplayedText('');
-      setSelectedChip(null);
-      setQuestionIndex(next);
-      typeQuestion(next);
-    }, 650);
-  }
-
-  return (
-    <div
-      className="relative rounded-2xl overflow-hidden w-full"
-      style={{
-        background: `hsl(var(--card))`,
-        border: `1px solid hsl(var(--primary) / 0.3)`,
-        boxShadow: `0 0 44px hsl(var(--primary) / 0.14), var(--shadow-xl)`,
-        maxWidth: 460,
-      }}
-    >
-      {/* Channel header */}
-      <div
-        className="flex items-center justify-between px-5 py-3"
-        style={{ borderBottom: `1px solid hsl(var(--border-subtle) / 0.6)`, background: `hsl(var(--surface-deeper) / 0.6)` }}
-      >
-        <div className="flex items-center gap-2.5">
-          <span
-            className="w-2 h-2 rounded-full bg-primary"
-            style={{ boxShadow: '0 0 8px hsl(var(--primary))', animation: 'fadeIn 1s ease-in-out infinite alternate' }}
-          />
-          <span className="vitals text-xs" style={{ color: 'hsl(var(--primary))' }}>
-            intake · live demo
-          </span>
-        </div>
-        <span className="vitals text-xs" style={{ color: 'hsl(var(--text-dimmer))' }}>
-          {briefReady ? '3 / 3' : `${questionIndex + 1} / ${DEMO_QUESTIONS.length}`}
-        </span>
-      </div>
-
-      {/* Body */}
-      <div className="p-5 md:p-6" style={{ minHeight: 240 }}>
-        {briefReady ? (
-          <div className="flex flex-col items-start gap-3 fade-in animate-in">
-            <span
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold"
-              style={{
-                color: 'hsl(var(--primary))',
-                background: 'hsl(var(--primary) / 0.1)',
-                border: '1px solid hsl(var(--primary) / 0.35)',
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              Brief ready
-            </span>
-            <p className="text-sm leading-relaxed" style={{ color: 'hsl(var(--text-dim))' }}>
-              Structured and sent to your provider: complaint, timeline,
-              severity, meds, allergies, history — with anything serious
-              flagged on top.
-            </p>
-          </div>
-        ) : (
-          <>
-            <p
-              className="text-lg font-semibold mb-5 text-foreground"
-              style={{ fontFamily: 'var(--font-heading)', minHeight: 56 }}
-            >
-              {displayedText}
-              <span className="animate-cursor" style={{ color: 'hsl(var(--primary))' }}>▍</span>
-            </p>
-            <div
-              className="flex flex-wrap gap-2 transition-opacity duration-200"
-              style={{ opacity: chipsVisible ? 1 : 0 }}
-            >
-              {current.chips.map((chip) => {
-                const selected = selectedChip === chip;
-                return (
-                  <button
-                    key={chip}
-                    onClick={() => handleChipSelect(chip)}
-                    className="px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150"
-                    style={{
-                      background: selected ? 'hsl(var(--primary))' : 'hsl(var(--primary) / 0.07)',
-                      color: selected ? 'hsl(var(--primary-foreground))' : 'hsl(var(--foreground))',
-                      border: `1px solid ${selected ? 'hsl(var(--primary))' : 'hsl(var(--primary) / 0.3)'}`,
-                    }}
-                  >
-                    {chip}
-                  </button>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Footer note */}
-      <div
-        className="px-5 py-2.5 text-xs"
-        style={{
-          borderTop: `1px solid hsl(var(--border-subtle) / 0.5)`,
-          color: 'hsl(var(--text-dimmer))',
-        }}
-      >
-        Tap to answer — it adapts to what you say. Try it.
-      </div>
-    </div>
-  );
-}
-
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const { hero, howItWorks, features, providers, ctaSection } = home;
+  const navigate = useNavigate();
 
   return (
     <>
@@ -301,8 +135,8 @@ export default function HomePage() {
             background: `radial-gradient(circle, hsl(var(--primary) / 0.09) 0%, transparent 68%)`,
           }}
         />
-        <div className="relative max-w-content mx-auto px-6 grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-12 lg:gap-10 items-center">
-          <div>
+        <div className="relative max-w-content mx-auto px-6">
+          <div className="max-w-3xl mx-auto text-center">
             <p
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium mb-7"
               style={{
@@ -329,34 +163,18 @@ export default function HomePage() {
               {hero.subhead}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-10">
-              <Link
-                to="/intake"
-                className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 bg-primary hover:brightness-110"
-                style={{
-                  color: 'hsl(var(--primary-foreground))',
-                  fontFamily: 'var(--font-heading)',
-                  boxShadow: '0 0 28px hsl(var(--primary) / 0.4)',
-                }}
-              >
-                {hero.ctaPrimary}
-              </Link>
-              <Link
-                to="/providers"
-                className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 hover:border-foreground/40"
-                style={{
-                  color: 'hsl(var(--foreground))',
-                  border: `1px solid hsl(var(--border-subtle))`,
-                  fontFamily: 'var(--font-heading)',
-                }}
-              >
-                {hero.ctaSecondary}
-              </Link>
-            </div>
+          </div>
 
-            {/* Honest design facts, flowsheet-style */}
+          {/* Live intake — talk or type with Ace, right here */}
+          <AceHeroComposer
+            onLaunch={(message) => navigate('/intake', { state: { firstMessage: message } })}
+            onVoice={() => navigate('/intake', { state: { voice: true } })}
+          />
+
+          {/* Honest design facts + the provider path */}
+          <div className="mt-12 flex flex-col items-center gap-6">
             <dl
-              className="grid grid-cols-3 max-w-md divide-x"
+              className="grid grid-cols-3 max-w-md divide-x text-center"
               style={{ borderColor: 'hsl(var(--border-subtle) / 0.6)' }}
             >
               {hero.stats.map((s: { id: string; value: string; label: string }, i: number) => (
@@ -376,10 +194,13 @@ export default function HomePage() {
                 </div>
               ))}
             </dl>
-          </div>
-
-          <div className="flex lg:justify-end">
-            <IntakeMonitor />
+            <Link
+              to="/providers"
+              className="text-sm font-medium transition-colors hover:text-foreground"
+              style={{ color: 'hsl(var(--text-dim))', fontFamily: 'var(--font-heading)' }}
+            >
+              {hero.ctaSecondary} &rarr;
+            </Link>
           </div>
         </div>
       </section>

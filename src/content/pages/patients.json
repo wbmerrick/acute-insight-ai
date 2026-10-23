@@ -10,7 +10,7 @@
     {
       "id": "st1",
       "value": "Minutes",
-      "label": "Tap-first adaptive intake"
+      "label": "Conversational AI intake"
     },
     {
       "id": "st2",
@@ -205,7 +205,7 @@
         "id": "s2",
         "number": "02",
         "title": "Complete your AI intake",
-        "body": "Describe what's going on through an adaptive questionnaire or a natural conversation. It takes minutes and asks the right follow-up questions based on what you tell it."
+        "body": "Describe what's going on in a natural conversation with Ace — by voice or text. It takes minutes and asks the right follow-up questions based on what you tell it."
       },
       {
         "id": "s3",
@@ -277,7 +277,7 @@
       {
         "id": "fq1",
         "question": "What exactly does Acute Insight AI do?",
-        "answer": "It's an intelligent pre-visit intake. You describe what's going on — by tapping through adaptive questions or chatting naturally with the AI assistant — and your provider receives a structured clinical summary with flagged concerns before your visit. It does not diagnose, treat, or prescribe."
+        "answer": "It's an intelligent pre-visit intake. You describe what's going on — by talking or typing with Ace, our AI assistant — and your provider receives a structured clinical summary with flagged concerns before your visit. It does not diagnose, treat, or prescribe."
       },
       {
         "id": "fq2",

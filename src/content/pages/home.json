@@ -5,7 +5,7 @@
     "headline2": "That",
     "headlineAccent": "Thinks",
     "headline3": "Ahead.",
-    "subhead": "Acute Insight AI replaces paper forms and clunky portals with an intelligent intake that adapts to each patient — tap-based, conversational, and clinically structured.",
+    "subhead": "Acute Insight AI replaces paper forms and clunky portals with a conversational intake that adapts to each patient — talk or type, and it comes out clinically structured.",
     "ctaPrimary": "Start your intake",
     "ctaSecondary": "For providers",
     "stats": [
@@ -35,8 +35,8 @@
         "id": "step-1",
         "step": "01",
         "title": "Ask",
-        "subtitle": "Tap, don't type",
-        "description": "Adaptive multiple-choice questions guide patients through their history. The AI branches intelligently based on each answer — no irrelevant questions, no dead ends."
+        "subtitle": "Talk or type",
+        "description": "Patients tell their story in their own words — by voice or text. Ace asks the right follow-ups based on each answer, and skips what doesn't apply — no irrelevant questions, no dead ends."
       },
       {
         "id": "step-2",
@@ -66,9 +66,9 @@
       },
       {
         "id": "feat-2",
-        "stat": "Tap-first",
+        "stat": "Conversational",
         "title": "Built for Completion",
-        "description": "Tap-based selection eliminates typing fatigue. Clear progress keeps patients oriented. And the intake knows when it has enough — it stops asking instead of burning patients out."
+        "description": "Patients talk or type, whichever is easier — no wall of form fields. And the intake knows when it has enough: it stops asking instead of burning patients out."
       },
       {
         "id": "feat-3",

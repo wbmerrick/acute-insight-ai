@@ -6,7 +6,7 @@
   "hero": {
     "eyebrow": "The full picture",
     "heading": "From first symptom to clinical insight",
-    "subheading": "Acute Insight AI connects patients and providers through an intelligent intake layer — structured questionnaires, conversational AI, and real-time clinical analysis."
+    "subheading": "Acute Insight AI connects patients and providers through an intelligent intake layer — a conversational AI intake and real-time clinical analysis."
   },
   "patientSection": {
     "eyebrow": "Patient workflow",
@@ -16,20 +16,20 @@
       {
         "id": "step-patient-1",
         "number": "01",
-        "title": "Create your account",
-        "body": "Sign up in seconds with your email. Your health information stays private — visible only to you and your care team, and never sold or shared."
+        "title": "Start the conversation",
+        "body": "Tell Ace what's going on, in your own words — by voice or text. No paper forms, and no account needed to begin."
       },
       {
         "id": "step-patient-2",
         "number": "02",
-        "title": "Choose your intake mode",
-        "body": "Pick the guided questionnaire for a structured step-by-step experience, or chat naturally with our AI — it adapts to how you communicate."
+        "title": "Answer a few follow-ups",
+        "body": "Ace adapts to what you say and asks only what's relevant — chief complaint, duration, severity, medications, allergies, and history."
       },
       {
         "id": "step-patient-3",
         "number": "03",
-        "title": "Describe your symptoms",
-        "body": "Answer questions about your chief complaint, duration, severity, medications, allergies, and medical history at your own pace."
+        "title": "Create your free account",
+        "body": "A quick sign-up saves your intake and lets you send it to your provider. Your health information stays private — visible only to you and your care team, and never sold or shared."
       },
       {
         "id": "step-patient-4",
@@ -70,7 +70,7 @@
         "id": "step-provider-4",
         "number": "04",
         "title": "Access the full transcript",
-        "body": "Drill into the complete Q&A transcript or chat history alongside the patient's health profile, demographics, and prior intake history."
+        "body": "Drill into the complete conversation transcript alongside the patient's health profile, demographics, and prior intake history."
       }
     ],
     "cta": {
@@ -103,8 +103,8 @@
       {
         "id": "feat-4",
         "icon": "modes",
-        "title": "Dual intake modes",
-        "body": "Patients choose between a structured 8-step questionnaire or a free-form AI chat. Both paths produce the same structured clinical output."
+        "title": "Talk or type",
+        "body": "Patients answer by voice or text, whichever is easier — a natural conversation with Ace, not a form. Every intake produces the same structured clinical output."
       },
       {
         "id": "feat-5",

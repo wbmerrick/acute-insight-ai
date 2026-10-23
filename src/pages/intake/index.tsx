@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useLocation } from 'react-router';
 import { Helmet } from '@dr.pogodin/react-helmet';
 import { useSession } from '@/lib/auth/auth-client';
 import { CHAT_CSS } from './chat.css';
@@ -164,12 +164,14 @@ function CompleteScreen({ onReset, onPortal }: { onReset: () => void; onPortal: 
 }
 
 // ─── The chat ─────────────────────────────────────────────────────────────────
-function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal }: {
+function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal, initialMessage, autoStartVoice }: {
   hasAccount: boolean;
   onNeedAccount: () => void;
   intakeId: number | null;
   onComplete: () => void;
   onPortal: () => void;
+  initialMessage?: string;      // handed off from the homepage hero composer
+  autoStartVoice?: boolean;     // homepage "Talk" → start listening on arrival
 }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [streaming, setStreaming] = useState<string | null>(null); // active assistant text
@@ -465,6 +467,23 @@ function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal }: 
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void ask(input); }
   }
 
+  // Hand-off from the homepage hero: send the first message (or open the mic)
+  // exactly once when the chat mounts.
+  const firedInitial = useRef(false);
+  useEffect(() => {
+    if (firedInitial.current) return;
+    if (!initialMessage?.trim() && !autoStartVoice) return;
+    // Guard is set inside the timer, not before it, so a StrictMode mount→
+    // cleanup→mount cycle (which clears the first timer) still fires exactly once.
+    const t = setTimeout(() => {
+      if (firedInitial.current) return;
+      firedInitial.current = true;
+      if (initialMessage && initialMessage.trim()) void ask(initialMessage.trim());
+      else if (autoStartVoice) startListening();
+    }, 90);
+    return () => clearTimeout(t);
+  }, [initialMessage, autoStartVoice, ask]);
+
   const guestLeft = GUEST_TURNS - guestPatientTurns();
   const hint = hasAccount
     ? "Tell Ace what's going on — no need to include your name or birthdate here."
@@ -633,11 +652,20 @@ function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal }: 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 function IntakeFlow() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useSession();
   const [phase, setPhase] = useState<'chat' | 'complete'>('chat');
   const [intakeId, setIntakeId] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [resetKey, setResetKey] = useState(0);
+
+  // First message / voice intent handed off from the homepage hero composer.
+  // Captured once so a re-render or "Start over" doesn't replay it.
+  const handoff = useRef<{ firstMessage?: string; voice?: boolean }>(
+    (location.state as { firstMessage?: string; voice?: boolean } | null) ?? {},
+  );
+  const initialMessage = resetKey === 0 ? handoff.current.firstMessage : undefined;
+  const autoStartVoice = resetKey === 0 ? handoff.current.voice : undefined;
 
   const startedRef = useRef(false);
   const startIntake = useCallback(async () => {
@@ -685,6 +713,8 @@ function IntakeFlow() {
                 key={resetKey}
                 hasAccount={!!user}
                 intakeId={intakeId}
+                initialMessage={initialMessage}
+                autoStartVoice={autoStartVoice}
                 onNeedAccount={() => setShowModal(true)}
                 onComplete={() => setPhase('complete')}
                 onPortal={() => navigate('/portal')}

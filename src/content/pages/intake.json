@@ -1,8 +1,8 @@
 {
   "pageTitle": "AI Patient Intake",
-  "pageDescription": "Complete your intake before your appointment. Our AI guides you through a quick, adaptive questionnaire.",
+  "pageDescription": "Complete your intake before your appointment. Talk or type with Ace, our AI assistant.",
   "startHeading": "Before your visit",
-  "startSubheading": "Answer a few questions so your provider has everything they need. Takes just a few minutes.",
+  "startSubheading": "Tell Ace what's going on so your provider has everything they need. Takes just a few minutes.",
   "startButton": "Start intake",
   "hipaaNote": "Private to you and your care team. Not for emergencies — if this is urgent, call 911.",
   "progressLabel": "Step",
