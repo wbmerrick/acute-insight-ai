@@ -7,11 +7,11 @@
   "startIntakeButton": "Begin Intake",
   "recentIntakesHeading": "Recent intakes",
   "noIntakesText": "No intakes yet. Start your first one above.",
-  "historyHeading": "Intake history",
+  "historyHeading": "Your health timeline",
   "profileHeading": "Health profile",
   "accountLabel": "Patient account",
   "signOutButton": "Sign out",
   "overviewTab": "Overview",
-  "historyTab": "History",
+  "historyTab": "Timeline",
   "profileTab": "Profile"
 }

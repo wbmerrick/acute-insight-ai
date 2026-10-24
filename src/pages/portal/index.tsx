@@ -5,6 +5,8 @@ import { motion } from 'motion/react';
 import { useSession, signOut } from '@/lib/auth/auth-client';
 import { ProtectedRoute } from '@/lib/auth/auth-client';
 import { portal } from 'virtual:content';
+import type { ClinicalBrief } from '@/lib/clinical-brief';
+import { acuityMeta } from '@/components/clinical-brief-view';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -14,6 +16,7 @@ interface IntakeSession {
   chiefComplaint: string | null;
   aiSummary: string | null;
   aiFlags: string[] | null;
+  aiBrief: ClinicalBrief | null;
   appointmentDate: string | null;
   providerName: string | null;
   createdAt: string;
@@ -64,10 +67,12 @@ function StatCard({ label, value, icon, accent = false }: { label: string; value
 
 // ─── Intake row ──────────────────────────────────────────────────────────────
 
-function IntakeRow({ intake }: { intake: IntakeSession }) {
+function IntakeRow({ intake, onCheckIn }: { intake: IntakeSession; onCheckIn?: (intake: IntakeSession) => void }) {
   const date = new Date(intake.createdAt);
   const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   const isComplete = intake.status === 'complete';
+  const disp = intake.aiBrief?.disposition ?? null;
+  const dm = disp ? acuityMeta(disp.level) : null;
 
   return (
     <div
@@ -106,7 +111,20 @@ function IntakeRow({ intake }: { intake: IntakeSession }) {
           >
             {isComplete ? 'Complete' : 'In progress'}
           </span>
+          {disp && dm && (
+            <span
+              className="px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide"
+              style={{ fontFamily: 'var(--font-mono)', background: `hsl(${dm.h} / 0.12)`, color: `hsl(${dm.h})`, border: `1px solid hsl(${dm.h} / 0.3)` }}
+            >
+              {dm.tag}
+            </span>
+          )}
         </div>
+        {disp?.label && (
+          <p className="text-xs mb-1" style={{ color: 'hsl(var(--text-dim))', fontFamily: 'var(--font-sans)' }}>
+            Suggested next step: {disp.label}
+          </p>
+        )}
         {intake.aiSummary && (
           <p className="text-xs text-muted-foreground line-clamp-2 mb-1" style={{ fontFamily: 'var(--font-sans)' }}>
             {intake.aiSummary}
@@ -138,6 +156,17 @@ function IntakeRow({ intake }: { intake: IntakeSession }) {
               </span>
             ))}
           </div>
+        )}
+        {isComplete && onCheckIn && (
+          <button
+            type="button"
+            onClick={() => onCheckIn(intake)}
+            className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold hover:underline"
+            style={{ color: 'hsl(var(--primary))', fontFamily: 'var(--font-sans)' }}
+          >
+            Check in with Ace about this
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </button>
         )}
       </div>
     </div>
@@ -180,6 +209,14 @@ function PortalContent() {
     await signOut();
     navigate('/login');
   }
+
+  // Companion check-in: hand the thread back to Ace with the prior visit as context.
+  function checkIn(intake: IntakeSession) {
+    const when = new Date(intake.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+    const cc = (intake.chiefComplaint || 'my last visit').replace(/\s+/g, ' ').trim().slice(0, 140);
+    navigate('/intake', { state: { firstMessage: `I'm checking in about my visit from ${when}, when I reported: "${cc}".` } });
+  }
+  const lastCompleted = completedIntakes[0] ?? null;
 
   return (
     <div
@@ -336,6 +373,36 @@ function PortalContent() {
                   />
                 </div>
 
+                {/* Companion check-in — since your last visit */}
+                {lastCompleted && (
+                  <motion.div
+                    className="rounded-2xl p-6 mb-6"
+                    style={{ background: `hsl(var(--card))`, border: `1px solid hsl(var(--primary) / 0.3)`, boxShadow: `0 0 36px hsl(var(--primary) / 0.06)` }}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <p className="text-[11px] uppercase tracking-widest mb-2" style={{ fontFamily: 'var(--font-mono)', color: 'hsl(var(--primary))' }}>
+                      Since your last visit
+                    </p>
+                    <h3 className="text-base font-bold text-foreground mb-1" style={{ fontFamily: 'var(--font-heading)' }}>
+                      How are you doing since {new Date(lastCompleted.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}?
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4" style={{ fontFamily: 'var(--font-sans)' }}>
+                      You came in for “{(lastCompleted.chiefComplaint || 'a visit').slice(0, 90)}{(lastCompleted.chiefComplaint || '').length > 90 ? '…' : ''}”. Ace can check in, note what’s changed, update your record, and flag anything your provider should see.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => checkIn(lastCompleted)}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+                      style={{ background: `hsl(var(--primary))`, color: `hsl(var(--background))`, fontFamily: 'var(--font-sans)', boxShadow: `0 0 16px hsl(var(--primary) / 0.25)` }}
+                    >
+                      Check in with Ace
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                    </button>
+                  </motion.div>
+                )}
+
                 {/* Start intake CTA */}
                 <motion.div
                   className="rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
@@ -407,7 +474,7 @@ function PortalContent() {
                   ) : (
                     <div>
                       {intakes.slice(0, 5).map((intake) => (
-                        <IntakeRow key={intake.id} intake={intake} />
+                        <IntakeRow key={intake.id} intake={intake} onCheckIn={checkIn} />
                       ))}
                       {intakes.length > 5 && (
                         <button
@@ -449,6 +516,9 @@ function PortalContent() {
                       {intakes.length} total
                     </span>
                   </div>
+                  <p className="text-sm -mt-4 mb-6" style={{ color: 'hsl(var(--text-dim))', fontFamily: 'var(--font-sans)' }}>
+                    Your living record — every intake, its suggested next step, and what was flagged. Check in with Ace on any of them.
+                  </p>
                   {intakes.length === 0 ? (
                     <div className="py-10 text-center">
                       <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-sans)' }}>
@@ -456,7 +526,7 @@ function PortalContent() {
                       </p>
                     </div>
                   ) : (
-                    intakes.map((intake) => <IntakeRow key={intake.id} intake={intake} />)
+                    intakes.map((intake) => <IntakeRow key={intake.id} intake={intake} onCheckIn={checkIn} />)
                   )}
                 </div>
               </motion.div>
