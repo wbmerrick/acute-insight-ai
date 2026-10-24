@@ -15,6 +15,7 @@ const ProvidersPage = lazy(() => import('./pages/providers'));
 const PatientsPage = lazy(() => import('./pages/patients'));
 const AdminProvidersPage = lazy(() => import('./pages/admin/providers'));
 const HowItWorksPage = lazy(() => import('./pages/how-it-works'));
+const DemoPage = lazy(() => import('./pages/demo'));
 const PrivacyPage = lazy(() => import('./pages/privacy'));
 const TermsPage = lazy(() => import('./pages/terms'));
 const SecurityPage = lazy(() => import('./pages/security'));
@@ -63,6 +64,10 @@ export const routes: RouteObject[] = [
   {
     path: '/how-it-works',
     element: <HowItWorksPage />,
+  },
+  {
+    path: '/demo',
+    element: <DemoPage />,
   },
   {
     path: '/privacy',

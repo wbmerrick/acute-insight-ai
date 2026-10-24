@@ -194,13 +194,22 @@ export default function HomePage() {
                 </div>
               ))}
             </dl>
-            <Link
-              to="/providers"
-              className="text-sm font-medium transition-colors hover:text-foreground"
-              style={{ color: 'hsl(var(--text-dim))', fontFamily: 'var(--font-heading)' }}
-            >
-              {hero.ctaSecondary} &rarr;
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+              <Link
+                to="/demo"
+                className="text-sm font-semibold transition-colors hover:brightness-110"
+                style={{ color: 'hsl(var(--primary))', fontFamily: 'var(--font-heading)' }}
+              >
+                See a sample visit &rarr;
+              </Link>
+              <Link
+                to="/providers"
+                className="text-sm font-medium transition-colors hover:text-foreground"
+                style={{ color: 'hsl(var(--text-dim))', fontFamily: 'var(--font-heading)' }}
+              >
+                {hero.ctaSecondary} &rarr;
+              </Link>
+            </div>
           </div>
         </div>
       </section>

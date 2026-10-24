@@ -57,6 +57,7 @@ export default function Header() {
   }, []);
 
   const navLinks = [
+    { label: 'See it work', href: '/demo' },
     { label: 'For patients', href: '/patients' },
     { label: 'For providers', href: '/providers' },
     { label: 'How it works', href: '/how-it-works' },
