@@ -84099,9 +84099,25 @@ var EMERGENCY_KEYWORDS = [
   "paralyzed",
   "paralysis"
 ];
+var FAMILY_HX_CTX = /\b(dad|mom|father|mother|parent|grandparent|grand(father|mother|pa|ma)|brother|sister|sibling|uncle|aunt|cousin|relative)('?s)?( (had|has|have|got|with|died of|died from))?\s*(a |an )?\s*$/;
+var HISTORY_CTX = /\b(family history of|fhx(\s+of)?|hx\s+of|history of|previous|prior|past)\s+(a\s+|an\s+)?$/;
+var NEGATION_CTX = /\b(no|not|without|denies?|deny|negative for|never had)\s+$/;
+var NEVER_SUPPRESS = /* @__PURE__ */ new Set(["suicidal", "kill myself"]);
 function detectEmergency(text2) {
   const lower = text2.toLowerCase();
-  return EMERGENCY_KEYWORDS.some((kw) => lower.includes(kw));
+  for (const kw of EMERGENCY_KEYWORDS) {
+    const canSuppress = !NEVER_SUPPRESS.has(kw);
+    let from = 0;
+    for (; ; ) {
+      const idx = lower.indexOf(kw, from);
+      if (idx === -1) break;
+      const before = lower.slice(Math.max(0, idx - 32), idx);
+      const suppressed = canSuppress && (FAMILY_HX_CTX.test(before) || HISTORY_CTX.test(before) || NEGATION_CTX.test(before));
+      if (!suppressed) return true;
+      from = idx + kw.length;
+    }
+  }
+  return false;
 }
 function extractCoveredTopics(messages) {
   const covered = /* @__PURE__ */ new Set();
@@ -84225,7 +84241,8 @@ function buildTemplateClinicalBrief(chiefComplaint, responses) {
   const blob = chiefComplaint + " " + responses.map((r) => Array.isArray(r.answer) ? r.answer.join(" ") : r.answer).join(" ");
   const isEmergency = detectEmergency(blob);
   const CONCERNING = /chest (pain|tight|pressure|discomfort)|short(ness)? of breath|difficulty breathing|hard to breathe|radiat|numbness|weak(ness)?|slurred|vision (loss|change)|faint|pass(ed|ing) out|severe|worst|uncontrolled bleeding|coughing up blood|high fever|stiff neck|new confusion|severe dehydrat/i;
-  const isUrgent = flags.some((f) => /high severity|serious associated/i.test(f)) || CONCERNING.test(blob);
+  const denegBlob = blob.replace(/\b(no|not|without|denies?|deny|negative for|never had)\b(\s+\w+){0,3}/gi, " ");
+  const isUrgent = flags.some((f) => /high severity|serious associated/i.test(f)) || CONCERNING.test(denegBlob);
   let level;
   let label, timeframe, rationale, safetyNet;
   if (isEmergency) {

@@ -26,9 +26,36 @@ const COVERED_TOPICS = [
 
 type Topic = (typeof COVERED_TOPICS)[number];
 
+// Contexts in which an emergency keyword is NOT the patient's own current problem.
+// Applied only to the text immediately before an occurrence (tight windows), so a
+// real mention elsewhere still fires. Over-triage is the safe error.
+const FAMILY_HX_CTX = /\b(dad|mom|father|mother|parent|grandparent|grand(father|mother|pa|ma)|brother|sister|sibling|uncle|aunt|cousin|relative)('?s)?( (had|has|have|got|with|died of|died from))?\s*(a |an )?\s*$/;
+const HISTORY_CTX = /\b(family history of|fhx(\s+of)?|hx\s+of|history of|previous|prior|past)\s+(a\s+|an\s+)?$/;
+const NEGATION_CTX = /\b(no|not|without|denies?|deny|negative for|never had)\s+$/;
+// Self-harm cues are never suppressed — any mention fires.
+const NEVER_SUPPRESS = new Set(['suicidal', 'kill myself']);
+
+/**
+ * True if the text mentions an emergency symptom as the patient's OWN current
+ * problem. Occurrences that are clearly family history, past history, or negated
+ * are skipped; if any occurrence is unqualified, it fires (over-triage is safe).
+ */
 export function detectEmergency(text: string): boolean {
   const lower = text.toLowerCase();
-  return EMERGENCY_KEYWORDS.some((kw) => lower.includes(kw));
+  for (const kw of EMERGENCY_KEYWORDS) {
+    const canSuppress = !NEVER_SUPPRESS.has(kw);
+    let from = 0;
+    for (;;) {
+      const idx = lower.indexOf(kw, from);
+      if (idx === -1) break;
+      const before = lower.slice(Math.max(0, idx - 32), idx);
+      const suppressed =
+        canSuppress && (FAMILY_HX_CTX.test(before) || HISTORY_CTX.test(before) || NEGATION_CTX.test(before));
+      if (!suppressed) return true;
+      from = idx + kw.length;
+    }
+  }
+  return false;
 }
 
 function extractCoveredTopics(messages: ChatTurn[]): Set<Topic> {
@@ -206,7 +233,10 @@ export function buildTemplateClinicalBrief(
   // (be seen today) even without a numeric severity. Over-triage is the safe error.
   const CONCERNING =
     /chest (pain|tight|pressure|discomfort)|short(ness)? of breath|difficulty breathing|hard to breathe|radiat|numbness|weak(ness)?|slurred|vision (loss|change)|faint|pass(ed|ing) out|severe|worst|uncontrolled bleeding|coughing up blood|high fever|stiff neck|new confusion|severe dehydrat/i;
-  const isUrgent = flags.some((f) => /high severity|serious associated/i.test(f)) || CONCERNING.test(blob);
+  // Drop short negated phrases ("no chest pain", "denies fever") so an explicitly
+  // absent symptom doesn't trip the concerning-symptom scan.
+  const denegBlob = blob.replace(/\b(no|not|without|denies?|deny|negative for|never had)\b(\s+\w+){0,3}/gi, ' ');
+  const isUrgent = flags.some((f) => /high severity|serious associated/i.test(f)) || CONCERNING.test(denegBlob);
 
   let level: Acuity;
   let label: string, timeframe: string, rationale: string, safetyNet: string;
