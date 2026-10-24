@@ -61,45 +61,11 @@ function EkgStrip() {
           className="animate-trace trace-glow"
           style={{ ['--trace-length' as string]: 3200 }}
         />
-        {/* Flag annotation over the tall complex */}
-        <g className="fade-in animate-in" style={{ animationDelay: '2.3s', animationDuration: '0.5s' }}>
-          <line
-            x1={854}
-            y1={baseline - 76}
-            x2={854}
-            y2={34}
-            stroke="hsl(var(--accent) / 0.75)"
-            strokeWidth="1"
-            strokeDasharray="3 3"
-          />
-          <rect
-            x={866}
-            y={16}
-            rx={6}
-            width={212}
-            height={30}
-            fill="hsl(var(--surface-deeper) / 0.95)"
-            stroke="hsl(var(--accent) / 0.8)"
-            strokeWidth="1"
-          />
-          <text
-            x={880}
-            y={36}
-            fill="hsl(var(--accent))"
-            fontSize="14"
-            fontFamily="var(--font-mono)"
-          >
-            flagged · severity 8/10
-          </text>
-        </g>
       </svg>
 
       {/* Strip annotations */}
       <div className="absolute left-4 md:left-8 top-3 vitals text-xs" style={{ color: 'hsl(var(--text-dimmer))' }}>
-        lead II — intake in progress
-      </div>
-      <div className="absolute right-4 md:right-8 bottom-3 vitals text-xs" style={{ color: 'hsl(var(--primary) / 0.8)' }}>
-        brief ready
+        lead II
       </div>
     </div>
   );
