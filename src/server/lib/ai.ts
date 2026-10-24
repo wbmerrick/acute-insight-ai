@@ -17,6 +17,7 @@
  */
 
 import { getSecret } from '#airo/secrets';
+import { coerceClinicalBrief, type ClinicalBrief } from '../../lib/clinical-brief.js';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -358,4 +359,62 @@ export async function generateProviderBrief(
     : [];
 
   return { summary: parsed.summary.trim(), flags };
+}
+
+// ─── Structured clinical brief (co-pilot + triage) ───────────────────────────
+
+const CLINICAL_BRIEF_SYSTEM_PROMPT = `You are a clinical decision-SUPPORT assistant preparing a pre-visit brief from a patient's self-reported intake, for a licensed clinician to review, edit, and act on. You never deliver a diagnosis, order, or prescription — you surface considerations the clinician decides on. Build everything ONLY from what the patient reported; never invent exam findings, vitals, or results.
+
+Respond with ONLY valid JSON (no markdown fences), in exactly this shape:
+{
+  "summary": "<100-180 word clinical-prose brief: CC/HPI, meds, allergies, relevant PMH, patient concerns>",
+  "flags": ["<short attention item>", ...],
+  "disposition": {"level":"emergency|urgent|telehealth|routine|selfcare","label":"<short next step>","timeframe":"<e.g. 'today', 'within 24 hours', 'at your convenience'>","rationale":"<1-2 plain-language sentences for the PATIENT>","safetyNet":"<when to escalate to the ER / call 911>"},
+  "note": {"plan":["<suggested next step / management consideration>", ...],"assessment":"<clinical impression in clinician shorthand>","objective":["<exam/vital to OBTAIN at the visit>", ...],"hpi":"<concise HPI in clinical prose>"},
+  "differential": [{"condition":"<dx>","likelihood":"higher|possible|consider","rationale":"<brief, from reported features>"}, ...],
+  "workup": [{"item":"<suggested lab/imaging/follow-up>","rationale":"<why>"}, ...]
+}
+
+GUIDANCE
+- disposition.level: emergency = red-flag needing the ED/911 now; urgent = should be seen in person today / same-day; telehealth = appropriate for a virtual same-day/soon visit; routine = schedule at convenience; selfcare = reasonable self-care with follow-up if not improving. Choose conservatively — when uncertain between two, pick the higher acuity. ALWAYS give a concrete safetyNet describing escalation.
+- note.plan is listed FIRST (inverted SOAP), as suggested considerations ("Consider…", "If X, then Y"), never as issued orders. objective lists what to CHECK at the visit, not findings.
+- differential: 0-6 items, most likely first, each with a one-line rationale tied to reported features. Empty array for routine refills/administrative visits.
+- workup: 0-6 suggested items with rationale. Empty when none applies.
+- summary/hpi: clinical prose from reported history only. Use standard shorthand (pt, c/o, PMH, NKDA) where natural.
+- flags: 0-6 short strings — red flags, severity >=8/10, chronicity, concerning meds, psychosocial safety, explicit worry.`;
+
+/**
+ * Generate the full structured clinical brief (summary, flags, patient
+ * disposition, inverted-SOAP note, differential, workup) from a completed
+ * intake. Throws on API failure or unusable output — caller falls back.
+ */
+export async function generateClinicalBrief(
+  chiefComplaint: string,
+  responses: QAPairInput[]
+): Promise<ClinicalBrief> {
+  const transcript = responses
+    .map((qa) => {
+      const ans = Array.isArray(qa.answer) ? qa.answer.join(', ') : qa.answer;
+      return `Q: ${qa.question}\nA: ${ans}`;
+    })
+    .join('\n\n');
+
+  const raw = await callAnthropic({
+    model: summaryModel(),
+    system: CLINICAL_BRIEF_SYSTEM_PROMPT,
+    messages: [
+      {
+        role: 'user',
+        content: `Chief complaint (patient's words): ${chiefComplaint}\n\nIntake transcript:\n${transcript}`,
+      },
+    ],
+    maxTokens: 1600,
+    temperature: 0.2,
+  });
+
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Clinical brief: no JSON in model output');
+  const brief = coerceClinicalBrief(JSON.parse(jsonMatch[0]));
+  if (!brief) throw new Error('Clinical brief: unusable model output');
+  return brief;
 }

@@ -82,6 +82,7 @@ export const intakeSessions = pgTable('intake_sessions', {
   responses: jsonb('responses'), // full Q&A pairs
   aiSummary: text('ai_summary'),
   aiFlags: jsonb('ai_flags'), // array of flag strings
+  aiBrief: jsonb('ai_brief'), // full structured ClinicalBrief (disposition, SOAP note, differential, workup)
   appointmentDate: timestamp('appointment_date'),
   providerName: varchar('provider_name', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow(),

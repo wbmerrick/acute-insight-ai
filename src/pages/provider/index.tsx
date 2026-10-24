@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useSession, signOut } from '@/lib/auth/auth-client';
 import { ProtectedRoute } from '@/lib/auth/auth-client';
 import { provider } from 'virtual:content';
+import type { ClinicalBrief } from '@/lib/clinical-brief';
+import { ProviderNote } from '@/components/clinical-brief-view';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -23,6 +25,7 @@ interface ProviderIntake {
   chiefComplaint: string | null;
   aiSummary: string | null;
   aiFlags: string[] | null;
+  aiBrief: ClinicalBrief | null;
   appointmentDate: string | null;
   providerName: string | null;
   createdAt: string;
@@ -205,8 +208,15 @@ function DetailPanel({ intake }: { intake: ProviderIntake }) {
         </div>
       </div>
 
-      {/* Clinical flags */}
-      {intake.aiFlags && intake.aiFlags.length > 0 && (
+      {/* Co-pilot brief — inverted SOAP, differential, workup, triage */}
+      {intake.aiBrief && (
+        <div className="mb-4">
+          <ProviderNote brief={intake.aiBrief} />
+        </div>
+      )}
+
+      {/* Clinical flags (legacy intakes captured before the structured brief) */}
+      {!intake.aiBrief && intake.aiFlags && intake.aiFlags.length > 0 && (
         <div
           className="rounded-2xl p-5 mb-4"
           style={{
@@ -243,7 +253,8 @@ function DetailPanel({ intake }: { intake: ProviderIntake }) {
         </div>
       )}
 
-      {/* AI Brief */}
+      {/* AI Brief (legacy summary — shown only when there's no structured brief) */}
+      {!intake.aiBrief && (
       <div
         className="rounded-2xl p-5 mb-4"
         style={{
@@ -282,6 +293,7 @@ function DetailPanel({ intake }: { intake: ProviderIntake }) {
           </p>
         </div>
       </div>
+      )}
 
       {/* Health profile */}
       {intake.profile && (

@@ -24,6 +24,7 @@ export default async function handler(req: Request, res: Response) {
         chiefComplaint: intakeSessions.chiefComplaint,
         aiSummary: intakeSessions.aiSummary,
         aiFlags: intakeSessions.aiFlags,
+        aiBrief: intakeSessions.aiBrief,
         appointmentDate: intakeSessions.appointmentDate,
         providerName: intakeSessions.providerName,
         createdAt: intakeSessions.createdAt,

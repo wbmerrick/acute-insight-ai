@@ -3,6 +3,8 @@ import { Link, useNavigate, useLocation } from 'react-router';
 import { Helmet } from '@dr.pogodin/react-helmet';
 import { useSession } from '@/lib/auth/auth-client';
 import { CHAT_CSS } from './chat.css';
+import type { Disposition } from '@/lib/clinical-brief';
+import { DispositionCard } from '@/components/clinical-brief-view';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Acute Insight intake — conversational chat, modeled on iSpry's "Spry" chat:
@@ -145,16 +147,25 @@ function AccountModal({ onClose, onAuthed }: { onClose: () => void; onAuthed: ()
 }
 
 // ─── Complete screen ──────────────────────────────────────────────────────────
-function CompleteScreen({ onReset, onPortal }: { onReset: () => void; onPortal: () => void }) {
+function CompleteScreen({ onReset, onPortal, disposition }: { onReset: () => void; onPortal: () => void; disposition?: Disposition | null }) {
   return (
-    <div className="ace-chat" style={{ maxWidth: 560, textAlign: 'center', margin: '0 auto' }}>
-      <div style={{ width: 56, height: 56, borderRadius: 16, margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'hsl(var(--primary) / 0.12)', border: '1px solid hsl(var(--primary) / 0.3)' }}>
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+    <div className="ace-chat" style={{ maxWidth: 620, margin: '0 auto' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: 56, height: 56, borderRadius: 16, margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'hsl(var(--primary) / 0.12)', border: '1px solid hsl(var(--primary) / 0.3)' }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+        </div>
+        <h1 className="display" style={{ fontSize: 'clamp(1.8rem,3.5vw,2.4rem)', color: 'hsl(var(--foreground))', marginBottom: 12 }}>Intake submitted.</h1>
+        <p style={{ color: 'hsl(var(--text-dim))', lineHeight: 1.7, marginBottom: disposition ? 24 : 28, fontFamily: 'var(--font-sans)' }}>
+          Your provider will review your brief before your visit. You can see this intake any time in your portal.
+        </p>
       </div>
-      <h1 className="display" style={{ fontSize: 'clamp(1.8rem,3.5vw,2.4rem)', color: 'hsl(var(--foreground))', marginBottom: 12 }}>Intake submitted.</h1>
-      <p style={{ color: 'hsl(var(--text-dim))', lineHeight: 1.7, marginBottom: 28, fontFamily: 'var(--font-sans)' }}>
-        Your provider will review your brief before your visit. You can see this intake any time in your portal.
-      </p>
+      {disposition && (
+        <div style={{ marginBottom: 28 }}>
+          <p style={{ textAlign: 'center', font: '12px var(--font-mono)', color: 'hsl(var(--text-dimmer))', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Your suggested next step</p>
+          <DispositionCard disposition={disposition} />
+          <p style={{ textAlign: 'center', fontSize: 12, color: 'hsl(var(--text-dimmer))', marginTop: 10, lineHeight: 1.5 }}>A suggestion based on what you shared — not a diagnosis. Your provider decides your care.</p>
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
         <button onClick={onPortal} style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))', border: 0, borderRadius: 12, padding: '12px 24px', fontFamily: 'var(--font-heading)', fontWeight: 600, cursor: 'pointer' }}>Go to my portal</button>
         <button onClick={onReset} style={{ background: 'transparent', color: 'hsl(var(--foreground))', border: '1px solid hsl(var(--border-subtle))', borderRadius: 12, padding: '12px 24px', fontFamily: 'var(--font-heading)', fontWeight: 600, cursor: 'pointer' }}>Start another intake</button>
@@ -168,7 +179,7 @@ function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal, in
   hasAccount: boolean;
   onNeedAccount: () => void;
   intakeId: number | null;
-  onComplete: () => void;
+  onComplete: (disposition?: Disposition) => void;
   onPortal: () => void;
   initialMessage?: string;      // handed off from the homepage hero composer
   autoStartVoice?: boolean;     // homepage "Talk" → start listening on arrival
@@ -442,7 +453,8 @@ function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal, in
         body: JSON.stringify({ responses, chiefComplaint }),
       });
       if (!res.ok) throw new Error('submit');
-      onComplete();
+      const data = (await res.json().catch(() => ({}))) as { disposition?: Disposition };
+      onComplete(data.disposition);
     } catch {
       setError('Failed to submit. Please try again.');
     } finally {
@@ -656,6 +668,7 @@ function IntakeFlow() {
   const { user } = useSession();
   const [phase, setPhase] = useState<'chat' | 'complete'>('chat');
   const [intakeId, setIntakeId] = useState<number | null>(null);
+  const [disposition, setDisposition] = useState<Disposition | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [resetKey, setResetKey] = useState(0);
 
@@ -698,7 +711,8 @@ function IntakeFlow() {
         <div className="w-full max-w-3xl">
           {phase === 'complete' ? (
             <CompleteScreen
-              onReset={() => { setPhase('chat'); setResetKey((k) => k + 1); void startIntake(); }}
+              disposition={disposition}
+              onReset={() => { setDisposition(null); setPhase('chat'); setResetKey((k) => k + 1); void startIntake(); }}
               onPortal={() => navigate('/portal')}
             />
           ) : (
@@ -716,7 +730,7 @@ function IntakeFlow() {
                 initialMessage={initialMessage}
                 autoStartVoice={autoStartVoice}
                 onNeedAccount={() => setShowModal(true)}
-                onComplete={() => setPhase('complete')}
+                onComplete={(d) => { setDisposition(d ?? null); setPhase('complete'); }}
                 onPortal={() => navigate('/portal')}
               />
             </>

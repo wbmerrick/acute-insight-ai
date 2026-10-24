@@ -3,8 +3,9 @@ import { db } from '../../../../db/client.js';
 import { intakeSessions } from '../../../../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { getAuth } from '../../../../../lib/auth/auth.js';
-import { aiAvailable, generateProviderBrief } from '../../../../lib/ai.js';
-import { buildTemplateSummary } from '../../../../lib/intake-fallback.js';
+import { aiAvailable, generateClinicalBrief } from '../../../../lib/ai.js';
+import { buildTemplateClinicalBrief } from '../../../../lib/intake-fallback.js';
+import { ACUITY_LEVELS } from '../../../../../lib/clinical-brief.js';
 
 interface QAPair {
   questionId: string;
@@ -38,18 +39,22 @@ export default async function handler(req: Request, res: Response) {
       .limit(1);
     if (!existing) return res.status(404).json({ error: 'Intake session not found' });
 
-    // Deterministic flags always run (severity ≥8, chronicity, serious associated
-    // symptoms) — the LLM augments them, it never replaces the safety floor.
-    const template = buildTemplateSummary(chiefComplaint, responses);
-    let aiSummary = template.summary;
-    let flags = template.flags;
+    // Deterministic brief always runs — a safety floor with a triage disposition
+    // and flags. The LLM augments it into a full co-pilot brief when available,
+    // but can never downgrade the disposition below the deterministic acuity.
+    let brief = buildTemplateClinicalBrief(chiefComplaint, responses);
+    const floor = brief.disposition;
 
     if (aiAvailable()) {
       try {
-        const brief = await generateProviderBrief(chiefComplaint, responses);
-        aiSummary = brief.summary;
-        // Union of deterministic + LLM flags, deduplicated
-        flags = [...new Set([...template.flags, ...brief.flags])];
+        const ai = await generateClinicalBrief(chiefComplaint, responses);
+        const aiHigherOrEqual =
+          ACUITY_LEVELS.indexOf(ai.disposition.level) <= ACUITY_LEVELS.indexOf(floor.level);
+        brief = {
+          ...ai,
+          flags: [...new Set([...brief.flags, ...ai.flags])],
+          disposition: aiHigherOrEqual ? ai.disposition : floor,
+        };
       } catch (err) {
         console.error(
           JSON.stringify({
@@ -66,8 +71,9 @@ export default async function handler(req: Request, res: Response) {
         status: 'complete',
         chiefComplaint,
         responses,
-        aiSummary,
-        aiFlags: flags.length > 0 ? flags : null,
+        aiSummary: brief.summary,
+        aiFlags: brief.flags.length > 0 ? brief.flags : null,
+        aiBrief: brief,
       })
       .where(
         and(
@@ -76,7 +82,7 @@ export default async function handler(req: Request, res: Response) {
         )
       );
 
-    res.json({ ok: true, aiSummary, aiFlags: flags });
+    res.json({ ok: true, aiSummary: brief.summary, aiFlags: brief.flags, disposition: brief.disposition });
   } catch (error) {
     console.error(
       JSON.stringify({

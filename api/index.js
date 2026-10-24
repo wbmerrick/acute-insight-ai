@@ -73,13 +73,13 @@ var require_ms = __commonJS({
         "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
       );
     };
-    function parse3(str) {
-      str = String(str);
-      if (str.length > 100) {
+    function parse3(str2) {
+      str2 = String(str2);
+      if (str2.length > 100) {
         return;
       }
       var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
-        str
+        str2
       );
       if (!match) {
         return;
@@ -795,7 +795,7 @@ var require_node = __commonJS({
     var { formatters } = module.exports;
     formatters.o = function(v) {
       this.inspectOpts.colors = this.useColors;
-      return util.inspect(v, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
+      return util.inspect(v, this.inspectOpts).split("\n").map((str2) => str2.trim()).join(" ");
     };
     formatters.O = function(v) {
       this.inspectOpts.colors = this.useColors;
@@ -821,8 +821,8 @@ var require_depd = __commonJS({
     var relative = __require("path").relative;
     module.exports = depd;
     var basePath = process.cwd();
-    function containsNamespace(str, namespace) {
-      var vals = str.split(/[ ,]+/);
+    function containsNamespace(str2, namespace) {
+      var vals = str2.split(/[ ,]+/);
       var ns = String(namespace).toLowerCase();
       for (var i = 0; i < vals.length; i++) {
         var val = vals[i];
@@ -849,21 +849,21 @@ var require_depd = __commonJS({
       return descriptor;
     }
     function createArgumentsString(arity) {
-      var str = "";
+      var str2 = "";
       for (var i = 0; i < arity; i++) {
-        str += ", arg" + i;
+        str2 += ", arg" + i;
       }
-      return str.substr(2);
+      return str2.substr(2);
     }
     function createStackString(stack) {
-      var str = this.name + ": " + this.namespace;
+      var str2 = this.name + ": " + this.namespace;
       if (this.message) {
-        str += " deprecated " + this.message;
+        str2 += " deprecated " + this.message;
       }
       for (var i = 0; i < stack.length; i++) {
-        str += "\n    at " + stack[i].toString();
+        str2 += "\n    at " + stack[i].toString();
       }
-      return str;
+      return str2;
     }
     function depd(namespace) {
       if (!namespace) {
@@ -892,15 +892,15 @@ var require_depd = __commonJS({
       if (process.noDeprecation) {
         return true;
       }
-      var str = process.env.NO_DEPRECATION || "";
-      return containsNamespace(str, namespace);
+      var str2 = process.env.NO_DEPRECATION || "";
+      return containsNamespace(str2, namespace);
     }
     function istraced(namespace) {
       if (process.traceDeprecation) {
         return true;
       }
-      var str = process.env.TRACE_DEPRECATION || "";
-      return containsNamespace(str, namespace);
+      var str2 = process.env.TRACE_DEPRECATION || "";
+      return containsNamespace(str2, namespace);
     }
     function log(message2, site) {
       var haslisteners = eehaslisteners(process, "deprecation");
@@ -1334,8 +1334,8 @@ var require_toidentifier = __commonJS({
   "node_modules/toidentifier/index.js"(exports, module) {
     "use strict";
     module.exports = toIdentifier;
-    function toIdentifier(str) {
-      return str.split(" ").map(function(token) {
+    function toIdentifier(str2) {
+      return str2.split(" ").map(function(token) {
         return token.slice(0, 1).toUpperCase() + token.slice(1);
       }).join("").replace(/[^ _0-9a-z]/gi, "");
     }
@@ -1559,16 +1559,16 @@ var require_bytes = __commonJS({
         }
       }
       var val = value / map2[unit.toLowerCase()];
-      var str = val.toFixed(decimalPlaces);
+      var str2 = val.toFixed(decimalPlaces);
       if (!fixedDecimals) {
-        str = str.replace(formatDecimalsRegExp, "$1");
+        str2 = str2.replace(formatDecimalsRegExp, "$1");
       }
       if (thousandsSeparator) {
-        str = str.split(".").map(function(s, i) {
+        str2 = str2.split(".").map(function(s, i) {
           return i === 0 ? s.replace(formatThousandsRegExp, thousandsSeparator) : s;
         }).join(".");
       }
-      return str + unitSeparator + unit;
+      return str2 + unitSeparator + unit;
     }
     function parse3(val) {
       if (typeof val === "number" && !isNaN(val)) {
@@ -1673,12 +1673,12 @@ var require_bom_handling = __commonJS({
       this.encoder = encoder3;
       this.addBOM = true;
     }
-    PrependBOMWrapper.prototype.write = function(str) {
+    PrependBOMWrapper.prototype.write = function(str2) {
       if (this.addBOM) {
-        str = BOMChar + str;
+        str2 = BOMChar + str2;
         this.addBOM = false;
       }
-      return this.encoder.write(str);
+      return this.encoder.write(str2);
     };
     PrependBOMWrapper.prototype.end = function() {
       return this.encoder.end();
@@ -1777,31 +1777,31 @@ var require_internal = __commonJS({
     function InternalEncoder(options, codec) {
       this.enc = codec.enc;
     }
-    InternalEncoder.prototype.write = function(str) {
-      return Buffer2.from(str, this.enc);
+    InternalEncoder.prototype.write = function(str2) {
+      return Buffer2.from(str2, this.enc);
     };
     InternalEncoder.prototype.end = function() {
     };
     function InternalEncoderBase64(options, codec) {
       this.prevStr = "";
     }
-    InternalEncoderBase64.prototype.write = function(str) {
-      str = this.prevStr + str;
-      var completeQuads = str.length - str.length % 4;
-      this.prevStr = str.slice(completeQuads);
-      str = str.slice(0, completeQuads);
-      return Buffer2.from(str, "base64");
+    InternalEncoderBase64.prototype.write = function(str2) {
+      str2 = this.prevStr + str2;
+      var completeQuads = str2.length - str2.length % 4;
+      this.prevStr = str2.slice(completeQuads);
+      str2 = str2.slice(0, completeQuads);
+      return Buffer2.from(str2, "base64");
     };
     InternalEncoderBase64.prototype.end = function() {
       return Buffer2.from(this.prevStr, "base64");
     };
     function InternalEncoderCesu8(options, codec) {
     }
-    InternalEncoderCesu8.prototype.write = function(str) {
-      var buf = Buffer2.alloc(str.length * 3);
+    InternalEncoderCesu8.prototype.write = function(str2) {
+      var buf = Buffer2.alloc(str2.length * 3);
       var bufIdx = 0;
-      for (var i = 0; i < str.length; i++) {
-        var charCode = str.charCodeAt(i);
+      for (var i = 0; i < str2.length; i++) {
+        var charCode = str2.charCodeAt(i);
         if (charCode < 128) {
           buf[bufIdx++] = charCode;
         } else if (charCode < 2048) {
@@ -1882,25 +1882,25 @@ var require_internal = __commonJS({
     function InternalEncoderUtf8(options, codec) {
       this.highSurrogate = "";
     }
-    InternalEncoderUtf8.prototype.write = function(str) {
+    InternalEncoderUtf8.prototype.write = function(str2) {
       if (this.highSurrogate) {
-        str = this.highSurrogate + str;
+        str2 = this.highSurrogate + str2;
         this.highSurrogate = "";
       }
-      if (str.length > 0) {
-        var charCode = str.charCodeAt(str.length - 1);
+      if (str2.length > 0) {
+        var charCode = str2.charCodeAt(str2.length - 1);
         if (charCode >= 55296 && charCode < 56320) {
-          this.highSurrogate = str[str.length - 1];
-          str = str.slice(0, str.length - 1);
+          this.highSurrogate = str2[str2.length - 1];
+          str2 = str2.slice(0, str2.length - 1);
         }
       }
-      return Buffer2.from(str, this.enc);
+      return Buffer2.from(str2, this.enc);
     };
     InternalEncoderUtf8.prototype.end = function() {
       if (this.highSurrogate) {
-        var str = this.highSurrogate;
+        var str2 = this.highSurrogate;
         this.highSurrogate = "";
-        return Buffer2.from(str, this.enc);
+        return Buffer2.from(str2, this.enc);
       }
     };
   }
@@ -1927,8 +1927,8 @@ var require_utf32 = __commonJS({
       this.isLE = codec.isLE;
       this.highSurrogate = 0;
     }
-    Utf32Encoder.prototype.write = function(str) {
-      var src = Buffer2.from(str, "ucs2");
+    Utf32Encoder.prototype.write = function(str2) {
+      var src = Buffer2.from(str2, "ucs2");
       var dst = Buffer2.alloc(src.length * 2 + 4);
       var write32 = this.isLE ? dst.writeUInt32LE : dst.writeUInt32BE;
       var offset = 0;
@@ -2053,8 +2053,8 @@ var require_utf32 = __commonJS({
       }
       this.encoder = codec.iconv.getEncoder(options.defaultEncoding || "utf-32le", options);
     }
-    Utf32AutoEncoder.prototype.write = function(str) {
-      return this.encoder.write(str);
+    Utf32AutoEncoder.prototype.write = function(str2) {
+      return this.encoder.write(str2);
     };
     Utf32AutoEncoder.prototype.end = function() {
       return this.encoder.end();
@@ -2154,8 +2154,8 @@ var require_utf16 = __commonJS({
     Utf16BECodec.prototype.bomAware = true;
     function Utf16BEEncoder() {
     }
-    Utf16BEEncoder.prototype.write = function(str) {
-      var buf = Buffer2.from(str, "ucs2");
+    Utf16BEEncoder.prototype.write = function(str2) {
+      var buf = Buffer2.from(str2, "ucs2");
       for (var i = 0; i < buf.length; i += 2) {
         var tmp = buf[i];
         buf[i] = buf[i + 1];
@@ -2204,8 +2204,8 @@ var require_utf16 = __commonJS({
       }
       this.encoder = codec.iconv.getEncoder("utf-16le", options);
     }
-    Utf16Encoder.prototype.write = function(str) {
-      return this.encoder.write(str);
+    Utf16Encoder.prototype.write = function(str2) {
+      return this.encoder.write(str2);
     };
     Utf16Encoder.prototype.end = function() {
       return this.encoder.end();
@@ -2301,8 +2301,8 @@ var require_utf7 = __commonJS({
     function Utf7Encoder(options, codec) {
       this.iconv = codec.iconv;
     }
-    Utf7Encoder.prototype.write = function(str) {
-      return Buffer2.from(str.replace(nonDirectChars, function(chunk) {
+    Utf7Encoder.prototype.write = function(str2) {
+      return Buffer2.from(str2.replace(nonDirectChars, function(chunk) {
         return "+" + (chunk === "+" ? "" : this.iconv.encode(chunk, "utf16-be").toString("base64").replace(/=+$/, "")) + "-";
       }.bind(this)));
     };
@@ -2386,14 +2386,14 @@ var require_utf7 = __commonJS({
       this.base64Accum = Buffer2.alloc(6);
       this.base64AccumIdx = 0;
     }
-    Utf7IMAPEncoder.prototype.write = function(str) {
+    Utf7IMAPEncoder.prototype.write = function(str2) {
       var inBase64 = this.inBase64;
       var base64Accum = this.base64Accum;
       var base64AccumIdx = this.base64AccumIdx;
-      var buf = Buffer2.alloc(str.length * 5 + 10);
+      var buf = Buffer2.alloc(str2.length * 5 + 10);
       var bufIdx = 0;
-      for (var i2 = 0; i2 < str.length; i2++) {
-        var uChar = str.charCodeAt(i2);
+      for (var i2 = 0; i2 < str2.length; i2++) {
+        var uChar = str2.charCodeAt(i2);
         if (uChar >= 32 && uChar <= 126) {
           if (inBase64) {
             if (base64AccumIdx > 0) {
@@ -2534,10 +2534,10 @@ var require_sbcs_codec = __commonJS({
     function SBCSEncoder(options, codec) {
       this.encodeBuf = codec.encodeBuf;
     }
-    SBCSEncoder.prototype.write = function(str) {
-      var buf = Buffer2.alloc(str.length);
-      for (var i = 0; i < str.length; i++) {
-        buf[i] = this.encodeBuf[str.charCodeAt(i)];
+    SBCSEncoder.prototype.write = function(str2) {
+      var buf = Buffer2.alloc(str2.length);
+      for (var i = 0; i < str2.length; i++) {
+        buf[i] = this.encodeBuf[str2.charCodeAt(i)];
       }
       return buf;
     };
@@ -3413,8 +3413,8 @@ var require_dbcs_codec = __commonJS({
       this.defaultCharSingleByte = codec.defCharSB;
       this.gb18030 = codec.gb18030;
     }
-    DBCSEncoder.prototype.write = function(str) {
-      var newBuf = Buffer2.alloc(str.length * (this.gb18030 ? 4 : 3));
+    DBCSEncoder.prototype.write = function(str2) {
+      var newBuf = Buffer2.alloc(str2.length * (this.gb18030 ? 4 : 3));
       var leadSurrogate = this.leadSurrogate;
       var seqObj = this.seqObj;
       var nextChar = -1;
@@ -3422,8 +3422,8 @@ var require_dbcs_codec = __commonJS({
       var j = 0;
       while (true) {
         if (nextChar === -1) {
-          if (i2 == str.length) break;
-          var uCode = str.charCodeAt(i2++);
+          if (i2 == str2.length) break;
+          var uCode = str2.charCodeAt(i2++);
         } else {
           var uCode = nextChar;
           nextChar = -1;
@@ -5261,10 +5261,10 @@ var require_lib = __commonJS({
     module.exports.encodings = null;
     module.exports.defaultCharUnicode = "\uFFFD";
     module.exports.defaultCharSingleByte = "?";
-    module.exports.encode = function encode4(str, encoding, options) {
-      str = "" + (str || "");
+    module.exports.encode = function encode4(str2, encoding, options) {
+      str2 = "" + (str2 || "");
       var encoder3 = module.exports.getEncoder(encoding, options);
-      var res = encoder3.write(str);
+      var res = encoder3.write(str2);
       var trail = encoder3.end();
       return trail && trail.length > 0 ? Buffer2.concat([res, trail]) : res;
     };
@@ -5872,9 +5872,9 @@ var require_dist = __commonJS({
       }
       return { type, index, parameters };
     }
-    function skipValue(str, index, len, stopChar) {
+    function skipValue(str2, index, len, stopChar) {
       while (index < len) {
-        const code = str.charCodeAt(index);
+        const code = str2.charCodeAt(index);
         if (code === SEMI || code === stopChar)
           break;
         index++;
@@ -5899,12 +5899,12 @@ var require_dist = __commonJS({
       }
       return end;
     }
-    function qstring(str) {
-      if (TOKEN_REGEXP.test(str))
-        return str;
-      if (TEXT_REGEXP.test(str))
-        return `"${str.replace(QUOTE_REGEXP, "\\$&")}"`;
-      throw new TypeError(`Invalid parameter value: ${str}`);
+    function qstring(str2) {
+      if (TOKEN_REGEXP.test(str2))
+        return str2;
+      if (TEXT_REGEXP.test(str2))
+        return `"${str2.replace(QUOTE_REGEXP, "\\$&")}"`;
+      throw new TypeError(`Invalid parameter value: ${str2}`);
     }
   }
 });
@@ -15340,11 +15340,11 @@ var require_mime_types = __commonJS({
       }
       return false;
     }
-    function contentType(str) {
-      if (!str || typeof str !== "string") {
+    function contentType(str2) {
+      if (!str2 || typeof str2 !== "string") {
         return false;
       }
-      var mime = str.indexOf("/") === -1 ? exports.lookup(str) : str;
+      var mime = str2.indexOf("/") === -1 ? exports.lookup(str2) : str2;
       if (!mime) {
         return false;
       }
@@ -15677,9 +15677,9 @@ var require_dist2 = __commonJS({
       }
       return { type, index, parameters };
     }
-    function skipValue(str, index, len, stopChar) {
+    function skipValue(str2, index, len, stopChar) {
       while (index < len) {
-        const code = str.charCodeAt(index);
+        const code = str2.charCodeAt(index);
         if (code === SEMI || code === stopChar)
           break;
         index++;
@@ -15704,12 +15704,12 @@ var require_dist2 = __commonJS({
       }
       return end;
     }
-    function qstring(str) {
-      if (TOKEN_REGEXP.test(str))
-        return str;
-      if (TEXT_REGEXP.test(str))
-        return `"${str.replace(QUOTE_REGEXP, "\\$&")}"`;
-      throw new TypeError(`Invalid parameter value: ${str}`);
+    function qstring(str2) {
+      if (TOKEN_REGEXP.test(str2))
+        return str2;
+      if (TEXT_REGEXP.test(str2))
+        return `"${str2.replace(QUOTE_REGEXP, "\\$&")}"`;
+      throw new TypeError(`Invalid parameter value: ${str2}`);
     }
   }
 });
@@ -15862,14 +15862,14 @@ var require_read = __commonJS({
             return;
           }
         }
-        let str = body;
+        let str2 = body;
         try {
           debug("parse body");
-          str = typeof body !== "string" && encoding !== null ? iconv.decode(body, encoding) : body;
-          req.body = parse3(str, encoding);
+          str2 = typeof body !== "string" && encoding !== null ? iconv.decode(body, encoding) : body;
+          req.body = parse3(str2, encoding);
         } catch (err) {
           next(createError(400, err, {
-            body: str,
+            body: str2,
             type: err.type || "entity.parse.failed"
           }));
           return;
@@ -15986,11 +15986,11 @@ var require_json = __commonJS({
         }
       };
     }
-    function createStrictSyntaxError(str, char2) {
-      const index = str.indexOf(char2);
+    function createStrictSyntaxError(str2, char2) {
+      const index = str2.indexOf(char2);
       let partial2 = "";
       if (index !== -1) {
-        partial2 = str.substring(0, index) + JSON_SYNTAX_CHAR.repeat(str.length - index);
+        partial2 = str2.substring(0, index) + JSON_SYNTAX_CHAR.repeat(str2.length - index);
       }
       try {
         JSON.parse(partial2);
@@ -15998,14 +15998,14 @@ var require_json = __commonJS({
       } catch (e) {
         return normalizeJsonSyntaxError(e, {
           message: e.message.replace(JSON_SYNTAX_REGEXP, function(placeholder) {
-            return str.substring(index, index + placeholder.length);
+            return str2.substring(index, index + placeholder.length);
           }),
           stack: e.stack
         });
       }
     }
-    function firstchar(str) {
-      const match = FIRST_CHAR_REGEXP.exec(str);
+    function firstchar(str2) {
+      const match = FIRST_CHAR_REGEXP.exec(str2);
       return match ? match[1] : void 0;
     }
     function normalizeJsonSyntaxError(error3, obj) {
@@ -16116,20 +16116,20 @@ var require_object_inspect = __commonJS({
     var gPO = (typeof Reflect === "function" ? Reflect.getPrototypeOf : Object.getPrototypeOf) || ([].__proto__ === Array.prototype ? function(O) {
       return O.__proto__;
     } : null);
-    function addNumericSeparator(num, str) {
-      if (num === Infinity || num === -Infinity || num !== num || num && num > -1e3 && num < 1e3 || $test.call(/e/, str)) {
-        return str;
+    function addNumericSeparator(num, str2) {
+      if (num === Infinity || num === -Infinity || num !== num || num && num > -1e3 && num < 1e3 || $test.call(/e/, str2)) {
+        return str2;
       }
       var sepRegex = /[0-9](?=(?:[0-9]{3})+(?![0-9]))/g;
       if (typeof num === "number") {
         var int2 = num < 0 ? -$floor(-num) : $floor(num);
         if (int2 !== num) {
           var intStr = String(int2);
-          var dec = $slice.call(str, intStr.length + 1);
+          var dec = $slice.call(str2, intStr.length + 1);
           return $replace.call(intStr, sepRegex, "$&_") + "." + $replace.call($replace.call(dec, /([0-9]{3})/g, "$&_"), /_$/, "");
         }
       }
-      return $replace.call(str, sepRegex, "$&_");
+      return $replace.call(str2, sepRegex, "$&_");
     }
     var utilInspect = require_util_inspect();
     var inspectCustom = utilInspect.custom;
@@ -16179,8 +16179,8 @@ var require_object_inspect = __commonJS({
         if (obj === 0) {
           return Infinity / obj > 0 ? "0" : "-0";
         }
-        var str = String(obj);
-        return numericSeparator ? addNumericSeparator(obj, str) : str;
+        var str2 = String(obj);
+        return numericSeparator ? addNumericSeparator(obj, str2) : str2;
       }
       if (typeof obj === "bigint") {
         var bigIntStr = String(obj) + "n";
@@ -16500,15 +16500,15 @@ var require_object_inspect = __commonJS({
       }
       return typeof x.nodeName === "string" && typeof x.getAttribute === "function";
     }
-    function inspectString(str, opts) {
-      if (str.length > opts.maxStringLength) {
-        var remaining = str.length - opts.maxStringLength;
+    function inspectString(str2, opts) {
+      if (str2.length > opts.maxStringLength) {
+        var remaining = str2.length - opts.maxStringLength;
         var trailer = "... " + remaining + " more character" + (remaining > 1 ? "s" : "");
-        return inspectString($slice.call(str, 0, opts.maxStringLength), opts) + trailer;
+        return inspectString($slice.call(str2, 0, opts.maxStringLength), opts) + trailer;
       }
       var quoteRE = quoteREs[opts.quoteStyle || "single"];
       quoteRE.lastIndex = 0;
-      var s = $replace.call($replace.call(str, quoteRE, "\\$1"), /[\x00-\x1f]/g, lowbyte);
+      var s = $replace.call($replace.call(str2, quoteRE, "\\$1"), /[\x00-\x1f]/g, lowbyte);
       return wrapQuotes(s, "single", opts);
     }
     function lowbyte(c) {
@@ -16525,8 +16525,8 @@ var require_object_inspect = __commonJS({
       }
       return "\\x" + (n < 16 ? "0" : "") + $toUpperCase.call(n.toString(16));
     }
-    function markBoxed(str) {
-      return "Object(" + str + ")";
+    function markBoxed(str2) {
+      return "Object(" + str2 + ")";
     }
     function weakCollectionOf(type) {
       return type + " { ? }";
@@ -16991,14 +16991,14 @@ var require_implementation = __commonJS({
       return arr;
     };
     var joiny = function(arr, joiner) {
-      var str = "";
+      var str2 = "";
       for (var i = 0; i < arr.length; i += 1) {
-        str += arr[i];
+        str2 += arr[i];
         if (i + 1 < arr.length) {
-          str += joiner;
+          str2 += joiner;
         }
       }
-      return str;
+      return str2;
     };
     module.exports = function bind2(that) {
       var target = this;
@@ -17878,8 +17878,8 @@ var require_utils2 = __commonJS({
         return acc;
       }, target);
     };
-    var decode3 = function(str, defaultDecoder, charset) {
-      var strWithoutPlus = str.replace(/\+/g, " ");
+    var decode3 = function(str2, defaultDecoder, charset) {
+      var strWithoutPlus = str2.replace(/\+/g, " ");
       if (charset === "iso-8859-1") {
         return strWithoutPlus.replace(/%[0-9a-f]{2}/gi, unescape);
       }
@@ -17890,15 +17890,15 @@ var require_utils2 = __commonJS({
       }
     };
     var limit = 1024;
-    var encode4 = function encode5(str, defaultEncoder, charset, kind, format) {
-      if (str.length === 0) {
-        return str;
+    var encode4 = function encode5(str2, defaultEncoder, charset, kind, format) {
+      if (str2.length === 0) {
+        return str2;
       }
-      var string4 = str;
-      if (typeof str === "symbol") {
-        string4 = Symbol.prototype.toString.call(str);
-      } else if (typeof str !== "string") {
-        string4 = String(str);
+      var string4 = str2;
+      if (typeof str2 === "symbol") {
+        string4 = Symbol.prototype.toString.call(str2);
+      } else if (typeof str2 !== "string") {
+        string4 = String(str2);
       }
       if (charset === "iso-8859-1") {
         return escape(string4).replace(/%u[0-9a-f]{4}/gi, function($0) {
@@ -18348,8 +18348,8 @@ var require_parse = __commonJS({
       strictNullHandling: false,
       throwOnLimitExceeded: false
     };
-    var interpretNumericEntities = function(str) {
-      return str.replace(/&#(\d+);/g, function($0, numberStr) {
+    var interpretNumericEntities = function(str2) {
+      return str2.replace(/&#(\d+);/g, function($0, numberStr) {
         return String.fromCharCode(parseInt(numberStr, 10));
       });
     };
@@ -18375,9 +18375,9 @@ var require_parse = __commonJS({
     };
     var isoSentinel = "utf8=%26%2310003%3B";
     var charsetSentinel = "utf8=%E2%9C%93";
-    var parseValues = function parseQueryStringValues(str, options) {
+    var parseValues = function parseQueryStringValues(str2, options) {
       var obj = { __proto__: null };
-      var cleanStr = options.ignoreQueryPrefix ? str.replace(/^\?/, "") : str;
+      var cleanStr = options.ignoreQueryPrefix ? str2.replace(/^\?/, "") : str2;
       cleanStr = cleanStr.replace(/%5B/gi, "[").replace(/%5D/gi, "]");
       var limit = options.parameterLimit === Infinity ? void 0 : options.parameterLimit;
       var parts = cleanStr.split(
@@ -18624,17 +18624,17 @@ var require_parse = __commonJS({
         throwOnLimitExceeded: typeof opts.throwOnLimitExceeded === "boolean" ? opts.throwOnLimitExceeded : false
       };
     };
-    module.exports = function(str, opts) {
+    module.exports = function(str2, opts) {
       var options = normalizeParseOptions(opts);
-      if (str === "" || str === null || typeof str === "undefined") {
+      if (str2 === "" || str2 === null || typeof str2 === "undefined") {
         return options.plainObjects ? { __proto__: null } : {};
       }
-      var tempObj = typeof str === "string" ? parseValues(str, options) : str;
+      var tempObj = typeof str2 === "string" ? parseValues(str2, options) : str2;
       var obj = options.plainObjects ? { __proto__: null } : {};
       var keys = Object.keys(tempObj);
       for (var i = 0; i < keys.length; ++i) {
         var key = keys[i];
-        var newObj = parseKeys(key, tempObj[key], options, typeof str === "string");
+        var newObj = parseKeys(key, tempObj[key], options, typeof str2 === "string");
         obj = utils.merge(obj, newObj, options);
       }
       if (options.allowSparse === true) {
@@ -18806,17 +18806,17 @@ var require_escape_html = __commonJS({
     var matchHtmlRegExp = /["'&<>]/;
     module.exports = escapeHtml;
     function escapeHtml(string4) {
-      var str = "" + string4;
-      var match = matchHtmlRegExp.exec(str);
+      var str2 = "" + string4;
+      var match = matchHtmlRegExp.exec(str2);
       if (!match) {
-        return str;
+        return str2;
       }
       var escape2;
       var html2 = "";
       var index = 0;
       var lastIndex = 0;
-      for (index = match.index; index < str.length; index++) {
-        switch (str.charCodeAt(index)) {
+      for (index = match.index; index < str2.length; index++) {
+        switch (str2.charCodeAt(index)) {
           case 34:
             escape2 = "&quot;";
             break;
@@ -18836,12 +18836,12 @@ var require_escape_html = __commonJS({
             continue;
         }
         if (lastIndex !== index) {
-          html2 += str.substring(lastIndex, index);
+          html2 += str2.substring(lastIndex, index);
         }
         lastIndex = index + 1;
         html2 += escape2;
       }
-      return lastIndex !== index ? html2 + str.substring(lastIndex, index) : html2;
+      return lastIndex !== index ? html2 + str2.substring(lastIndex, index) : html2;
     }
   }
 });
@@ -18881,20 +18881,20 @@ var require_parseurl = __commonJS({
       parsed._raw = url2;
       return req._parsedOriginalUrl = parsed;
     }
-    function fastparse(str) {
-      if (typeof str !== "string" || str.charCodeAt(0) !== 47) {
-        return parse3(str);
+    function fastparse(str2) {
+      if (typeof str2 !== "string" || str2.charCodeAt(0) !== 47) {
+        return parse3(str2);
       }
-      var pathname = str;
+      var pathname = str2;
       var query = null;
       var search = null;
-      for (var i = 1; i < str.length; i++) {
-        switch (str.charCodeAt(i)) {
+      for (var i = 1; i < str2.length; i++) {
+        switch (str2.charCodeAt(i)) {
           case 63:
             if (search === null) {
-              pathname = str.substring(0, i);
-              query = str.substring(i + 1);
-              search = str.substring(i);
+              pathname = str2.substring(0, i);
+              query = str2.substring(i + 1);
+              search = str2.substring(i);
             }
             break;
           case 9:
@@ -18911,12 +18911,12 @@ var require_parseurl = __commonJS({
           /* #  */
           case 160:
           case 65279:
-            return parse3(str);
+            return parse3(str2);
         }
       }
       var url2 = Url !== void 0 ? new Url() : {};
-      url2.path = str;
-      url2.href = str;
+      url2.path = str2;
+      url2.href = str2;
       url2.pathname = pathname;
       if (search !== null) {
         url2.query = query;
@@ -19239,14 +19239,14 @@ var require_content_type = __commonJS({
       return header;
     }
     function qstring(val) {
-      var str = String(val);
-      if (TOKEN_REGEXP.test(str)) {
-        return str;
+      var str2 = String(val);
+      if (TOKEN_REGEXP.test(str2)) {
+        return str2;
       }
-      if (str.length > 0 && !TEXT_REGEXP.test(str)) {
+      if (str2.length > 0 && !TEXT_REGEXP.test(str2)) {
         throw new TypeError("invalid parameter value");
       }
-      return '"' + str.replace(QUOTE_REGEXP, "\\$1") + '"';
+      return '"' + str2.replace(QUOTE_REGEXP, "\\$1") + '"';
     }
     function ContentType(type) {
       this.parameters = /* @__PURE__ */ Object.create(null);
@@ -20033,11 +20033,11 @@ var require_proxy_addr = __commonJS({
     }
     function parseipNotation(note) {
       var pos = note.lastIndexOf("/");
-      var str = pos !== -1 ? note.substring(0, pos) : note;
-      if (!isip(str)) {
-        throw new TypeError("invalid IP address: " + str);
+      var str2 = pos !== -1 ? note.substring(0, pos) : note;
+      if (!isip(str2)) {
+        throw new TypeError("invalid IP address: " + str2);
       }
-      var ip = parseip(str);
+      var ip = parseip(str2);
       if (pos === -1 && ip.kind() === "ipv6" && ip.isIPv4MappedAddress()) {
         ip = ip.toIPv4Address();
       }
@@ -20162,22 +20162,22 @@ var require_utils3 = __commonJS({
     exports.normalizeTypes = function(types3) {
       return types3.map(exports.normalizeType);
     };
-    function acceptParams(str) {
-      var length = str.length;
-      var colonIndex = str.indexOf(";");
+    function acceptParams(str2) {
+      var length = str2.length;
+      var colonIndex = str2.indexOf(";");
       var index = colonIndex === -1 ? length : colonIndex;
-      var ret = { value: str.slice(0, index).trim(), quality: 1, params: {} };
+      var ret = { value: str2.slice(0, index).trim(), quality: 1, params: {} };
       while (index < length) {
-        var splitIndex = str.indexOf("=", index);
+        var splitIndex = str2.indexOf("=", index);
         if (splitIndex === -1) break;
-        var colonIndex = str.indexOf(";", index);
+        var colonIndex = str2.indexOf(";", index);
         var endIndex = colonIndex === -1 ? length : colonIndex;
         if (splitIndex > endIndex) {
-          index = str.lastIndexOf(";", splitIndex - 1) + 1;
+          index = str2.lastIndexOf(";", splitIndex - 1) + 1;
           continue;
         }
-        var key = str.slice(index, splitIndex).trim();
-        var value = str.slice(splitIndex + 1, endIndex).trim();
+        var key = str2.slice(index, splitIndex).trim();
+        var value = str2.slice(splitIndex + 1, endIndex).trim();
         if (key === "q") {
           ret.quality = parseFloat(value);
         } else {
@@ -20260,8 +20260,8 @@ var require_utils3 = __commonJS({
         return etag(buf, options);
       };
     }
-    function parseExtendedQueryString(str) {
-      return qs.parse(str, {
+    function parseExtendedQueryString(str2) {
+      return qs.parse(str2, {
         allowPrototypes: true
       });
     }
@@ -20369,11 +20369,11 @@ var require_dist3 = __commonJS({
     var ID_START = /^[$_\p{ID_Start}]$/u;
     var ID_CONTINUE = /^[$\u200c\u200d\p{ID_Continue}]$/u;
     var ID = /^[$_\p{ID_Start}][$\u200c\u200d\p{ID_Continue}]*$/u;
-    function escapeText(str) {
-      return str.replace(/[{}()\[\]+?!:*\\]/g, "\\$&");
+    function escapeText(str2) {
+      return str2.replace(/[{}()\[\]+?!:*\\]/g, "\\$&");
     }
-    function escape2(str) {
-      return str.replace(/[.+*?^${}()[\]|/\\]/g, "\\$&");
+    function escape2(str2) {
+      return str2.replace(/[.+*?^${}()[\]|/\\]/g, "\\$&");
     }
     var TokenData = class {
       constructor(tokens, originalPath) {
@@ -20393,9 +20393,9 @@ var require_dist3 = __commonJS({
       }
     };
     exports.PathError = PathError;
-    function parse3(str, options = {}) {
+    function parse3(str2, options = {}) {
       const { encodePath = NOOP_VALUE } = options;
-      const chars = [...str];
+      const chars = [...str2];
       let index = 0;
       function consumeUntil(end) {
         const output = [];
@@ -20417,7 +20417,7 @@ var require_dist3 = __commonJS({
           }
           if (value === "\\") {
             if (index === chars.length) {
-              throw new PathError(`Unexpected end after \\ at index ${index}`, str);
+              throw new PathError(`Unexpected end after \\ at index ${index}`, str2);
             }
             path2 += chars[index++];
             continue;
@@ -20442,11 +20442,11 @@ var require_dist3 = __commonJS({
                 name += chars[index];
               }
               if (quoteStart) {
-                throw new PathError(`Unterminated quote at index ${quoteStart}`, str);
+                throw new PathError(`Unterminated quote at index ${quoteStart}`, str2);
               }
             }
             if (!name) {
-              throw new PathError(`Missing parameter name at index ${index}`, str);
+              throw new PathError(`Missing parameter name at index ${index}`, str2);
             }
             writePath();
             output.push({ type, name });
@@ -20461,17 +20461,17 @@ var require_dist3 = __commonJS({
             continue;
           }
           if (value === "}" || value === "(" || value === ")" || value === "[" || value === "]" || value === "+" || value === "?" || value === "!") {
-            throw new PathError(`Unexpected ${value} at index ${index - 1}`, str);
+            throw new PathError(`Unexpected ${value} at index ${index - 1}`, str2);
           }
           path2 += value;
         }
         if (end) {
-          throw new PathError(`Unexpected end at index ${index}, expected ${end}`, str);
+          throw new PathError(`Unexpected end at index ${index}, expected ${end}`, str2);
         }
         writePath();
         return output;
       }
-      return new TokenData(consumeUntil(""), str);
+      return new TokenData(consumeUntil(""), str2);
     }
     function compile(path2, options = {}) {
       const { encode: encode4 = encodeURIComponent, delimiter = DEFAULT_DELIMITER } = options;
@@ -21669,8 +21669,8 @@ var require_charset = __commonJS({
       accepts.length = j;
       return accepts;
     }
-    function parseCharset(str, i) {
-      var match = simpleCharsetRegExp.exec(str);
+    function parseCharset(str2, i) {
+      var match = simpleCharsetRegExp.exec(str2);
       if (!match) return null;
       var charset = match[1];
       var q = 1;
@@ -21767,8 +21767,8 @@ var require_encoding = __commonJS({
       accepts.length = j;
       return accepts;
     }
-    function parseEncoding(str, i) {
-      var match = simpleEncodingRegExp.exec(str);
+    function parseEncoding(str2, i) {
+      var match = simpleEncodingRegExp.exec(str2);
       if (!match) return null;
       var encoding = match[1];
       var q = 1;
@@ -21869,8 +21869,8 @@ var require_language = __commonJS({
       accepts.length = j;
       return accepts;
     }
-    function parseLanguage(str, i) {
-      var match = simpleLanguageRegExp.exec(str);
+    function parseLanguage(str2, i) {
+      var match = simpleLanguageRegExp.exec(str2);
       if (!match) return null;
       var prefix = match[1];
       var suffix = match[2];
@@ -21964,8 +21964,8 @@ var require_mediaType = __commonJS({
       accepts.length = j;
       return accepts;
     }
-    function parseMediaType(str, i) {
-      var match = simpleMediaTypeRegExp.exec(str);
+    function parseMediaType(str2, i) {
+      var match = simpleMediaTypeRegExp.exec(str2);
       if (!match) return null;
       var params = /* @__PURE__ */ Object.create(null);
       var q = 1;
@@ -22066,15 +22066,15 @@ var require_mediaType = __commonJS({
       }
       return count2;
     }
-    function splitKeyValuePair(str) {
-      var index = str.indexOf("=");
+    function splitKeyValuePair(str2) {
+      var index = str2.indexOf("=");
       var key;
       var val;
       if (index === -1) {
-        key = str;
+        key = str2;
       } else {
-        key = str.slice(0, index);
-        val = str.slice(index + 1);
+        key = str2.slice(0, index);
+        val = str2.slice(index + 1);
       }
       return [key, val];
     }
@@ -22090,8 +22090,8 @@ var require_mediaType = __commonJS({
       accepts.length = j + 1;
       return accepts;
     }
-    function splitParameters(str) {
-      var parameters = str.split(";");
+    function splitParameters(str2) {
+      var parameters = str2.split(";");
       for (var i = 1, j = 0; i < parameters.length; i++) {
         if (quoteCount(parameters[j]) % 2 == 0) {
           parameters[++j] = parameters[i];
@@ -22291,19 +22291,19 @@ var require_fresh = __commonJS({
       var timestamp2 = date4 && Date.parse(date4);
       return typeof timestamp2 === "number" ? timestamp2 : NaN;
     }
-    function parseTokenList(str) {
+    function parseTokenList(str2) {
       var end = 0;
       var list = [];
       var start = 0;
-      for (var i = 0, len = str.length; i < len; i++) {
-        switch (str.charCodeAt(i)) {
+      for (var i = 0, len = str2.length; i < len; i++) {
+        switch (str2.charCodeAt(i)) {
           case 32:
             if (start === end) {
               start = end = i + 1;
             }
             break;
           case 44:
-            list.push(str.substring(start, end));
+            list.push(str2.substring(start, end));
             start = end = i + 1;
             break;
           default:
@@ -22311,7 +22311,7 @@ var require_fresh = __commonJS({
             break;
         }
       }
-      list.push(str.substring(start, end));
+      list.push(str2.substring(start, end));
       return list;
     }
   }
@@ -22322,17 +22322,17 @@ var require_range_parser = __commonJS({
   "node_modules/range-parser/index.js"(exports, module) {
     "use strict";
     module.exports = rangeParser;
-    function rangeParser(size, str, options) {
-      if (typeof str !== "string") {
+    function rangeParser(size, str2, options) {
+      if (typeof str2 !== "string") {
         throw new TypeError("argument str must be a string");
       }
-      var index = str.indexOf("=");
+      var index = str2.indexOf("=");
       if (index === -1) {
         return -2;
       }
-      var arr = str.slice(index + 1).split(",");
+      var arr = str2.slice(index + 1).split(",");
       var ranges = [];
-      ranges.type = str.slice(0, index);
+      ranges.type = str2.slice(0, index);
       for (var i = 0; i < arr.length; i++) {
         var range = arr[i].split("-");
         var start = parseInt(range[0], 10);
@@ -22615,8 +22615,8 @@ var require_content_disposition = __commonJS({
       }
       return string4;
     }
-    function decodefield(str) {
-      const match = EXT_VALUE_REGEXP.exec(str);
+    function decodefield(str2) {
+      const match = EXT_VALUE_REGEXP.exec(str2);
       if (!match) {
         throw new TypeError("invalid extended field value");
       }
@@ -22695,12 +22695,12 @@ var require_content_disposition = __commonJS({
       return "%" + String(char2).charCodeAt(0).toString(16).toUpperCase();
     }
     function qstring(val) {
-      var str = String(val);
-      return '"' + str.replace(QUOTE_REGEXP, "\\$1") + '"';
+      var str2 = String(val);
+      return '"' + str2.replace(QUOTE_REGEXP, "\\$1") + '"';
     }
     function ustring(val) {
-      var str = String(val);
-      var encoded = encodeURIComponent(str).replace(ENCODE_URL_ATTR_CHAR_REGEXP, pencode);
+      var str2 = String(val);
+      var encoded = encodeURIComponent(str2).replace(ENCODE_URL_ATTR_CHAR_REGEXP, pencode);
       return "UTF-8''" + encoded;
     }
     function ContentDisposition(type, parameters) {
@@ -22728,26 +22728,26 @@ var require_content_disposition = __commonJS({
       code >= 65 && code <= 70 || // A-F
       code >= 97 && code <= 102;
     }
-    function hasHexEscape(str) {
-      const maxIndex = str.length - 3;
+    function hasHexEscape(str2) {
+      const maxIndex = str2.length - 3;
       let lastIndex = -1;
-      while ((lastIndex = str.indexOf("%", lastIndex + 1)) !== -1 && lastIndex <= maxIndex) {
-        if (isHexDigit(str[lastIndex + 1]) && isHexDigit(str[lastIndex + 2])) {
+      while ((lastIndex = str2.indexOf("%", lastIndex + 1)) !== -1 && lastIndex <= maxIndex) {
+        if (isHexDigit(str2[lastIndex + 1]) && isHexDigit(str2[lastIndex + 2])) {
           return true;
         }
       }
       return false;
     }
-    function decodeHexEscapes(str) {
-      const firstEscape = str.indexOf("%");
-      if (firstEscape === -1) return str;
-      let result = str.slice(0, firstEscape);
-      for (let idx = firstEscape; idx < str.length; idx++) {
-        if (str[idx] === "%" && idx + 2 < str.length && isHexDigit(str[idx + 1]) && isHexDigit(str[idx + 2])) {
-          result += String.fromCharCode(Number.parseInt(str[idx + 1] + str[idx + 2], 16));
+    function decodeHexEscapes(str2) {
+      const firstEscape = str2.indexOf("%");
+      if (firstEscape === -1) return str2;
+      let result = str2.slice(0, firstEscape);
+      for (let idx = firstEscape; idx < str2.length; idx++) {
+        if (str2[idx] === "%" && idx + 2 < str2.length && isHexDigit(str2[idx + 1]) && isHexDigit(str2[idx + 2])) {
+          result += String.fromCharCode(Number.parseInt(str2[idx + 1] + str2[idx + 2], 16));
           idx += 2;
         } else {
-          result += str[idx];
+          result += str2[idx];
         }
       }
       return result;
@@ -22785,54 +22785,54 @@ var require_cookie = __commonJS({
     var cookieValueRegExp = /^("?)[\u0021\u0023-\u002B\u002D-\u003A\u003C-\u005B\u005D-\u007E]*\1$/;
     var domainValueRegExp = /^([.]?[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)([.][a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
     var pathValueRegExp = /^[\u0020-\u003A\u003D-\u007E]*$/;
-    function parse3(str, opt) {
-      if (typeof str !== "string") {
+    function parse3(str2, opt) {
+      if (typeof str2 !== "string") {
         throw new TypeError("argument str must be a string");
       }
       var obj = {};
-      var len = str.length;
+      var len = str2.length;
       if (len < 2) return obj;
       var dec = opt && opt.decode || decode3;
       var index = 0;
       var eqIdx = 0;
       var endIdx = 0;
       do {
-        eqIdx = str.indexOf("=", index);
+        eqIdx = str2.indexOf("=", index);
         if (eqIdx === -1) break;
-        endIdx = str.indexOf(";", index);
+        endIdx = str2.indexOf(";", index);
         if (endIdx === -1) {
           endIdx = len;
         } else if (eqIdx > endIdx) {
-          index = str.lastIndexOf(";", eqIdx - 1) + 1;
+          index = str2.lastIndexOf(";", eqIdx - 1) + 1;
           continue;
         }
-        var keyStartIdx = startIndex(str, index, eqIdx);
-        var keyEndIdx = endIndex(str, eqIdx, keyStartIdx);
-        var key = str.slice(keyStartIdx, keyEndIdx);
+        var keyStartIdx = startIndex(str2, index, eqIdx);
+        var keyEndIdx = endIndex(str2, eqIdx, keyStartIdx);
+        var key = str2.slice(keyStartIdx, keyEndIdx);
         if (!__hasOwnProperty.call(obj, key)) {
-          var valStartIdx = startIndex(str, eqIdx + 1, endIdx);
-          var valEndIdx = endIndex(str, endIdx, valStartIdx);
-          if (str.charCodeAt(valStartIdx) === 34 && str.charCodeAt(valEndIdx - 1) === 34) {
+          var valStartIdx = startIndex(str2, eqIdx + 1, endIdx);
+          var valEndIdx = endIndex(str2, endIdx, valStartIdx);
+          if (str2.charCodeAt(valStartIdx) === 34 && str2.charCodeAt(valEndIdx - 1) === 34) {
             valStartIdx++;
             valEndIdx--;
           }
-          var val = str.slice(valStartIdx, valEndIdx);
+          var val = str2.slice(valStartIdx, valEndIdx);
           obj[key] = tryDecode3(val, dec);
         }
         index = endIdx + 1;
       } while (index < len);
       return obj;
     }
-    function startIndex(str, index, max) {
+    function startIndex(str2, index, max) {
       do {
-        var code = str.charCodeAt(index);
+        var code = str2.charCodeAt(index);
         if (code !== 32 && code !== 9) return index;
       } while (++index < max);
       return max;
     }
-    function endIndex(str, index, min) {
+    function endIndex(str2, index, min) {
       while (index > min) {
-        var code = str.charCodeAt(--index);
+        var code = str2.charCodeAt(--index);
         if (code !== 32 && code !== 9) return index + 1;
       }
       return min;
@@ -22849,54 +22849,54 @@ var require_cookie = __commonJS({
       if (!cookieValueRegExp.test(value)) {
         throw new TypeError("argument val is invalid");
       }
-      var str = name + "=" + value;
-      if (!opt) return str;
+      var str2 = name + "=" + value;
+      if (!opt) return str2;
       if (null != opt.maxAge) {
         var maxAge = Math.floor(opt.maxAge);
         if (!isFinite(maxAge)) {
           throw new TypeError("option maxAge is invalid");
         }
-        str += "; Max-Age=" + maxAge;
+        str2 += "; Max-Age=" + maxAge;
       }
       if (opt.domain) {
         if (!domainValueRegExp.test(opt.domain)) {
           throw new TypeError("option domain is invalid");
         }
-        str += "; Domain=" + opt.domain;
+        str2 += "; Domain=" + opt.domain;
       }
       if (opt.path) {
         if (!pathValueRegExp.test(opt.path)) {
           throw new TypeError("option path is invalid");
         }
-        str += "; Path=" + opt.path;
+        str2 += "; Path=" + opt.path;
       }
       if (opt.expires) {
         var expires = opt.expires;
         if (!isDate2(expires) || isNaN(expires.valueOf())) {
           throw new TypeError("option expires is invalid");
         }
-        str += "; Expires=" + expires.toUTCString();
+        str2 += "; Expires=" + expires.toUTCString();
       }
       if (opt.httpOnly) {
-        str += "; HttpOnly";
+        str2 += "; HttpOnly";
       }
       if (opt.secure) {
-        str += "; Secure";
+        str2 += "; Secure";
       }
       if (opt.partitioned) {
-        str += "; Partitioned";
+        str2 += "; Partitioned";
       }
       if (opt.priority) {
         var priority = typeof opt.priority === "string" ? opt.priority.toLowerCase() : opt.priority;
         switch (priority) {
           case "low":
-            str += "; Priority=Low";
+            str2 += "; Priority=Low";
             break;
           case "medium":
-            str += "; Priority=Medium";
+            str2 += "; Priority=Medium";
             break;
           case "high":
-            str += "; Priority=High";
+            str2 += "; Priority=High";
             break;
           default:
             throw new TypeError("option priority is invalid");
@@ -22906,34 +22906,34 @@ var require_cookie = __commonJS({
         var sameSite = typeof opt.sameSite === "string" ? opt.sameSite.toLowerCase() : opt.sameSite;
         switch (sameSite) {
           case true:
-            str += "; SameSite=Strict";
+            str2 += "; SameSite=Strict";
             break;
           case "lax":
-            str += "; SameSite=Lax";
+            str2 += "; SameSite=Lax";
             break;
           case "strict":
-            str += "; SameSite=Strict";
+            str2 += "; SameSite=Strict";
             break;
           case "none":
-            str += "; SameSite=None";
+            str2 += "; SameSite=None";
             break;
           default:
             throw new TypeError("option sameSite is invalid");
         }
       }
-      return str;
+      return str2;
     }
-    function decode3(str) {
-      return str.indexOf("%") !== -1 ? decodeURIComponent(str) : str;
+    function decode3(str2) {
+      return str2.indexOf("%") !== -1 ? decodeURIComponent(str2) : str2;
     }
     function isDate2(val) {
       return __toString.call(val) === "[object Date]";
     }
-    function tryDecode3(str, decode4) {
+    function tryDecode3(str2, decode4) {
       try {
-        return decode4(str);
+        return decode4(str2);
       } catch (e) {
-        return str;
+        return str2;
       }
     }
   }
@@ -23332,13 +23332,13 @@ var require_send = __commonJS({
         res.removeHeader(header);
       }
     }
-    function collapseLeadingSlashes(str) {
-      for (var i = 0; i < str.length; i++) {
-        if (str[i] !== "/") {
+    function collapseLeadingSlashes(str2) {
+      for (var i = 0; i < str2.length; i++) {
+        if (str2[i] !== "/") {
           break;
         }
       }
-      return i > 1 ? "/" + str.substr(i) : str;
+      return i > 1 ? "/" + str2.substr(i) : str2;
     }
     function containsDotFile(parts) {
       for (var i = 0; i < parts.length; i++) {
@@ -23385,12 +23385,12 @@ var require_send = __commonJS({
       var timestamp2 = date4 && Date.parse(date4);
       return typeof timestamp2 === "number" ? timestamp2 : NaN;
     }
-    function parseTokenList(str) {
+    function parseTokenList(str2) {
       var end = 0;
       var list = [];
       var start = 0;
-      for (var i = 0, len = str.length; i < len; i++) {
-        switch (str.charCodeAt(i)) {
+      for (var i = 0, len = str2.length; i < len; i++) {
+        switch (str2.charCodeAt(i)) {
           case 32:
             if (start === end) {
               start = end = i + 1;
@@ -23398,7 +23398,7 @@ var require_send = __commonJS({
             break;
           case 44:
             if (start !== end) {
-              list.push(str.substring(start, end));
+              list.push(str2.substring(start, end));
             }
             start = end = i + 1;
             break;
@@ -23408,7 +23408,7 @@ var require_send = __commonJS({
         }
       }
       if (start !== end) {
-        list.push(str.substring(start, end));
+        list.push(str2.substring(start, end));
       }
       return list;
     }
@@ -23872,9 +23872,9 @@ var require_response = __commonJS({
         opts = {};
       }
       opts._locals = self2.locals;
-      done = done || function(err, str) {
+      done = done || function(err, str2) {
         if (err) return req.next(err);
-        self2.send(str);
+        self2.send(str2);
       };
       app2.render(view, opts, done);
     };
@@ -24030,13 +24030,13 @@ var require_serve_static = __commonJS({
         stream.pipe(res);
       };
     }
-    function collapseLeadingSlashes(str) {
-      for (var i = 0; i < str.length; i++) {
-        if (str.charCodeAt(i) !== 47) {
+    function collapseLeadingSlashes(str2) {
+      for (var i = 0; i < str2.length; i++) {
+        if (str2.charCodeAt(i) !== 47) {
           break;
         }
       }
-      return i > 1 ? "/" + str.substr(i) : str;
+      return i > 1 ? "/" + str2.substr(i) : str2;
     }
     function createHtmlDocument(title, body) {
       return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>' + title + "</title>\n</head>\n<body>\n<pre>" + body + "</pre>\n</body>\n</html>\n";
@@ -25426,15 +25426,15 @@ var init_symbol = __esm({
 function createBaggage(entries = {}) {
   return new BaggageImpl(new Map(Object.entries(entries)));
 }
-function baggageEntryMetadataFromString(str) {
-  if (typeof str !== "string") {
-    diag.error(`Cannot create baggage metadata from unknown type: ${typeof str}`);
-    str = "";
+function baggageEntryMetadataFromString(str2) {
+  if (typeof str2 !== "string") {
+    diag.error(`Cannot create baggage metadata from unknown type: ${typeof str2}`);
+    str2 = "";
   }
   return {
     __TYPE__: baggageEntryMetadataSymbol,
     toString() {
-      return str;
+      return str2;
     }
   };
 }
@@ -29206,8 +29206,8 @@ function parseStringReferenceWithTable(parts) {
   const [table2, column] = parts;
   return ReferenceNode.create(ColumnNode.create(column), TableNode.create(table2));
 }
-function trim(str) {
-  return str.trim();
+function trim(str2) {
+  return str2.trim();
 }
 var init_reference_parser = __esm({
   "node_modules/kysely/dist/parser/reference-parser.js"() {
@@ -38027,8 +38027,8 @@ function parseTable(from) {
     return TableNode.create(from);
   }
 }
-function trim2(str) {
-  return str.trim();
+function trim2(str2) {
+  return str2.trim();
 }
 var init_table_parser = __esm({
   "node_modules/kysely/dist/parser/table-parser.js"() {
@@ -41240,8 +41240,8 @@ function parseSchemableIdentifierArray(id) {
   }
   return id.map(parseSchemableIdentifier);
 }
-function trim3(str) {
-  return str.trim();
+function trim3(str2) {
+  return str2.trim();
 }
 var init_identifier_parser = __esm({
   "node_modules/kysely/dist/parser/identifier-parser.js"() {
@@ -45082,8 +45082,8 @@ var init_default_query_compiler = __esm({
         this.append("collate ");
         this.visitNode(node2.collation);
       }
-      append(str) {
-        this.#sql += str;
+      append(str2) {
+        this.#sql += str2;
       }
       appendValue(parameter) {
         this.addParameter(parameter);
@@ -47199,8 +47199,8 @@ var init_dist2 = __esm({
 });
 
 // node_modules/better-auth/node_modules/@better-auth/core/dist/utils/string.mjs
-function capitalizeFirstLetter(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+function capitalizeFirstLetter(str2) {
+  return str2.charAt(0).toUpperCase() + str2.slice(1);
 }
 var WORD_PATTERN;
 var init_string = __esm({
@@ -49323,20 +49323,20 @@ var require_utils4 = __commonJS({
       }
       return Object.defineProperties(Object.create(Object.getPrototypeOf(config3)), Object.getOwnPropertyDescriptors(config3));
     }
-    var escapeIdentifier2 = function(str) {
-      return '"' + str.replace(/"/g, '""') + '"';
+    var escapeIdentifier2 = function(str2) {
+      return '"' + str2.replace(/"/g, '""') + '"';
     };
-    var escapeLiteral2 = function(str) {
+    var escapeLiteral2 = function(str2) {
       let hasBackslash = false;
       let escaped = "'";
-      if (str == null) {
+      if (str2 == null) {
         return "''";
       }
-      if (typeof str !== "string") {
+      if (typeof str2 !== "string") {
         return "''";
       }
-      for (let i = 0; i < str.length; i++) {
-        const c = str[i];
+      for (let i = 0; i < str2.length; i++) {
+        const c = str2[i];
         if (c === "'") {
           escaped += c + c;
         } else if (c === "\\") {
@@ -49751,22 +49751,22 @@ var require_type_overrides = __commonJS({
 var require_pg_connection_string = __commonJS({
   "node_modules/pg-connection-string/index.js"(exports, module) {
     "use strict";
-    function parse3(str, options = {}) {
-      if (str.charAt(0) === "/") {
-        const config4 = str.split(" ");
+    function parse3(str2, options = {}) {
+      if (str2.charAt(0) === "/") {
+        const config4 = str2.split(" ");
         return { host: config4[0], database: config4[1] };
       }
       const config3 = /* @__PURE__ */ Object.create(null);
       let result;
       let dummyHost = false;
-      if (/ |%[^a-f0-9]|%[a-f0-9][^a-f0-9]/i.test(str)) {
-        str = encodeURI(str).replace(/%25(\d\d)/g, "%$1");
+      if (/ |%[^a-f0-9]|%[a-f0-9][^a-f0-9]/i.test(str2)) {
+        str2 = encodeURI(str2).replace(/%25(\d\d)/g, "%$1");
       }
       try {
         try {
-          result = new URL(str, "postgres://base");
+          result = new URL(str2, "postgres://base");
         } catch (e) {
-          result = new URL(str.replace("@/", "@___DUMMY___/"), "postgres://base");
+          result = new URL(str2.replace("@/", "@___DUMMY___/"), "postgres://base");
           dummyHost = true;
         }
       } catch (err) {
@@ -49912,8 +49912,8 @@ var require_pg_connection_string = __commonJS({
       }, /* @__PURE__ */ Object.create(null));
       return poolConfig;
     }
-    function parseIntoClientConfig(str) {
-      return toClientConfig(parse3(str));
+    function parseIntoClientConfig(str2) {
+      return toClientConfig(parse3(str2));
     }
     function deprecatedSslModeWarning(sslmode) {
       if (!deprecatedSslModeWarning.warned && typeof process !== "undefined" && process.emitWarning) {
@@ -52339,11 +52339,11 @@ var require_client = __commonJS({
       // escapeIdentifier and escapeLiteral moved to utility functions & exported
       // on PG
       // re-exported here for backwards compatibility
-      escapeIdentifier(str) {
-        return utils.escapeIdentifier(str);
+      escapeIdentifier(str2) {
+        return utils.escapeIdentifier(str2);
       }
-      escapeLiteral(str) {
-        return utils.escapeLiteral(str);
+      escapeLiteral(str2) {
+        return utils.escapeLiteral(str2);
       }
       _pulseQueryQueue() {
         if (this.pipeline) {
@@ -53517,9 +53517,9 @@ function escapeRegExpChar(char2) {
   if (char2 === "-" || char2 === "^" || char2 === "$" || char2 === "+" || char2 === "." || char2 === "(" || char2 === ")" || char2 === "|" || char2 === "[" || char2 === "]" || char2 === "{" || char2 === "}" || char2 === "*" || char2 === "?" || char2 === "\\") return `\\${char2}`;
   else return char2;
 }
-function escapeRegExpString(str) {
+function escapeRegExpString(str2) {
   let result = "";
-  for (let i = 0; i < str.length; i++) result += escapeRegExpChar(str[i]);
+  for (let i = 0; i < str2.length; i++) result += escapeRegExpChar(str2[i]);
   return result;
 }
 function transform(pattern, separator = true) {
@@ -55454,9 +55454,9 @@ var checkFailed = "check_failed";
 function invalidDuration() {
   throw new TypeError("Invalid time period format");
 }
-function secs(str) {
-  typeof str != "string" && invalidDuration();
-  const matched = REGEX.exec(str);
+function secs(str2) {
+  typeof str2 != "string" && invalidDuration();
+  const matched = REGEX.exec(str2);
   (!matched || matched[4] && matched[1]) && invalidDuration();
   const value = parseFloat(matched[2]), durationSeconds = Math.round(value * multipliers[matched[3][0].toLowerCase()]);
   return Number.isFinite(durationSeconds) || invalidDuration(), matched[1] === "-" || matched[4] === "ago" ? -durationSeconds : durationSeconds;
@@ -56401,10 +56401,10 @@ function hexToBytes(hex2) {
   }
   return array2;
 }
-function utf8ToBytes(str) {
-  if (typeof str !== "string")
+function utf8ToBytes(str2) {
+  if (typeof str2 !== "string")
     throw new TypeError("string expected");
-  return new Uint8Array(new TextEncoder().encode(str));
+  return new Uint8Array(new TextEncoder().encode(str2));
 }
 function overlapBytes(a, b) {
   if (!a.byteLength || !b.byteLength)
@@ -56577,7 +56577,7 @@ function managedNonce(fn, randomBytes_ = randomBytes2) {
 }
 
 // node_modules/@noble/ciphers/_arx.js
-var encodeStr = (str) => Uint8Array.from(str.split(""), (c) => c.charCodeAt(0));
+var encodeStr = (str2) => Uint8Array.from(str2.split(""), (c) => c.charCodeAt(0));
 var sigma16_32 = /* @__PURE__ */ (() => swap32IfBE(u32(encodeStr("expand 16-byte k"))))();
 var sigma32_32 = /* @__PURE__ */ (() => swap32IfBE(u32(encodeStr("expand 32-byte k"))))();
 function rotl(a, b) {
@@ -57433,14 +57433,14 @@ function promiseAllObject(promisesObj) {
 }
 function randomString(length = 10) {
   const chars = "abcdefghijklmnopqrstuvwxyz";
-  let str = "";
+  let str2 = "";
   for (let i = 0; i < length; i++) {
-    str += chars[Math.floor(Math.random() * chars.length)];
+    str2 += chars[Math.floor(Math.random() * chars.length)];
   }
-  return str;
+  return str2;
 }
-function esc(str) {
-  return JSON.stringify(str);
+function esc(str2) {
+  return JSON.stringify(str2);
 }
 function slugify(input) {
   return input.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "");
@@ -57554,8 +57554,8 @@ var primitiveTypes = /* @__PURE__ */ new Set([
   "symbol",
   "undefined"
 ]);
-function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function escapeRegex(str2) {
+  return str2.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 function clone(inst, def, params) {
   const cl = new inst._zod.constr(def ?? inst._zod.def);
@@ -57821,13 +57821,13 @@ function getSizableOrigin(input) {
   return "unknown";
 }
 var highSurrogate = /[\uD800-\uDBFF]/;
-function codePointLength(str) {
-  const units = str.length;
-  if (!highSurrogate.test(str))
+function codePointLength(str2) {
+  const units = str2.length;
+  if (!highSurrogate.test(str2))
     return units;
   let count2 = units;
   for (let i = 0; i < units - 1; i++) {
-    if ((str.charCodeAt(i) & 64512) === 55296 && (str.charCodeAt(i + 1) & 64512) === 56320) {
+    if ((str2.charCodeAt(i) & 64512) === 55296 && (str2.charCodeAt(i + 1) & 64512) === 56320) {
       count2--;
       i++;
     }
@@ -63715,12 +63715,12 @@ function sec(value) {
 }
 
 // node_modules/better-auth/dist/cookies/cookie-utils.mjs
-function tryDecode(str) {
-  if (str.indexOf("%") === -1) return str;
+function tryDecode(str2) {
+  if (str2.indexOf("%") === -1) return str2;
   try {
-    return decodeURIComponent(str);
+    return decodeURIComponent(str2);
   } catch {
-    return str;
+    return str2;
   }
 }
 var SECURE_COOKIE_PREFIX = "__Secure-";
@@ -64634,11 +64634,11 @@ async function getBody(request, allowedMediaTypes) {
 function isAPIError(error3) {
   return error3 instanceof APIError || error3?.name === "APIError";
 }
-function tryDecode2(str) {
+function tryDecode2(str2) {
   try {
-    return str.includes("%") ? decodeURIComponent(str) : str;
+    return str2.includes("%") ? decodeURIComponent(str2) : str2;
   } catch {
-    return str;
+    return str2;
   }
 }
 async function tryCatch(promise) {
@@ -64828,22 +64828,22 @@ var getCookieKey = (key, prefix) => {
   else return;
   return finalKey;
 };
-function parseCookies2(str) {
-  if (typeof str !== "string") throw new TypeError("argument str must be a string");
+function parseCookies2(str2) {
+  if (typeof str2 !== "string") throw new TypeError("argument str must be a string");
   const cookies = /* @__PURE__ */ new Map();
   let index = 0;
-  while (index < str.length) {
-    const eqIdx = str.indexOf("=", index);
+  while (index < str2.length) {
+    const eqIdx = str2.indexOf("=", index);
     if (eqIdx === -1) break;
-    let endIdx = str.indexOf(";", index);
-    if (endIdx === -1) endIdx = str.length;
+    let endIdx = str2.indexOf(";", index);
+    if (endIdx === -1) endIdx = str2.length;
     else if (endIdx < eqIdx) {
-      index = str.lastIndexOf(";", eqIdx - 1) + 1;
+      index = str2.lastIndexOf(";", eqIdx - 1) + 1;
       continue;
     }
-    const key = str.slice(index, eqIdx).trim();
+    const key = str2.slice(index, eqIdx).trim();
     if (!cookies.has(key)) {
-      let val = str.slice(eqIdx + 1, endIdx).trim();
+      let val = str2.slice(eqIdx + 1, endIdx).trim();
       if (val.codePointAt(0) === 34) val = val.slice(1, -1);
       cookies.set(key, tryDecode2(val));
     }
@@ -69801,7 +69801,7 @@ var github = (options) => {
 
 // node_modules/better-auth/node_modules/@better-auth/core/dist/social-providers/gitlab.mjs
 var cleanDoubleSlashes = (input = "") => {
-  return input.split("://").map((str) => str.replace(/\/{2,}/g, "/")).join("://");
+  return input.split("://").map((str2) => str2.replace(/\/{2,}/g, "/")).join("://");
 };
 var issuerToEndpoints = (issuer) => {
   const baseUrl2 = issuer || "https://gitlab.com";
@@ -75044,10 +75044,10 @@ var DEFAULT_SECRET = "better-auth-secret-12345678901234567890";
 
 // node_modules/better-auth/dist/context/secret-utils.mjs
 init_error2();
-function estimateEntropy(str) {
-  const unique = new Set(str).size;
+function estimateEntropy(str2) {
+  const unique = new Set(str2).size;
   if (unique === 0) return 0;
-  return Math.log2(Math.pow(unique, str.length));
+  return Math.log2(Math.pow(unique, str2.length));
 }
 function parseSecretsEnv(envValue) {
   if (!envValue) return null;
@@ -75562,10 +75562,10 @@ async function createTelemetry(options, context2) {
 }
 
 // node_modules/better-auth/dist/context/create-context.mjs
-function estimateEntropy2(str) {
-  const unique = new Set(str).size;
+function estimateEntropy2(str2) {
+  const unique = new Set(str2).size;
   if (unique === 0) return 0;
-  return Math.log2(Math.pow(unique, str.length));
+  return Math.log2(Math.pow(unique, str2.length));
 }
 function validateSecret(secret, logger2) {
   const isDefaultSecret = secret === DEFAULT_SECRET;
@@ -76858,8 +76858,8 @@ function sql2(strings, ...params) {
     return new SQL(list);
   }
   sql22.fromList = fromList;
-  function raw(str) {
-    return new SQL([new StringChunk(str)]);
+  function raw(str2) {
+    return new SQL([new StringChunk(str2)]);
   }
   sql22.raw = raw;
   function join2(chunks, separator) {
@@ -79789,8 +79789,8 @@ var PgDialect = class {
   escapeParam(num) {
     return `$${num + 1}`;
   }
-  escapeString(str) {
-    return `'${str.replace(/'/g, "''")}'`;
+  escapeString(str2) {
+    return `'${str2.replace(/'/g, "''")}'`;
   }
   buildWithCTE(queries) {
     if (!queries?.length) return void 0;
@@ -83406,6 +83406,8 @@ var intakeSessions = pgTable("intake_sessions", {
   aiSummary: text("ai_summary"),
   aiFlags: jsonb("ai_flags"),
   // array of flag strings
+  aiBrief: jsonb("ai_brief"),
+  // full structured ClinicalBrief (disposition, SOAP note, differential, workup)
   appointmentDate: timestamp("appointment_date"),
   providerName: varchar("provider_name", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
@@ -83766,6 +83768,7 @@ async function handler9(req, res) {
       chiefComplaint: intakeSessions.chiefComplaint,
       aiSummary: intakeSessions.aiSummary,
       aiFlags: intakeSessions.aiFlags,
+      aiBrief: intakeSessions.aiBrief,
       appointmentDate: intakeSessions.appointmentDate,
       providerName: intakeSessions.providerName,
       createdAt: intakeSessions.createdAt,
@@ -83811,6 +83814,60 @@ async function handler10(req, res) {
     console.error(JSON.stringify({ event: "api.error", route: "intake/start/POST.ts", error: error3 instanceof Error ? error3.message : String(error3) }));
     res.status(500).json({ error: "Failed to start intake" });
   }
+}
+
+// src/lib/clinical-brief.ts
+var ACUITY_LABEL = {
+  emergency: "Emergency",
+  urgent: "Urgent",
+  telehealth: "Telehealth",
+  routine: "Routine",
+  selfcare: "Self-care"
+};
+var ACUITY_LEVELS = ["emergency", "urgent", "telehealth", "routine", "selfcare"];
+var LIKELIHOODS = ["higher", "possible", "consider"];
+function str(v, max = 600) {
+  return typeof v === "string" ? v.trim().slice(0, max) : "";
+}
+function strArray(v, maxItems, maxLen = 300) {
+  if (!Array.isArray(v)) return [];
+  return v.map((x) => str(x, maxLen)).filter((x) => x.length > 0).slice(0, maxItems);
+}
+function coerceClinicalBrief(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const o = raw;
+  const summary = str(o.summary, 2e3);
+  if (!summary) return null;
+  const d = o.disposition && typeof o.disposition === "object" ? o.disposition : {};
+  const level = ACUITY_LEVELS.includes(d.level) ? d.level : "routine";
+  const disposition = {
+    level,
+    label: str(d.label, 160) || ACUITY_LABEL[level],
+    timeframe: str(d.timeframe, 80),
+    rationale: str(d.rationale, 600),
+    safetyNet: str(d.safetyNet, 600)
+  };
+  const n = o.note && typeof o.note === "object" ? o.note : {};
+  const note = {
+    plan: strArray(n.plan, 10),
+    assessment: str(n.assessment, 800),
+    objective: strArray(n.objective, 12),
+    hpi: str(n.hpi, 1200)
+  };
+  const differential = Array.isArray(o.differential) ? o.differential.map((x) => {
+    const it = x && typeof x === "object" ? x : {};
+    const condition = str(it.condition, 160);
+    if (!condition) return null;
+    const likelihood = LIKELIHOODS.includes(it.likelihood) ? it.likelihood : "consider";
+    return { condition, likelihood, rationale: str(it.rationale, 400) };
+  }).filter((x) => x !== null).slice(0, 8) : [];
+  const workup = Array.isArray(o.workup) ? o.workup.map((x) => {
+    const it = x && typeof x === "object" ? x : {};
+    const item = str(it.item, 200);
+    if (!item) return null;
+    return { item, rationale: str(it.rationale, 400) };
+  }).filter((x) => x !== null).slice(0, 10) : [];
+  return { summary, flags: strArray(o.flags, 8, 160), disposition, note, differential, workup };
 }
 
 // src/server/lib/ai.ts
@@ -83977,15 +84034,26 @@ async function streamIntakeReply(messages, onDelta) {
     clearTimeout(timer);
   }
 }
-var BRIEF_SYSTEM_PROMPT = `You are a clinical documentation assistant preparing a pre-visit brief for a physician from a patient's self-reported intake. Organize ONLY what the patient reported \u2014 do not diagnose, do not suggest treatments or orders, do not add information that was not stated. Use standard clinical shorthand where natural (pt, hx, c/o, PMH, meds, NKDA).
+var CLINICAL_BRIEF_SYSTEM_PROMPT = `You are a clinical decision-SUPPORT assistant preparing a pre-visit brief from a patient's self-reported intake, for a licensed clinician to review, edit, and act on. You never deliver a diagnosis, order, or prescription \u2014 you surface considerations the clinician decides on. Build everything ONLY from what the patient reported; never invent exam findings, vitals, or results.
 
-Respond with ONLY valid JSON, no markdown fences, in exactly this shape:
-{"summary": "<the brief>", "flags": ["<flag>", ...]}
+Respond with ONLY valid JSON (no markdown fences), in exactly this shape:
+{
+  "summary": "<100-180 word clinical-prose brief: CC/HPI, meds, allergies, relevant PMH, patient concerns>",
+  "flags": ["<short attention item>", ...],
+  "disposition": {"level":"emergency|urgent|telehealth|routine|selfcare","label":"<short next step>","timeframe":"<e.g. 'today', 'within 24 hours', 'at your convenience'>","rationale":"<1-2 plain-language sentences for the PATIENT>","safetyNet":"<when to escalate to the ER / call 911>"},
+  "note": {"plan":["<suggested next step / management consideration>", ...],"assessment":"<clinical impression in clinician shorthand>","objective":["<exam/vital to OBTAIN at the visit>", ...],"hpi":"<concise HPI in clinical prose>"},
+  "differential": [{"condition":"<dx>","likelihood":"higher|possible|consider","rationale":"<brief, from reported features>"}, ...],
+  "workup": [{"item":"<suggested lab/imaging/follow-up>","rationale":"<why>"}, ...]
+}
 
-The "summary" is one tight provider-facing paragraph set, 100\u2013180 words, in this order: chief complaint and HPI (onset, duration, severity, character, progression, modifiers, pertinent positives and negatives); current medications; allergies; relevant PMH; anything else the patient wanted the provider to know. Write in clinical prose, not Q&A format. If the patient's answers were sparse, write a shorter accurate brief rather than padding.
-
-The "flags" array lists items warranting the provider's attention before the visit: red-flag or emergency-adjacent symptoms, severity rated 8/10 or higher, symptoms persisting months or longer, concerning medication issues the patient described, psychosocial safety concerns, or explicit patient worry. 0\u20136 short flag strings (under 10 words each). Empty array if none.`;
-async function generateProviderBrief(chiefComplaint, responses) {
+GUIDANCE
+- disposition.level: emergency = red-flag needing the ED/911 now; urgent = should be seen in person today / same-day; telehealth = appropriate for a virtual same-day/soon visit; routine = schedule at convenience; selfcare = reasonable self-care with follow-up if not improving. Choose conservatively \u2014 when uncertain between two, pick the higher acuity. ALWAYS give a concrete safetyNet describing escalation.
+- note.plan is listed FIRST (inverted SOAP), as suggested considerations ("Consider\u2026", "If X, then Y"), never as issued orders. objective lists what to CHECK at the visit, not findings.
+- differential: 0-6 items, most likely first, each with a one-line rationale tied to reported features. Empty array for routine refills/administrative visits.
+- workup: 0-6 suggested items with rationale. Empty when none applies.
+- summary/hpi: clinical prose from reported history only. Use standard shorthand (pt, c/o, PMH, NKDA) where natural.
+- flags: 0-6 short strings \u2014 red flags, severity >=8/10, chronicity, concerning meds, psychosocial safety, explicit worry.`;
+async function generateClinicalBrief(chiefComplaint, responses) {
   const transcript = responses.map((qa) => {
     const ans = Array.isArray(qa.answer) ? qa.answer.join(", ") : qa.answer;
     return `Q: ${qa.question}
@@ -83993,7 +84061,7 @@ A: ${ans}`;
   }).join("\n\n");
   const raw = await callAnthropic({
     model: summaryModel(),
-    system: BRIEF_SYSTEM_PROMPT,
+    system: CLINICAL_BRIEF_SYSTEM_PROMPT,
     messages: [
       {
         role: "user",
@@ -84003,17 +84071,14 @@ Intake transcript:
 ${transcript}`
       }
     ],
-    maxTokens: 700,
+    maxTokens: 1600,
     temperature: 0.2
   });
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("Provider brief: no JSON in model output");
-  const parsed = JSON.parse(jsonMatch[0]);
-  if (typeof parsed.summary !== "string" || !parsed.summary.trim()) {
-    throw new Error("Provider brief: missing summary");
-  }
-  const flags = Array.isArray(parsed.flags) ? parsed.flags.filter((f) => typeof f === "string" && f.trim().length > 0).slice(0, 8) : [];
-  return { summary: parsed.summary.trim(), flags };
+  if (!jsonMatch) throw new Error("Clinical brief: no JSON in model output");
+  const brief = coerceClinicalBrief(JSON.parse(jsonMatch[0]));
+  if (!brief) throw new Error("Clinical brief: unusable model output");
+  return brief;
 }
 
 // src/server/lib/intake-fallback.ts
@@ -84155,6 +84220,47 @@ function buildTemplateSummary(chiefComplaint, responses) {
   const summary = summaryParts.length > 0 ? `Patient presents with chief complaint: ${chiefComplaint}. ${summaryParts.join(" ")}` : `Patient presents with chief complaint: ${chiefComplaint}.`;
   return { summary, flags };
 }
+function buildTemplateClinicalBrief(chiefComplaint, responses) {
+  const { summary, flags } = buildTemplateSummary(chiefComplaint, responses);
+  const blob = chiefComplaint + " " + responses.map((r) => Array.isArray(r.answer) ? r.answer.join(" ") : r.answer).join(" ");
+  const isEmergency = detectEmergency(blob);
+  const CONCERNING = /chest (pain|tight|pressure|discomfort)|short(ness)? of breath|difficulty breathing|hard to breathe|radiat|numbness|weak(ness)?|slurred|vision (loss|change)|faint|pass(ed|ing) out|severe|worst|uncontrolled bleeding|coughing up blood|high fever|stiff neck|new confusion|severe dehydrat/i;
+  const isUrgent = flags.some((f) => /high severity|serious associated/i.test(f)) || CONCERNING.test(blob);
+  let level;
+  let label, timeframe, rationale, safetyNet;
+  if (isEmergency) {
+    level = "emergency";
+    label = "Call 911 or go to the ER now";
+    timeframe = "now";
+    rationale = "Some of what you described may need emergency care right away.";
+    safetyNet = "If you have chest pain, trouble breathing, weakness on one side, or feel you are in danger, call 911 now. For thoughts of self-harm, call or text 988.";
+  } else if (isUrgent) {
+    level = "urgent";
+    label = "Be seen today";
+    timeframe = "today";
+    rationale = "Based on what you shared, it would be best to be evaluated today.";
+    safetyNet = "Go to the ER or call 911 if your symptoms suddenly worsen, or you develop chest pain, trouble breathing, or fainting.";
+  } else {
+    level = "routine";
+    label = "Routine scheduled visit";
+    timeframe = "at your convenience";
+    rationale = "Your provider will review your intake and go over everything at your visit.";
+    safetyNet = "Seek urgent care or call 911 if your symptoms suddenly worsen, or you develop chest pain, trouble breathing, or confusion.";
+  }
+  return {
+    summary,
+    flags,
+    disposition: { level, label, timeframe, rationale, safetyNet },
+    note: {
+      plan: ["Clinician to review the reported history and determine the plan at the visit."],
+      assessment: "Pending clinician evaluation \u2014 see HPI.",
+      objective: ["Vital signs", "Focused exam relevant to the chief complaint"],
+      hpi: summary
+    },
+    differential: [],
+    workup: []
+  };
+}
 
 // src/server/api/intake/[id]/complete/POST.ts
 async function handler11(req, res) {
@@ -84171,14 +84277,17 @@ async function handler11(req, res) {
     }
     const [existing] = await db.select({ id: intakeSessions.id, status: intakeSessions.status }).from(intakeSessions).where(and(eq(intakeSessions.id, intakeId), eq(intakeSessions.userId, session2.user.id))).limit(1);
     if (!existing) return res.status(404).json({ error: "Intake session not found" });
-    const template = buildTemplateSummary(chiefComplaint, responses);
-    let aiSummary = template.summary;
-    let flags = template.flags;
+    let brief = buildTemplateClinicalBrief(chiefComplaint, responses);
+    const floor = brief.disposition;
     if (aiAvailable()) {
       try {
-        const brief = await generateProviderBrief(chiefComplaint, responses);
-        aiSummary = brief.summary;
-        flags = [.../* @__PURE__ */ new Set([...template.flags, ...brief.flags])];
+        const ai = await generateClinicalBrief(chiefComplaint, responses);
+        const aiHigherOrEqual = ACUITY_LEVELS.indexOf(ai.disposition.level) <= ACUITY_LEVELS.indexOf(floor.level);
+        brief = {
+          ...ai,
+          flags: [.../* @__PURE__ */ new Set([...brief.flags, ...ai.flags])],
+          disposition: aiHigherOrEqual ? ai.disposition : floor
+        };
       } catch (err) {
         console.error(
           JSON.stringify({
@@ -84192,15 +84301,16 @@ async function handler11(req, res) {
       status: "complete",
       chiefComplaint,
       responses,
-      aiSummary,
-      aiFlags: flags.length > 0 ? flags : null
+      aiSummary: brief.summary,
+      aiFlags: brief.flags.length > 0 ? brief.flags : null,
+      aiBrief: brief
     }).where(
       and(
         eq(intakeSessions.id, intakeId),
         eq(intakeSessions.userId, session2.user.id)
       )
     );
-    res.json({ ok: true, aiSummary, aiFlags: flags });
+    res.json({ ok: true, aiSummary: brief.summary, aiFlags: brief.flags, disposition: brief.disposition });
   } catch (error3) {
     console.error(
       JSON.stringify({

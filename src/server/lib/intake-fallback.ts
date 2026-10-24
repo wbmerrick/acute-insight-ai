@@ -6,6 +6,8 @@
  * history topics in a fixed, clinically sensible order.
  */
 
+import type { ClinicalBrief, Acuity } from '../../lib/clinical-brief.js';
+
 export interface ChatTurn {
   role: 'ai' | 'patient';
   content: string;
@@ -183,4 +185,62 @@ export function buildTemplateSummary(
       : `Patient presents with chief complaint: ${chiefComplaint}.`;
 
   return { summary, flags };
+}
+
+/**
+ * Deterministic structured clinical brief (fallback for the LLM version).
+ * Produces an honest, conservative triage disposition and a template note from
+ * the reported history — no speculative differential/workup (the clinician
+ * fills those in). Keeps the co-pilot + triage features working without the AI.
+ */
+export function buildTemplateClinicalBrief(
+  chiefComplaint: string,
+  responses: QAPair[]
+): ClinicalBrief {
+  const { summary, flags } = buildTemplateSummary(chiefComplaint, responses);
+
+  const blob =
+    (chiefComplaint + ' ' + responses.map((r) => (Array.isArray(r.answer) ? r.answer.join(' ') : r.answer)).join(' '));
+  const isEmergency = detectEmergency(blob);
+  // Conservative: concerning descriptions in free-text chat bump to "urgent"
+  // (be seen today) even without a numeric severity. Over-triage is the safe error.
+  const CONCERNING =
+    /chest (pain|tight|pressure|discomfort)|short(ness)? of breath|difficulty breathing|hard to breathe|radiat|numbness|weak(ness)?|slurred|vision (loss|change)|faint|pass(ed|ing) out|severe|worst|uncontrolled bleeding|coughing up blood|high fever|stiff neck|new confusion|severe dehydrat/i;
+  const isUrgent = flags.some((f) => /high severity|serious associated/i.test(f)) || CONCERNING.test(blob);
+
+  let level: Acuity;
+  let label: string, timeframe: string, rationale: string, safetyNet: string;
+  if (isEmergency) {
+    level = 'emergency';
+    label = 'Call 911 or go to the ER now';
+    timeframe = 'now';
+    rationale = 'Some of what you described may need emergency care right away.';
+    safetyNet = 'If you have chest pain, trouble breathing, weakness on one side, or feel you are in danger, call 911 now. For thoughts of self-harm, call or text 988.';
+  } else if (isUrgent) {
+    level = 'urgent';
+    label = 'Be seen today';
+    timeframe = 'today';
+    rationale = 'Based on what you shared, it would be best to be evaluated today.';
+    safetyNet = 'Go to the ER or call 911 if your symptoms suddenly worsen, or you develop chest pain, trouble breathing, or fainting.';
+  } else {
+    level = 'routine';
+    label = 'Routine scheduled visit';
+    timeframe = 'at your convenience';
+    rationale = 'Your provider will review your intake and go over everything at your visit.';
+    safetyNet = 'Seek urgent care or call 911 if your symptoms suddenly worsen, or you develop chest pain, trouble breathing, or confusion.';
+  }
+
+  return {
+    summary,
+    flags,
+    disposition: { level, label, timeframe, rationale, safetyNet },
+    note: {
+      plan: ['Clinician to review the reported history and determine the plan at the visit.'],
+      assessment: 'Pending clinician evaluation — see HPI.',
+      objective: ['Vital signs', 'Focused exam relevant to the chief complaint'],
+      hpi: summary,
+    },
+    differential: [],
+    workup: [],
+  };
 }
