@@ -1,8 +1,9 @@
 import type { Request, Response } from 'express';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../../../../../db/client.js';
-import { visits } from '../../../../../db/schema.js';
+import { visits, patientProfiles } from '../../../../../db/schema.js';
 import { requireClinician, licensesOf, scopeCovers, logErr } from '../../../../../lib/dispatch.js';
+import { sendSms, acceptedText, toE164, smsAvailable } from '../../../../../lib/sms.js';
 
 /** First clinician to accept wins. The UPDATE's WHERE status='queued' is the lock. */
 export default async function handler(req: Request, res: Response) {
@@ -32,6 +33,19 @@ export default async function handler(req: Request, res: Response) {
 
     if (!accepted) return res.status(409).json({ error: 'Another clinician already accepted this visit' });
     res.json({ ok: true, id: accepted.id });
+
+    // Tell the patient who is calling. Fire-and-forget, PHI-free.
+    if (smsAvailable()) {
+      void (async () => {
+        try {
+          const [p] = await db.select({ phone: patientProfiles.phone }).from(patientProfiles).where(eq(patientProfiles.userId, visit.patientUserId)).limit(1);
+          const to = toE164(p?.phone);
+          if (to) await sendSms(to, acceptedText(ctx.profile.displayName, ctx.profile.credential));
+        } catch (err) {
+          logErr('dispatch.accept.notify.error', err);
+        }
+      })();
+    }
   } catch (error) {
     logErr('dispatch.accept.error', error);
     res.status(500).json({ error: 'Failed to accept visit' });

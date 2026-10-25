@@ -15,6 +15,8 @@ interface Me {
   stateLicenses: string[];
   maxAcuity: Acuity;
   online: boolean;
+  phone: string | null;
+  notifySms: boolean;
 }
 
 interface QueueItem {
@@ -142,6 +144,7 @@ function AvailabilityPanel({ me, onChange }: { me: Me; onChange: (m: Me) => void
             <span className="text-foreground font-medium">{me.displayName || 'Set your display name'}</span>
             {me.credential && <span>· {me.credential}</span>}
             <span>· Scope: {SCOPES.find((s) => s.value === me.maxAcuity)?.label}</span>
+            <span>· {me.phone && me.notifySms ? `Texts ${me.phone.replace(/^\+1(\d{3})(\d{3})(\d{4})$/, '($1) $2-$3')}` : 'No text alerts'}</span>
             <button type="button" onClick={() => setEditing(true)} className="ml-auto underline-offset-2 hover:underline" style={{ color: 'hsl(var(--primary))' }}>
               Edit
             </button>
@@ -151,7 +154,7 @@ function AvailabilityPanel({ me, onChange }: { me: Me; onChange: (m: Me) => void
             className="grid gap-4"
             onSubmit={async (e) => {
               e.preventDefault();
-              const ok = await save({ displayName: draft.displayName ?? '', credential: draft.credential ?? undefined, stateLicenses: draft.stateLicenses, maxAcuity: draft.maxAcuity });
+              const ok = await save({ displayName: draft.displayName ?? '', credential: draft.credential ?? undefined, stateLicenses: draft.stateLicenses, maxAcuity: draft.maxAcuity, phone: draft.phone ?? '', notifySms: draft.notifySms });
               if (ok) setEditing(false);
             }}
           >
@@ -177,6 +180,24 @@ function AvailabilityPanel({ me, onChange }: { me: Me; onChange: (m: Me) => void
                   <option value="">—</option>
                   {['MD', 'DO', 'NP', 'PA'].map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
+              </label>
+            </div>
+
+            <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
+              <label className="grid gap-1 text-xs" style={{ color: 'hsl(var(--text-dim))' }}>
+                Mobile number — we text you when a visit lands in your states while you're online
+                <input
+                  value={draft.phone ?? ''}
+                  onChange={(e) => setDraft({ ...draft, phone: e.target.value })}
+                  placeholder="(731) 555-0100"
+                  inputMode="tel"
+                  className="rounded-lg px-3 py-2 text-sm text-foreground outline-none"
+                  style={{ background: 'hsl(var(--surface-deeper))', border: `1px solid hsl(var(--border-subtle))` }}
+                />
+              </label>
+              <label className="flex items-center gap-2 text-xs pb-2.5" style={{ color: 'hsl(var(--text-dim))' }}>
+                <input type="checkbox" checked={draft.notifySms} onChange={(e) => setDraft({ ...draft, notifySms: e.target.checked })} />
+                Text me
               </label>
             </div>
 

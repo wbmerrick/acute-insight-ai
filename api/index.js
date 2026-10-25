@@ -48838,18 +48838,18 @@ var require_binaryParsers = __commonJS({
         }
         return value;
       };
-      var mask = 255;
+      var mask2 = 255;
       var firstBits = 8 - offset % 8;
       if (bits < firstBits) {
-        mask = 255 << 8 - bits & 255;
+        mask2 = 255 << 8 - bits & 255;
         firstBits = bits;
       }
       if (offset) {
-        mask = mask >> offset % 8;
+        mask2 = mask2 >> offset % 8;
       }
       var result = 0;
       if (offset % 8 + bits >= 8) {
-        result = callback(0, inv(data[offsetBytes]) & mask, firstBits);
+        result = callback(0, inv(data[offsetBytes]) & mask2, firstBits);
       }
       var bytes = bits + offset >> 3;
       for (var i = offsetBytes + 1; i < bytes; i++) {
@@ -56879,12 +56879,12 @@ var Poly1305 = class {
       g[i] &= 8191;
     }
     g[9] -= 1 << 13;
-    let mask = (c ^ 1) - 1;
+    let mask2 = (c ^ 1) - 1;
     for (let i = 0; i < 10; i++)
-      g[i] &= mask;
-    mask = ~mask;
+      g[i] &= mask2;
+    mask2 = ~mask2;
     for (let i = 0; i < 10; i++)
-      h[i] = h[i] & mask | g[i];
+      h[i] = h[i] & mask2 | g[i];
     h[0] = (h[0] | h[1] << 13) & 65535;
     h[1] = (h[1] >>> 3 | h[2] << 10) & 65535;
     h[2] = (h[2] >>> 6 | h[3] << 7) & 65535;
@@ -57635,7 +57635,7 @@ var BIGINT_FORMAT_RANGES = {
   int64: [/* @__PURE__ */ BigInt("-9223372036854775808"), /* @__PURE__ */ BigInt("9223372036854775807")],
   uint64: [/* @__PURE__ */ BigInt(0), /* @__PURE__ */ BigInt("18446744073709551615")]
 };
-function pick(schema2, mask) {
+function pick(schema2, mask2) {
   const currDef = schema2._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
@@ -57643,29 +57643,29 @@ function pick(schema2, mask) {
     throw new Error(".pick() cannot be used on object schemas containing refinements");
   }
   const newShape = {};
-  mirrorShape(newShape, schema2, maskedKeys(schema2, mask));
+  mirrorShape(newShape, schema2, maskedKeys(schema2, mask2));
   return clone(schema2, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
-function maskedKeys(schema2, mask) {
+function maskedKeys(schema2, mask2) {
   const raw = sourceShape(schema2);
   const keys = [];
-  for (const key of Reflect.ownKeys(mask)) {
+  for (const key of Reflect.ownKeys(mask2)) {
     if (!Object.getOwnPropertyDescriptor(raw, key)?.enumerable) {
       throw new Error(`Unrecognized key: "${String(key)}"`);
     }
-    if (mask[key])
+    if (mask2[key])
       keys.push(key);
   }
   return keys;
 }
-function omit(schema2, mask) {
+function omit(schema2, mask2) {
   const currDef = schema2._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     throw new Error(".omit() cannot be used on object schemas containing refinements");
   }
-  const omitted = new Set(maskedKeys(schema2, mask));
+  const omitted = new Set(maskedKeys(schema2, mask2));
   const newShape = {};
   mirrorShape(newShape, schema2, Reflect.ownKeys(sourceShape(schema2)).filter((key) => !omitted.has(key)));
   return clone(schema2, mergeDefs(currDef, { shape: newShape, checks: [] }));
@@ -57717,20 +57717,20 @@ function merge(a, b) {
   });
   return clone(a, def);
 }
-function partial(Class2, schema2, mask, name = "partial") {
+function partial(Class2, schema2, mask2, name = "partial") {
   const currDef = schema2._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     throw new Error(`.${name}() cannot be used on object schemas containing refinements`);
   }
-  const selected = mask ? new Set(maskedKeys(schema2, mask)) : void 0;
+  const selected = mask2 ? new Set(maskedKeys(schema2, mask2)) : void 0;
   const newShape = {};
   mirrorShape(newShape, schema2, Reflect.ownKeys(sourceShape(schema2)), Class2 && ((value, key) => selected && !selected.has(key) ? value : new Class2({ type: "optional", innerType: value })));
   return clone(schema2, mergeDefs(schema2._zod.def, { shape: newShape, checks: [] }));
 }
-function required(Class2, schema2, mask) {
-  const selected = mask ? new Set(maskedKeys(schema2, mask)) : void 0;
+function required(Class2, schema2, mask2) {
+  const selected = mask2 ? new Set(maskedKeys(schema2, mask2)) : void 0;
   const newShape = {};
   mirrorShape(newShape, schema2, Reflect.ownKeys(sourceShape(schema2)), (value, key) => (
     // overwrite with non-optional
@@ -63184,11 +63184,11 @@ var ZodObject = /* @__PURE__ */ $constructor("ZodObject", (inst, def) => {
   merge(other) {
     return util_exports.merge(this, other);
   },
-  pick(mask) {
-    return util_exports.pick(this, mask);
+  pick(mask2) {
+    return util_exports.pick(this, mask2);
   },
-  omit(mask) {
-    return util_exports.omit(this, mask);
+  omit(mask2) {
+    return util_exports.omit(this, mask2);
   },
   partial(...args) {
     return util_exports.partial(ZodOptional, this, args[0]);
@@ -67662,8 +67662,8 @@ function ipv4ToUint32(ip) {
 }
 function inIPv4Range(value, prefix, length) {
   if (length === 0) return true;
-  const mask = length === 32 ? 4294967295 : -1 << 32 - length >>> 0;
-  return (value & mask) === (prefix & mask);
+  const mask2 = length === 32 ? 4294967295 : -1 << 32 - length >>> 0;
+  return (value & mask2) === (prefix & mask2);
 }
 function classifyIPv4(ip) {
   if (ip === "0.0.0.0") return "unspecified";
@@ -83453,6 +83453,9 @@ var clinicianProfiles = pgTable("clinician_profiles", {
   // string[] of 2-letter states
   maxAcuity: varchar("max_acuity", { length: 16 }).default("urgent"),
   // highest acuity accepted: urgent | telehealth | routine
+  phone: varchar("phone", { length: 32 }),
+  notifySms: boolean4("notify_sms").default(true),
+  // text me when a visit lands in my states while I'm online
   online: boolean4("online").default(false),
   lastSeenAt: timestamp("last_seen_at"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -83740,8 +83743,30 @@ async function handler6(req, res) {
     const auth = getAuth();
     const session2 = await auth.api.getSession({ headers: new Headers(req.headers) });
     if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
-    const intakes = await db.select().from(intakeSessions).where(eq(intakeSessions.userId, session2.user.id)).orderBy(desc(intakeSessions.createdAt));
-    res.json(intakes);
+    const rows = await db.select({
+      intake: intakeSessions,
+      visitId: visits.id,
+      visitStatus: visits.status,
+      visitState: visits.patientState,
+      visitAcceptedAt: visits.acceptedAt,
+      visitCompletedAt: visits.completedAt,
+      clinicianName: clinicianProfiles.displayName,
+      clinicianCredential: clinicianProfiles.credential
+    }).from(intakeSessions).leftJoin(visits, eq(visits.intakeSessionId, intakeSessions.id)).leftJoin(clinicianProfiles, eq(clinicianProfiles.userId, visits.clinicianUserId)).where(eq(intakeSessions.userId, session2.user.id)).orderBy(desc(intakeSessions.createdAt));
+    res.json(
+      rows.map((r) => ({
+        ...r.intake,
+        visit: r.visitId ? {
+          id: r.visitId,
+          status: r.visitStatus,
+          state: r.visitState,
+          acceptedAt: r.visitAcceptedAt ? r.visitAcceptedAt.toISOString() : null,
+          completedAt: r.visitCompletedAt ? r.visitCompletedAt.toISOString() : null,
+          clinicianName: r.clinicianName,
+          clinicianCredential: r.clinicianCredential
+        } : null
+      }))
+    );
   } catch (error3) {
     console.error(JSON.stringify({ event: "api.error", route: "patient/intakes/GET.ts", error: error3 instanceof Error ? error3.message : String(error3) }));
     res.status(500).json({ error: "Failed to fetch intakes" });
@@ -84811,12 +84836,79 @@ async function handler18(req, res) {
       credential: p.credential,
       stateLicenses: licensesOf(p),
       maxAcuity: p.maxAcuity ?? "urgent",
-      online: !!p.online
+      online: !!p.online,
+      phone: p.phone,
+      notifySms: p.notifySms !== false
     });
   } catch (error3) {
     logErr("dispatch.me.get.error", error3);
     res.status(500).json({ error: "Failed to load clinician profile" });
   }
+}
+
+// src/server/lib/sms.ts
+function smsAvailable() {
+  return !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM);
+}
+function toE164(raw) {
+  if (!raw) return null;
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  if (raw.trim().startsWith("+") && digits.length >= 11 && digits.length <= 15) return `+${digits}`;
+  return null;
+}
+var sendSms = async (to, body) => {
+  if (!smsAvailable()) {
+    console.log(JSON.stringify({ event: "sms.skipped", reason: "twilio_not_configured", to: mask(to) }));
+    return false;
+  }
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  const from = process.env.TWILIO_FROM;
+  try {
+    const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+      method: "POST",
+      headers: {
+        Authorization: "Basic " + Buffer.from(`${sid}:${token}`).toString("base64"),
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({ To: to, From: from, Body: body }).toString()
+    });
+    if (!res.ok) {
+      const text2 = await res.text().catch(() => "");
+      console.error(JSON.stringify({ event: "sms.failed", status: res.status, to: mask(to), detail: text2.slice(0, 200) }));
+      return false;
+    }
+    console.log(JSON.stringify({ event: "sms.sent", to: mask(to) }));
+    return true;
+  } catch (err) {
+    console.error(JSON.stringify({ event: "sms.error", to: mask(to), error: err instanceof Error ? err.message : String(err) }));
+    return false;
+  }
+};
+function mask(to) {
+  return to.length > 4 ? `${"*".repeat(to.length - 4)}${to.slice(-4)}` : "****";
+}
+var ACUITY_WORD = {
+  urgent: "Urgent",
+  telehealth: "Telehealth",
+  routine: "Routine",
+  selfcare: "Self-care"
+};
+function newVisitText(acuity, state, base) {
+  return `Acute Insight: ${ACUITY_WORD[acuity] ?? "New"} visit waiting in ${state}. First to accept takes it: ${base}/clinician`;
+}
+function acceptedText(clinicianName, credential) {
+  const who = clinicianName ? `${clinicianName}${credential ? `, ${credential}` : ""}` : "A clinician";
+  return `Acute Insight: ${who} accepted your visit and will call you at this number shortly. Keep your phone nearby. If you get worse, call 911.`;
+}
+var lastSent = /* @__PURE__ */ new Map();
+function shouldThrottle(key, windowMs, now2 = Date.now()) {
+  const prev = lastSent.get(key);
+  if (prev !== void 0 && now2 - prev < windowMs) return true;
+  lastSent.set(key, now2);
+  return false;
 }
 
 // src/server/api/dispatch/me/PUT.ts
@@ -84841,6 +84933,12 @@ async function handler19(req, res) {
       if (!SCOPE_OPTIONS.includes(body.maxAcuity)) return res.status(400).json({ error: "maxAcuity must be urgent, telehealth or routine" });
       patch.maxAcuity = body.maxAcuity;
     }
+    if (typeof body.phone === "string") {
+      const raw = body.phone.trim();
+      if (raw && !toE164(raw)) return res.status(400).json({ error: "Enter a valid US mobile number" });
+      patch.phone = raw ? toE164(raw) : null;
+    }
+    if (typeof body.notifySms === "boolean") patch.notifySms = body.notifySms;
     if (typeof body.online === "boolean") {
       const licenses = patch.stateLicenses ?? ctx.profile.stateLicenses;
       if (body.online && (!Array.isArray(licenses) || licenses.length === 0)) {
@@ -84855,7 +84953,9 @@ async function handler19(req, res) {
       credential: updated.credential,
       stateLicenses: Array.isArray(updated.stateLicenses) ? updated.stateLicenses : [],
       maxAcuity: updated.maxAcuity ?? "urgent",
-      online: !!updated.online
+      online: !!updated.online,
+      phone: updated.phone,
+      notifySms: updated.notifySms !== false
     });
   } catch (error3) {
     logErr("dispatch.me.put.error", error3);
@@ -84926,6 +85026,7 @@ async function handler20(req, res) {
 }
 
 // src/server/api/dispatch/visits/POST.ts
+var CLINICIAN_TEXT_WINDOW_MS = 10 * 60 * 1e3;
 async function handler21(req, res) {
   try {
     const userId = await requirePatient(req, res);
@@ -84952,9 +85053,22 @@ async function handler21(req, res) {
     if (prior) return res.json({ ok: true, visitId: prior.id, status: prior.status });
     const [created] = await db.insert(visits).values({ intakeSessionId: id, patientUserId: userId, acuity, patientState: st, chiefComplaint: intake.chiefComplaint }).returning({ id: visits.id });
     res.json({ ok: true, visitId: created.id, status: "queued" });
+    void notifyClinicians(acuity, st, `${req.protocol}://${req.hostname}`);
   } catch (error3) {
     logErr("dispatch.request.error", error3);
     res.status(500).json({ error: "Failed to request a clinician" });
+  }
+}
+async function notifyClinicians(acuity, state, base) {
+  if (!smsAvailable()) return;
+  try {
+    const online = await db.select({ userId: clinicianProfiles.userId, phone: clinicianProfiles.phone, licenses: clinicianProfiles.stateLicenses, notify: clinicianProfiles.notifySms }).from(clinicianProfiles).where(eq(clinicianProfiles.online, true));
+    const text2 = newVisitText(acuity, state, base);
+    await Promise.all(
+      online.filter((c) => c.phone && c.notify !== false && Array.isArray(c.licenses) && c.licenses.includes(state)).filter((c) => !shouldThrottle(`clin:${c.userId}`, CLINICIAN_TEXT_WINDOW_MS)).map((c) => sendSms(c.phone, text2))
+    );
+  } catch (err) {
+    logErr("dispatch.notify.error", err);
   }
 }
 
@@ -85014,6 +85128,17 @@ async function handler23(req, res) {
     const [accepted] = await db.update(visits).set({ status: "accepted", clinicianUserId: ctx.userId, acceptedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, id), eq(visits.status, "queued"))).returning({ id: visits.id });
     if (!accepted) return res.status(409).json({ error: "Another clinician already accepted this visit" });
     res.json({ ok: true, id: accepted.id });
+    if (smsAvailable()) {
+      void (async () => {
+        try {
+          const [p] = await db.select({ phone: patientProfiles.phone }).from(patientProfiles).where(eq(patientProfiles.userId, visit.patientUserId)).limit(1);
+          const to = toE164(p?.phone);
+          if (to) await sendSms(to, acceptedText(ctx.profile.displayName, ctx.profile.credential));
+        } catch (err) {
+          logErr("dispatch.accept.notify.error", err);
+        }
+      })();
+    }
   } catch (error3) {
     logErr("dispatch.accept.error", error3);
     res.status(500).json({ error: "Failed to accept visit" });

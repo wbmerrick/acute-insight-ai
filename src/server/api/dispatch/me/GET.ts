@@ -12,6 +12,8 @@ export default async function handler(req: Request, res: Response) {
       stateLicenses: licensesOf(p),
       maxAcuity: p.maxAcuity ?? 'urgent',
       online: !!p.online,
+      phone: p.phone,
+      notifySms: p.notifySms !== false,
     });
   } catch (error) {
     logErr('dispatch.me.get.error', error);

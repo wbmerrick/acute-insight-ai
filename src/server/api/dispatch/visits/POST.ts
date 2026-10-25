@@ -1,9 +1,12 @@
 import type { Request, Response } from 'express';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
-import { visits, intakeSessions, patientProfiles } from '../../../db/schema.js';
+import { visits, intakeSessions, patientProfiles, clinicianProfiles } from '../../../db/schema.js';
 import { requirePatient, isUsState, DISPATCHABLE, logErr } from '../../../lib/dispatch.js';
 import type { ClinicalBrief, Acuity } from '../../../../lib/clinical-brief.js';
+import { sendSms, newVisitText, shouldThrottle, smsAvailable } from '../../../lib/sms.js';
+
+const CLINICIAN_TEXT_WINDOW_MS = 10 * 60 * 1000;
 
 /**
  * Patient requests a clinician for a completed intake — the "request a ride".
@@ -52,8 +55,30 @@ export default async function handler(req: Request, res: Response) {
       .returning({ id: visits.id });
 
     res.json({ ok: true, visitId: created.id, status: 'queued' });
+
+    // Fire-and-forget: text every online, opted-in clinician licensed in this state.
+    void notifyClinicians(acuity, st, `${req.protocol}://${req.hostname}`);
   } catch (error) {
     logErr('dispatch.request.error', error);
     res.status(500).json({ error: 'Failed to request a clinician' });
+  }
+}
+
+async function notifyClinicians(acuity: string, state: string, base: string) {
+  if (!smsAvailable()) return;
+  try {
+    const online = await db
+      .select({ userId: clinicianProfiles.userId, phone: clinicianProfiles.phone, licenses: clinicianProfiles.stateLicenses, notify: clinicianProfiles.notifySms })
+      .from(clinicianProfiles)
+      .where(eq(clinicianProfiles.online, true));
+    const text = newVisitText(acuity, state, base);
+    await Promise.all(
+      online
+        .filter((c) => c.phone && c.notify !== false && Array.isArray(c.licenses) && c.licenses.includes(state))
+        .filter((c) => !shouldThrottle(`clin:${c.userId}`, CLINICIAN_TEXT_WINDOW_MS))
+        .map((c) => sendSms(c.phone!, text)),
+    );
+  } catch (err) {
+    logErr('dispatch.notify.error', err);
   }
 }

@@ -139,6 +139,8 @@ export const clinicianProfiles = pgTable('clinician_profiles', {
   credential: varchar('credential', { length: 16 }), // MD | DO | NP | PA
   stateLicenses: jsonb('state_licenses'), // string[] of 2-letter states
   maxAcuity: varchar('max_acuity', { length: 16 }).default('urgent'), // highest acuity accepted: urgent | telehealth | routine
+  phone: varchar('phone', { length: 32 }),
+  notifySms: boolean('notify_sms').default(true), // text me when a visit lands in my states while I'm online
   online: boolean('online').default(false),
   lastSeenAt: timestamp('last_seen_at'),
   createdAt: timestamp('created_at').defaultNow(),

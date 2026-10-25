@@ -7,6 +7,7 @@ import { ProtectedRoute } from '@/lib/auth/auth-client';
 import { portal } from 'virtual:content';
 import type { ClinicalBrief } from '@/lib/clinical-brief';
 import { acuityMeta } from '@/components/clinical-brief-view';
+import { RequestClinician } from '@/components/request-clinician';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -20,6 +21,15 @@ interface IntakeSession {
   appointmentDate: string | null;
   providerName: string | null;
   createdAt: string;
+  visit: {
+    id: number;
+    status: 'queued' | 'accepted' | 'completed' | 'cancelled';
+    state: string;
+    acceptedAt: string | null;
+    completedAt: string | null;
+    clinicianName: string | null;
+    clinicianCredential: string | null;
+  } | null;
 }
 
 interface PatientProfile {
@@ -66,6 +76,43 @@ function StatCard({ label, value, icon, accent = false }: { label: string; value
 }
 
 // ─── Intake row ──────────────────────────────────────────────────────────────
+
+
+// ─── Dispatch status for one intake (the patient's side of the marketplace) ──
+function VisitStatus({ intake }: { intake: IntakeSession }) {
+  const [open, setOpen] = useState(false);
+  const disp = intake.aiBrief?.disposition;
+  const v = intake.visit;
+  if (!disp || disp.level === 'emergency') return null;
+  const who = v?.clinicianName ? `${v.clinicianName}${v.clinicianCredential ? `, ${v.clinicianCredential}` : ''}` : 'A clinician';
+  const pill = (text: string, h: string, pulse = false) => (
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium" style={{ background: `hsl(${h} / 0.1)`, color: `hsl(${h})`, border: `1px solid hsl(${h} / 0.3)`, fontFamily: 'var(--font-sans)' }}>
+      <span className={pulse ? 'animate-pulse' : ''} style={{ width: 6, height: 6, borderRadius: 99, background: 'currentColor' }} />
+      {text}
+    </span>
+  );
+  if (!v) {
+    return (
+      <div className="mt-2">
+        {!open ? (
+          <button type="button" onClick={() => setOpen(true)} className="text-xs font-semibold hover:underline" style={{ color: 'hsl(var(--primary))', fontFamily: 'var(--font-sans)' }}>
+            Connect with a clinician about this
+          </button>
+        ) : (
+          <div className="mt-2 max-w-xl"><RequestClinician intakeId={intake.id} disposition={disp} /></div>
+        )}
+      </div>
+    );
+  }
+  return (
+    <div className="mt-2">
+      {v.status === 'queued' && pill(`Waiting for a clinician in ${v.state}`, 'var(--warning)', true)}
+      {v.status === 'accepted' && pill(`${who} accepted — expect a call`, 'var(--primary)')}
+      {v.status === 'completed' && pill(`Visit completed with ${who}`, 'var(--primary)')}
+      {v.status === 'cancelled' && pill('Request cancelled', 'var(--text-dim)')}
+    </div>
+  );
+}
 
 function IntakeRow({ intake, onCheckIn }: { intake: IntakeSession; onCheckIn?: (intake: IntakeSession) => void }) {
   const date = new Date(intake.createdAt);
@@ -157,6 +204,7 @@ function IntakeRow({ intake, onCheckIn }: { intake: IntakeSession; onCheckIn?: (
             ))}
           </div>
         )}
+        {isComplete && disp && <VisitStatus intake={intake} />}
         {isComplete && onCheckIn && (
           <button
             type="button"
@@ -201,6 +249,19 @@ function PortalContent() {
     }
     void load();
   }, []);
+
+  // While a visit is waiting or accepted, keep the timeline live without a reload.
+  const hasLiveVisit = intakes.some((i) => i.visit && (i.visit.status === 'queued' || i.visit.status === 'accepted'));
+  useEffect(() => {
+    if (!hasLiveVisit) return;
+    const t = window.setInterval(async () => {
+      try {
+        const r = await fetch('/api/patient/intakes');
+        if (r.ok) setIntakes(await r.json());
+      } catch { /* retry next tick */ }
+    }, 8000);
+    return () => window.clearInterval(t);
+  }, [hasLiveVisit]);
 
   const completedIntakes = intakes.filter((i) => i.status === 'complete');
   const firstName = user?.name?.split(' ')[0] ?? 'Patient';

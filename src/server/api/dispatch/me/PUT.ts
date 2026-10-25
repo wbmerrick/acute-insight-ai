@@ -4,6 +4,7 @@ import { db } from '../../../db/client.js';
 import { clinicianProfiles } from '../../../db/schema.js';
 import { requireClinician, isUsState, SCOPE_OPTIONS, logErr } from '../../../lib/dispatch.js';
 import type { Acuity } from '../../../../lib/clinical-brief.js';
+import { toE164 } from '../../../lib/sms.js';
 
 const CREDENTIALS = new Set(['MD', 'DO', 'NP', 'PA']);
 
@@ -29,6 +30,12 @@ export default async function handler(req: Request, res: Response) {
       if (!SCOPE_OPTIONS.includes(body.maxAcuity as Acuity)) return res.status(400).json({ error: 'maxAcuity must be urgent, telehealth or routine' });
       patch.maxAcuity = body.maxAcuity;
     }
+    if (typeof body.phone === 'string') {
+      const raw = body.phone.trim();
+      if (raw && !toE164(raw)) return res.status(400).json({ error: 'Enter a valid US mobile number' });
+      patch.phone = raw ? toE164(raw) : null;
+    }
+    if (typeof body.notifySms === 'boolean') patch.notifySms = body.notifySms;
     if (typeof body.online === 'boolean') {
       // Going online without a license on file is a routing hazard, not a preference.
       const licenses = (patch.stateLicenses ?? ctx.profile.stateLicenses) as unknown;
@@ -51,6 +58,8 @@ export default async function handler(req: Request, res: Response) {
       stateLicenses: Array.isArray(updated.stateLicenses) ? updated.stateLicenses : [],
       maxAcuity: updated.maxAcuity ?? 'urgent',
       online: !!updated.online,
+      phone: updated.phone,
+      notifySms: updated.notifySms !== false,
     });
   } catch (error) {
     logErr('dispatch.me.put.error', error);
