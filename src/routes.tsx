@@ -9,6 +9,7 @@ const LoginPage = lazy(() => import('./pages/login'));
 const SignupPage = lazy(() => import('./pages/signup'));
 const PatientPortalPage = lazy(() => import('./pages/portal/index'));
 const ProviderDashboardPage = lazy(() => import('./pages/provider/index'));
+const ClinicianPage = lazy(() => import('./pages/clinician/index'));
 const IntakePage = lazy(() => import('./pages/intake/index'));
 const AboutPage = lazy(() => import('./pages/about'));
 const ProvidersPage = lazy(() => import('./pages/providers'));
@@ -40,6 +41,10 @@ export const routes: RouteObject[] = [
   {
     path: '/provider',
     element: <ProviderDashboardPage />,
+  },
+  {
+    path: '/clinician',
+    element: <ClinicianPage />,
   },
   {
     path: '/intake',

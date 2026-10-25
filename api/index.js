@@ -20952,7 +20952,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler18) {
+    Route.prototype.all = function all(handler26) {
       const callbacks = flatten.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -20970,7 +20970,7 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler18) {
+      Route.prototype[method] = function(handler26) {
         const callbacks = flatten.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -21173,17 +21173,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler18) {
+    Router.prototype.use = function use2(handler26) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler18 !== "function") {
-        let arg = handler18;
+      if (typeof handler26 !== "function") {
+        let arg = handler26;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler18;
+          path2 = handler26;
         }
       }
       const callbacks = flatten.call(slice.call(arguments, offset), Infinity);
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler18 = connection.cancelQuery;
-    if (!handler18) {
+    const handler26 = connection.cancelQuery;
+    if (!handler26) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler18.bind(connection);
+    return handler26.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler18 = connection.killSession;
-    if (!handler18) {
+    const handler26 = connection.killSession;
+    if (!handler26) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler18.bind(connection);
+    return handler26.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -65039,7 +65039,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler18 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler26 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65059,7 +65059,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler18(internalContext).catch(async (e) => {
+    const response = await handler26(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65089,20 +65089,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler18) => {
+  return (path2, options, handler26) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler18);
+    }, handler26);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler18) {
+function createMiddleware(optionsOrHandler, handler26) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler18;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler26;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65130,14 +65130,14 @@ function createMiddleware(optionsOrHandler, handler18) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler18) {
+  function fn(optionsOrHandler, handler26) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler18) throw new Error("Middleware handler is required");
+    if (!handler26) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler18);
+    }, handler26);
   }
   return fn;
 };
@@ -65577,16 +65577,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler18 = route.data;
+    const handler26 = route.data;
     try {
-      const allowedMediaTypes = handler18.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler26.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler18.options.disableBody ? void 0 : await getBody(handler18.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler26.options.disableBody ? void 0 : await getBody(handler26.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65601,7 +65601,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler18(context2);
+      return await handler26(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65658,11 +65658,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler18 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler26 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler18(ctx));
+      return await runWithEndpointContext(ctx, () => handler26(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75796,8 +75796,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler18 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler18(request));
+      const { handler: handler26 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler26(request));
     },
     api,
     options,
@@ -83344,11 +83344,13 @@ var schema_exports = {};
 __export(schema_exports, {
   accessRequests: () => accessRequests,
   account: () => account,
+  clinicianProfiles: () => clinicianProfiles,
   intakeSessions: () => intakeSessions,
   patientProfiles: () => patientProfiles,
   session: () => session,
   user: () => user,
-  verification: () => verification
+  verification: () => verification,
+  visits: () => visits
 });
 var user = pgTable("user", {
   id: varchar("id", { length: 36 }).primaryKey(),
@@ -83429,6 +83431,8 @@ var patientProfiles = pgTable("patient_profiles", {
   dateOfBirth: varchar("date_of_birth", { length: 16 }),
   gender: varchar("gender", { length: 32 }),
   phone: varchar("phone", { length: 32 }),
+  state: varchar("state", { length: 2 }),
+  // US state the patient is physically in — gates dispatch by licensure
   conditions: jsonb("conditions"),
   // string[]
   medications: jsonb("medications"),
@@ -83437,6 +83441,40 @@ var patientProfiles = pgTable("patient_profiles", {
   // string[]
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+});
+var clinicianProfiles = pgTable("clinician_profiles", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().unique().references(() => user.id, { onDelete: "cascade" }),
+  displayName: varchar("display_name", { length: 160 }),
+  // e.g. "Dr. Merrick"
+  credential: varchar("credential", { length: 16 }),
+  // MD | DO | NP | PA
+  stateLicenses: jsonb("state_licenses"),
+  // string[] of 2-letter states
+  maxAcuity: varchar("max_acuity", { length: 16 }).default("urgent"),
+  // highest acuity accepted: urgent | telehealth | routine
+  online: boolean4("online").default(false),
+  lastSeenAt: timestamp("last_seen_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+});
+var visits = pgTable("visits", {
+  id: serial("id").primaryKey(),
+  intakeSessionId: integer2("intake_session_id").notNull().unique().references(() => intakeSessions.id, { onDelete: "cascade" }),
+  patientUserId: varchar("patient_user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
+  acuity: varchar("acuity", { length: 16 }).notNull(),
+  // urgent | telehealth | routine | selfcare
+  patientState: varchar("patient_state", { length: 2 }).notNull(),
+  chiefComplaint: text("chief_complaint"),
+  status: varchar("status", { length: 16 }).default("queued"),
+  // queued | accepted | completed | cancelled
+  clinicianUserId: varchar("clinician_user_id", { length: 36 }).references(() => user.id, {
+    onDelete: "set null"
+  }),
+  queuedAt: timestamp("queued_at").defaultNow(),
+  acceptedAt: timestamp("accepted_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow()
 });
 
 // src/server/db/client.ts
@@ -83732,9 +83770,10 @@ async function handler8(req, res) {
     const session2 = await auth.api.getSession({ headers: new Headers(req.headers) });
     if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
     const { dateOfBirth, gender, phone, conditions, medications, allergies } = req.body;
+    const state = typeof req.body.state === "string" && /^[A-Za-z]{2}$/.test(req.body.state) ? req.body.state.toUpperCase() : void 0;
     const [existing] = await db.select({ id: patientProfiles.id }).from(patientProfiles).where(eq(patientProfiles.userId, session2.user.id)).limit(1);
     if (existing) {
-      await db.update(patientProfiles).set({ dateOfBirth, gender, phone, conditions, medications, allergies }).where(eq(patientProfiles.userId, session2.user.id));
+      await db.update(patientProfiles).set({ dateOfBirth, gender, phone, conditions, medications, allergies, ...state ? { state } : {} }).where(eq(patientProfiles.userId, session2.user.id));
     } else {
       await db.insert(patientProfiles).values({
         userId: session2.user.id,
@@ -83743,7 +83782,8 @@ async function handler8(req, res) {
         phone,
         conditions,
         medications,
-        allergies
+        allergies,
+        state: state ?? null
       });
     }
     res.json({ ok: true });
@@ -84657,6 +84697,365 @@ async function handler17(req, res) {
   }
 }
 
+// src/server/lib/dispatch.ts
+var US_STATES = [
+  "AL",
+  "AK",
+  "AZ",
+  "AR",
+  "CA",
+  "CO",
+  "CT",
+  "DE",
+  "DC",
+  "FL",
+  "GA",
+  "HI",
+  "ID",
+  "IL",
+  "IN",
+  "IA",
+  "KS",
+  "KY",
+  "LA",
+  "ME",
+  "MD",
+  "MA",
+  "MI",
+  "MN",
+  "MS",
+  "MO",
+  "MT",
+  "NE",
+  "NV",
+  "NH",
+  "NJ",
+  "NM",
+  "NY",
+  "NC",
+  "ND",
+  "OH",
+  "OK",
+  "OR",
+  "PA",
+  "RI",
+  "SC",
+  "SD",
+  "TN",
+  "TX",
+  "UT",
+  "VT",
+  "VA",
+  "WA",
+  "WV",
+  "WI",
+  "WY"
+];
+var STATE_SET = new Set(US_STATES);
+function isUsState(s) {
+  return typeof s === "string" && STATE_SET.has(s.toUpperCase());
+}
+var DISPATCHABLE = ["urgent", "telehealth", "routine", "selfcare"];
+var SCOPE_OPTIONS = ["urgent", "telehealth", "routine"];
+function scopeCovers(maxAcuity, acuity) {
+  const max = ACUITY_LEVELS.indexOf(maxAcuity ?? "urgent");
+  const a = ACUITY_LEVELS.indexOf(acuity);
+  if (max < 0 || a < 0) return false;
+  return a >= max;
+}
+async function requireClinician(req, res) {
+  const session2 = await getAuth().api.getSession({
+    headers: new Headers(req.headers)
+  });
+  if (!session2?.user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return null;
+  }
+  const [u] = await db.select().from(user).where(eq(user.id, session2.user.id)).limit(1);
+  if (!u || u.role !== "provider" && !u.isAdmin) {
+    res.status(403).json({ error: "Clinician access required" });
+    return null;
+  }
+  let [profile] = await db.select().from(clinicianProfiles).where(eq(clinicianProfiles.userId, u.id)).limit(1);
+  if (!profile) {
+    [profile] = await db.insert(clinicianProfiles).values({ userId: u.id, displayName: u.name ?? null, stateLicenses: [], online: false }).returning();
+  }
+  return { userId: u.id, isAdmin: !!u.isAdmin, profile };
+}
+function licensesOf(profile) {
+  const raw = profile.stateLicenses;
+  return Array.isArray(raw) ? raw.filter(isUsState).map((s) => s.toUpperCase()) : [];
+}
+async function requirePatient(req, res) {
+  const session2 = await getAuth().api.getSession({
+    headers: new Headers(req.headers)
+  });
+  if (!session2?.user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return null;
+  }
+  return session2.user.id;
+}
+function logErr(event, error3) {
+  console.error(JSON.stringify({ event, error: error3 instanceof Error ? error3.message : String(error3) }));
+}
+
+// src/server/api/dispatch/me/GET.ts
+async function handler18(req, res) {
+  try {
+    const ctx = await requireClinician(req, res);
+    if (!ctx) return;
+    const p = ctx.profile;
+    res.json({
+      displayName: p.displayName,
+      credential: p.credential,
+      stateLicenses: licensesOf(p),
+      maxAcuity: p.maxAcuity ?? "urgent",
+      online: !!p.online
+    });
+  } catch (error3) {
+    logErr("dispatch.me.get.error", error3);
+    res.status(500).json({ error: "Failed to load clinician profile" });
+  }
+}
+
+// src/server/api/dispatch/me/PUT.ts
+var CREDENTIALS = /* @__PURE__ */ new Set(["MD", "DO", "NP", "PA"]);
+async function handler19(req, res) {
+  try {
+    const ctx = await requireClinician(req, res);
+    if (!ctx) return;
+    const body = req.body ?? {};
+    const patch = {};
+    if (typeof body.displayName === "string") patch.displayName = body.displayName.trim().slice(0, 160) || null;
+    if (typeof body.credential === "string") {
+      const c = body.credential.toUpperCase();
+      if (!CREDENTIALS.has(c)) return res.status(400).json({ error: "credential must be MD, DO, NP or PA" });
+      patch.credential = c;
+    }
+    if (Array.isArray(body.stateLicenses)) {
+      const states = [...new Set(body.stateLicenses.filter(isUsState).map((s) => s.toUpperCase()))];
+      patch.stateLicenses = states;
+    }
+    if (typeof body.maxAcuity === "string") {
+      if (!SCOPE_OPTIONS.includes(body.maxAcuity)) return res.status(400).json({ error: "maxAcuity must be urgent, telehealth or routine" });
+      patch.maxAcuity = body.maxAcuity;
+    }
+    if (typeof body.online === "boolean") {
+      const licenses = patch.stateLicenses ?? ctx.profile.stateLicenses;
+      if (body.online && (!Array.isArray(licenses) || licenses.length === 0)) {
+        return res.status(400).json({ error: "Add at least one state license before going online" });
+      }
+      patch.online = body.online;
+      patch.lastSeenAt = /* @__PURE__ */ new Date();
+    }
+    const [updated] = await db.update(clinicianProfiles).set(patch).where(eq(clinicianProfiles.userId, ctx.userId)).returning();
+    res.json({
+      displayName: updated.displayName,
+      credential: updated.credential,
+      stateLicenses: Array.isArray(updated.stateLicenses) ? updated.stateLicenses : [],
+      maxAcuity: updated.maxAcuity ?? "urgent",
+      online: !!updated.online
+    });
+  } catch (error3) {
+    logErr("dispatch.me.put.error", error3);
+    res.status(500).json({ error: "Failed to update clinician profile" });
+  }
+}
+
+// src/server/api/dispatch/queue/GET.ts
+async function handler20(req, res) {
+  try {
+    const ctx = await requireClinician(req, res);
+    if (!ctx) return;
+    await db.update(clinicianProfiles).set({ lastSeenAt: /* @__PURE__ */ new Date() }).where(eq(clinicianProfiles.userId, ctx.userId));
+    const licenses = licensesOf(ctx.profile);
+    const allowedAcuities = ACUITY_LEVELS.filter((a) => scopeCovers(ctx.profile.maxAcuity, a));
+    const queue = ctx.profile.online && licenses.length > 0 && allowedAcuities.length > 0 ? await db.select({
+      id: visits.id,
+      intakeSessionId: visits.intakeSessionId,
+      acuity: visits.acuity,
+      patientState: visits.patientState,
+      chiefComplaint: visits.chiefComplaint,
+      queuedAt: visits.queuedAt,
+      flags: intakeSessions.aiFlags
+    }).from(visits).innerJoin(intakeSessions, eq(visits.intakeSessionId, intakeSessions.id)).where(
+      and(
+        eq(visits.status, "queued"),
+        inArray(visits.patientState, licenses),
+        inArray(visits.acuity, allowedAcuities)
+      )
+    ).orderBy(
+      sql2`array_position(${sql2.raw(`ARRAY[${ACUITY_LEVELS.map((a) => `'${a}'`).join(",")}]::varchar[]`)}, ${visits.acuity})`,
+      asc(visits.queuedAt)
+    ).limit(50) : [];
+    const active = await db.select({
+      id: visits.id,
+      intakeSessionId: visits.intakeSessionId,
+      acuity: visits.acuity,
+      patientState: visits.patientState,
+      chiefComplaint: visits.chiefComplaint,
+      status: visits.status,
+      queuedAt: visits.queuedAt,
+      acceptedAt: visits.acceptedAt,
+      brief: intakeSessions.aiBrief,
+      responses: intakeSessions.responses,
+      patientName: user.name,
+      patientEmail: user.email,
+      patientPhone: patientProfiles.phone,
+      patientDob: patientProfiles.dateOfBirth,
+      conditions: patientProfiles.conditions,
+      medications: patientProfiles.medications,
+      allergies: patientProfiles.allergies
+    }).from(visits).innerJoin(intakeSessions, eq(visits.intakeSessionId, intakeSessions.id)).innerJoin(user, eq(visits.patientUserId, user.id)).leftJoin(patientProfiles, eq(patientProfiles.userId, visits.patientUserId)).where(and(eq(visits.clinicianUserId, ctx.userId), eq(visits.status, "accepted"))).orderBy(desc(visits.acceptedAt)).limit(10);
+    const iso = (d) => d ? d.toISOString() : null;
+    res.json({
+      online: !!ctx.profile.online,
+      queue: queue.map((q) => ({
+        ...q,
+        queuedAt: iso(q.queuedAt),
+        flagCount: Array.isArray(q.flags) ? q.flags.length : 0,
+        flags: void 0
+      })),
+      active: active.map((a) => ({ ...a, queuedAt: iso(a.queuedAt), acceptedAt: iso(a.acceptedAt) }))
+    });
+  } catch (error3) {
+    logErr("dispatch.queue.error", error3);
+    res.status(500).json({ error: "Failed to load queue" });
+  }
+}
+
+// src/server/api/dispatch/visits/POST.ts
+async function handler21(req, res) {
+  try {
+    const userId = await requirePatient(req, res);
+    if (!userId) return;
+    const { intakeId, state, phone } = req.body ?? {};
+    const id = Number(intakeId);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: "intakeId required" });
+    if (!isUsState(state)) return res.status(400).json({ error: "A valid US state is required" });
+    const st = state.toUpperCase();
+    const [intake] = await db.select({ id: intakeSessions.id, status: intakeSessions.status, chiefComplaint: intakeSessions.chiefComplaint, brief: intakeSessions.aiBrief }).from(intakeSessions).where(and(eq(intakeSessions.id, id), eq(intakeSessions.userId, userId))).limit(1);
+    if (!intake) return res.status(404).json({ error: "Intake not found" });
+    if (intake.status !== "complete") return res.status(409).json({ error: "Finish the intake first" });
+    const brief = intake.brief;
+    const acuity = brief?.disposition?.level;
+    if (!acuity || !DISPATCHABLE.includes(acuity)) {
+      return res.status(409).json({ error: "This intake needs emergency care, not a queued visit. Call 911." });
+    }
+    const profilePatch = { state: st };
+    if (typeof phone === "string" && phone.trim()) profilePatch.phone = phone.trim().slice(0, 32);
+    const [existing] = await db.select({ id: patientProfiles.id }).from(patientProfiles).where(eq(patientProfiles.userId, userId)).limit(1);
+    if (existing) await db.update(patientProfiles).set(profilePatch).where(eq(patientProfiles.userId, userId));
+    else await db.insert(patientProfiles).values({ userId, ...profilePatch });
+    const [prior] = await db.select({ id: visits.id, status: visits.status }).from(visits).where(eq(visits.intakeSessionId, id)).limit(1);
+    if (prior) return res.json({ ok: true, visitId: prior.id, status: prior.status });
+    const [created] = await db.insert(visits).values({ intakeSessionId: id, patientUserId: userId, acuity, patientState: st, chiefComplaint: intake.chiefComplaint }).returning({ id: visits.id });
+    res.json({ ok: true, visitId: created.id, status: "queued" });
+  } catch (error3) {
+    logErr("dispatch.request.error", error3);
+    res.status(500).json({ error: "Failed to request a clinician" });
+  }
+}
+
+// src/server/api/dispatch/visits/[id]/GET.ts
+async function handler22(req, res) {
+  try {
+    const userId = await requirePatient(req, res);
+    if (!userId) return;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid visit id" });
+    const [v] = await db.select({
+      id: visits.id,
+      status: visits.status,
+      acuity: visits.acuity,
+      patientState: visits.patientState,
+      queuedAt: visits.queuedAt,
+      acceptedAt: visits.acceptedAt,
+      completedAt: visits.completedAt,
+      clinicianName: clinicianProfiles.displayName,
+      clinicianCredential: clinicianProfiles.credential
+    }).from(visits).leftJoin(clinicianProfiles, eq(clinicianProfiles.userId, visits.clinicianUserId)).where(and(eq(visits.id, id), eq(visits.patientUserId, userId))).limit(1);
+    if (!v) return res.status(404).json({ error: "Visit not found" });
+    const [{ n }] = await db.select({ n: count() }).from(clinicianProfiles).where(and(eq(clinicianProfiles.online, true)));
+    const online = await db.select({ licenses: clinicianProfiles.stateLicenses }).from(clinicianProfiles).where(eq(clinicianProfiles.online, true));
+    const inState = online.filter((c) => Array.isArray(c.licenses) && c.licenses.includes(v.patientState)).length;
+    const iso = (d) => d ? d.toISOString() : null;
+    res.json({
+      ...v,
+      queuedAt: iso(v.queuedAt),
+      acceptedAt: iso(v.acceptedAt),
+      completedAt: iso(v.completedAt),
+      cliniciansOnlineInState: inState,
+      cliniciansOnline: Number(n)
+    });
+  } catch (error3) {
+    logErr("dispatch.visit.get.error", error3);
+    res.status(500).json({ error: "Failed to load visit" });
+  }
+}
+
+// src/server/api/dispatch/visits/[id]/accept/POST.ts
+async function handler23(req, res) {
+  try {
+    const ctx = await requireClinician(req, res);
+    if (!ctx) return;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid visit id" });
+    if (!ctx.profile.online) return res.status(409).json({ error: "Go online to accept visits" });
+    const [visit] = await db.select().from(visits).where(eq(visits.id, id)).limit(1);
+    if (!visit) return res.status(404).json({ error: "Visit not found" });
+    if (!licensesOf(ctx.profile).includes(visit.patientState)) {
+      return res.status(403).json({ error: `Not licensed in ${visit.patientState}` });
+    }
+    if (!scopeCovers(ctx.profile.maxAcuity, visit.acuity)) {
+      return res.status(403).json({ error: "Outside your accepted scope" });
+    }
+    const [accepted] = await db.update(visits).set({ status: "accepted", clinicianUserId: ctx.userId, acceptedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, id), eq(visits.status, "queued"))).returning({ id: visits.id });
+    if (!accepted) return res.status(409).json({ error: "Another clinician already accepted this visit" });
+    res.json({ ok: true, id: accepted.id });
+  } catch (error3) {
+    logErr("dispatch.accept.error", error3);
+    res.status(500).json({ error: "Failed to accept visit" });
+  }
+}
+
+// src/server/api/dispatch/visits/[id]/release/POST.ts
+async function handler24(req, res) {
+  try {
+    const ctx = await requireClinician(req, res);
+    if (!ctx) return;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid visit id" });
+    const [released] = await db.update(visits).set({ status: "queued", clinicianUserId: null, acceptedAt: null }).where(and(eq(visits.id, id), eq(visits.status, "accepted"), eq(visits.clinicianUserId, ctx.userId))).returning({ id: visits.id });
+    if (!released) return res.status(404).json({ error: "No accepted visit to release" });
+    res.json({ ok: true });
+  } catch (error3) {
+    logErr("dispatch.release.error", error3);
+    res.status(500).json({ error: "Failed to release visit" });
+  }
+}
+
+// src/server/api/dispatch/visits/[id]/complete/POST.ts
+async function handler25(req, res) {
+  try {
+    const ctx = await requireClinician(req, res);
+    if (!ctx) return;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid visit id" });
+    const [done] = await db.update(visits).set({ status: "completed", completedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, id), eq(visits.status, "accepted"), eq(visits.clinicianUserId, ctx.userId))).returning({ id: visits.id, intakeSessionId: visits.intakeSessionId });
+    if (!done) return res.status(404).json({ error: "No active visit to complete" });
+    const name = ctx.profile.displayName?.trim();
+    if (name) {
+      await db.update(intakeSessions).set({ providerName: name }).where(eq(intakeSessions.id, done.intakeSessionId));
+    }
+    res.json({ ok: true });
+  } catch (error3) {
+    logErr("dispatch.complete.error", error3);
+    res.status(500).json({ error: "Failed to complete visit" });
+  }
+}
+
 // src/lib/seo-routes.ts
 var seoRoutes = [
   { path: "/", changefreq: "weekly", priority: 1 },
@@ -84819,6 +85218,14 @@ app.put("/api/admin/users/:id/role", handler14);
 app.post("/api/access-request", handler15);
 app.post("/api/speak", handler16);
 app.get("/api/admin/access-requests", handler17);
+app.get("/api/dispatch/me", handler18);
+app.put("/api/dispatch/me", handler19);
+app.get("/api/dispatch/queue", handler20);
+app.post("/api/dispatch/visits", handler21);
+app.get("/api/dispatch/visits/:id", handler22);
+app.post("/api/dispatch/visits/:id/accept", handler23);
+app.post("/api/dispatch/visits/:id/release", handler24);
+app.post("/api/dispatch/visits/:id/complete", handler25);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;

@@ -5,6 +5,7 @@ import {
   boolean,
   timestamp,
   serial,
+  integer,
   jsonb,
 } from 'drizzle-orm/pg-core';
 
@@ -114,6 +115,7 @@ export const patientProfiles = pgTable('patient_profiles', {
   dateOfBirth: varchar('date_of_birth', { length: 16 }),
   gender: varchar('gender', { length: 32 }),
   phone: varchar('phone', { length: 32 }),
+  state: varchar('state', { length: 2 }), // US state the patient is physically in — gates dispatch by licensure
   conditions: jsonb('conditions'), // string[]
   medications: jsonb('medications'), // string[]
   allergies: jsonb('allergies'), // string[]
@@ -121,4 +123,52 @@ export const patientProfiles = pgTable('patient_profiles', {
   updatedAt: timestamp('updated_at')
     .defaultNow()
     .$onUpdate(() => new Date()),
+});
+
+// ─── Dispatch: clinician supply ──────────────────────────────────────────────
+// A clinician "goes online" like a driver. Dispatch only ever shows a visit to a
+// clinician licensed in the patient's state whose scope covers the acuity.
+
+export const clinicianProfiles = pgTable('clinician_profiles', {
+  id: serial('id').primaryKey(),
+  userId: varchar('user_id', { length: 36 })
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  displayName: varchar('display_name', { length: 160 }), // e.g. "Dr. Merrick"
+  credential: varchar('credential', { length: 16 }), // MD | DO | NP | PA
+  stateLicenses: jsonb('state_licenses'), // string[] of 2-letter states
+  maxAcuity: varchar('max_acuity', { length: 16 }).default('urgent'), // highest acuity accepted: urgent | telehealth | routine
+  online: boolean('online').default(false),
+  lastSeenAt: timestamp('last_seen_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at')
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+// ─── Dispatch: visit requests (the "ride") ───────────────────────────────────
+// Created when a patient asks to be connected after a non-emergency intake.
+// Emergency dispositions never enter the queue — that path is 911, full stop.
+
+export const visits = pgTable('visits', {
+  id: serial('id').primaryKey(),
+  intakeSessionId: integer('intake_session_id') // unique per intake — one request per brief
+    .notNull()
+    .unique()
+    .references(() => intakeSessions.id, { onDelete: 'cascade' }),
+  patientUserId: varchar('patient_user_id', { length: 36 })
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  acuity: varchar('acuity', { length: 16 }).notNull(), // urgent | telehealth | routine | selfcare
+  patientState: varchar('patient_state', { length: 2 }).notNull(),
+  chiefComplaint: text('chief_complaint'),
+  status: varchar('status', { length: 16 }).default('queued'), // queued | accepted | completed | cancelled
+  clinicianUserId: varchar('clinician_user_id', { length: 36 }).references(() => user.id, {
+    onDelete: 'set null',
+  }),
+  queuedAt: timestamp('queued_at').defaultNow(),
+  acceptedAt: timestamp('accepted_at'),
+  completedAt: timestamp('completed_at'),
+  createdAt: timestamp('created_at').defaultNow(),
 });

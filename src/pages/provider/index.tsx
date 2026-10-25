@@ -438,6 +438,13 @@ function DashboardContent() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              to="/clinician"
+              className="text-xs font-semibold px-3 py-1.5 rounded-full transition-colors"
+              style={{ background: 'hsl(var(--primary) / 0.12)', color: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary) / 0.35)', fontFamily: 'var(--font-heading)' }}
+            >
+              Go online
+            </Link>
             <span className="text-xs text-muted-foreground hidden sm:block" style={{ fontFamily: 'var(--font-sans)' }}>
               {firstName}
             </span>

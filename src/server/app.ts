@@ -18,6 +18,14 @@ import admin__users__id__role__put from "./api/admin/users/[id]/role/PUT";
 import access_request__post from "./api/access-request/POST";
 import speak__post from "./api/speak/POST";
 import admin__access_requests__get from "./api/admin/access-requests/GET";
+import dispatch__me__get from "./api/dispatch/me/GET";
+import dispatch__me__put from "./api/dispatch/me/PUT";
+import dispatch__queue__get from "./api/dispatch/queue/GET";
+import dispatch__visits__post from "./api/dispatch/visits/POST";
+import dispatch__visits__id__get from "./api/dispatch/visits/[id]/GET";
+import dispatch__visits__id__accept__post from "./api/dispatch/visits/[id]/accept/POST";
+import dispatch__visits__id__release__post from "./api/dispatch/visits/[id]/release/POST";
+import dispatch__visits__id__complete__post from "./api/dispatch/visits/[id]/complete/POST";
 // </api-imports>
 import { seoRoutes } from "../lib/seo-routes";
 import {
@@ -279,6 +287,14 @@ app.put("/api/admin/users/:id/role", admin__users__id__role__put);
 app.post("/api/access-request", access_request__post);
 app.post("/api/speak", speak__post);
 app.get("/api/admin/access-requests", admin__access_requests__get);
+app.get("/api/dispatch/me", dispatch__me__get);
+app.put("/api/dispatch/me", dispatch__me__put);
+app.get("/api/dispatch/queue", dispatch__queue__get);
+app.post("/api/dispatch/visits", dispatch__visits__post);
+app.get("/api/dispatch/visits/:id", dispatch__visits__id__get);
+app.post("/api/dispatch/visits/:id/accept", dispatch__visits__id__accept__post);
+app.post("/api/dispatch/visits/:id/release", dispatch__visits__id__release__post);
+app.post("/api/dispatch/visits/:id/complete", dispatch__visits__id__complete__post);
 // </api-registrations>
 
 // Error middleware must be registered AFTER the routes it protects; Express

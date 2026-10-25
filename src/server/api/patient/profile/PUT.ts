@@ -11,6 +11,7 @@ export default async function handler(req: Request, res: Response) {
     if (!session?.user) return res.status(401).json({ error: 'Unauthorized' });
 
     const { dateOfBirth, gender, phone, conditions, medications, allergies } = req.body;
+    const state = typeof req.body.state === 'string' && /^[A-Za-z]{2}$/.test(req.body.state) ? req.body.state.toUpperCase() : undefined;
 
     const [existing] = await db
       .select({ id: patientProfiles.id })
@@ -21,7 +22,7 @@ export default async function handler(req: Request, res: Response) {
     if (existing) {
       await db
         .update(patientProfiles)
-        .set({ dateOfBirth, gender, phone, conditions, medications, allergies })
+        .set({ dateOfBirth, gender, phone, conditions, medications, allergies, ...(state ? { state } : {}) })
         .where(eq(patientProfiles.userId, session.user.id));
     } else {
       await db.insert(patientProfiles).values({
@@ -32,6 +33,7 @@ export default async function handler(req: Request, res: Response) {
         conditions,
         medications,
         allergies,
+        state: state ?? null,
       });
     }
 

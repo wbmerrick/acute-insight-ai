@@ -5,6 +5,7 @@ import { useSession } from '@/lib/auth/auth-client';
 import { CHAT_CSS } from './chat.css';
 import type { Disposition } from '@/lib/clinical-brief';
 import { DispositionCard } from '@/components/clinical-brief-view';
+import { RequestClinician } from '@/components/request-clinician';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Acute Insight intake — conversational chat, modeled on iSpry's "Spry" chat:
@@ -147,7 +148,7 @@ function AccountModal({ onClose, onAuthed }: { onClose: () => void; onAuthed: ()
 }
 
 // ─── Complete screen ──────────────────────────────────────────────────────────
-function CompleteScreen({ onReset, onPortal, disposition }: { onReset: () => void; onPortal: () => void; disposition?: Disposition | null }) {
+function CompleteScreen({ onReset, onPortal, disposition, intakeId }: { onReset: () => void; onPortal: () => void; disposition?: Disposition | null; intakeId?: number | null }) {
   return (
     <div className="ace-chat" style={{ maxWidth: 620, margin: '0 auto' }}>
       <div style={{ textAlign: 'center' }}>
@@ -164,6 +165,11 @@ function CompleteScreen({ onReset, onPortal, disposition }: { onReset: () => voi
           <p style={{ textAlign: 'center', font: '12px var(--font-mono)', color: 'hsl(var(--text-dimmer))', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Your suggested next step</p>
           <DispositionCard disposition={disposition} />
           <p style={{ textAlign: 'center', fontSize: 12, color: 'hsl(var(--text-dimmer))', marginTop: 10, lineHeight: 1.5 }}>A suggestion based on what you shared — not a diagnosis. Your provider decides your care.</p>
+        </div>
+      )}
+      {disposition && intakeId && disposition.level !== 'emergency' && (
+        <div style={{ marginBottom: 28 }}>
+          <RequestClinician intakeId={intakeId} disposition={disposition} />
         </div>
       )}
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -712,6 +718,7 @@ function IntakeFlow() {
           {phase === 'complete' ? (
             <CompleteScreen
               disposition={disposition}
+              intakeId={intakeId}
               onReset={() => { setDisposition(null); setPhase('chat'); setResetKey((k) => k + 1); void startIntake(); }}
               onPortal={() => navigate('/portal')}
             />
