@@ -84850,6 +84850,8 @@ function getAuth() {
       schema: { user, session, account, verification, twoFactor: twoFactor2 }
     }),
     secret: authSecret,
+    // Sessions: 12h hard limit, refreshed hourly while in use. Client-side idle logoff (15 min clinical / 30 min patient) sits on top.
+    session: { expiresIn: 60 * 60 * 12, updateAge: 60 * 60 },
     // Protect admin status field from user input
     user: {
       additionalFields: {

@@ -7,6 +7,7 @@ import type { ClinicalBrief, Acuity } from '@/lib/clinical-brief';
 import { ACUITY_LABEL } from '@/lib/clinical-brief';
 import { ProviderNote, acuityMeta } from '@/components/clinical-brief-view';
 import { MfaBanner } from '@/components/mfa-banner';
+import { IdleGuard } from '@/components/idle-guard';
 
 // ─── Types (mirror /api/dispatch) ────────────────────────────────────────────
 
@@ -728,6 +729,7 @@ export default function ClinicianPage() {
       </Helmet>
       <ProtectedRoute>
         <ClinicianContent />
+        <IdleGuard mode="clinical" />
       </ProtectedRoute>
     </>
   );

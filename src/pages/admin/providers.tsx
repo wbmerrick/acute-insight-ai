@@ -4,6 +4,7 @@ import { Helmet } from '@dr.pogodin/react-helmet';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSession } from '@/lib/auth/auth-client';
 import { admin_providers } from 'virtual:content';
+import { IdleGuard } from '@/components/idle-guard';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -941,6 +942,7 @@ export default function AdminProvidersPage() {
 
           <AccessRequestsPanel />
           <AuditPanel />
+          <IdleGuard mode="clinical" />
         </main>
       </div>
 

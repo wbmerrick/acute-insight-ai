@@ -19,6 +19,8 @@ export default function LoginPage() {
 
   if (isAuthenticated) return <Navigate to={from} replace />;
 
+  const idleNotice = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('idle') === '1';
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
@@ -110,7 +112,10 @@ export default function LoginPage() {
               boxShadow: `0 0 40px hsl(var(--primary) / 0.06)`,
             }}
           >
-            {error && (
+            {idleNotice && !error && (
+                <p className="text-xs mb-3 px-3 py-2 rounded-lg" style={{ background: 'hsl(var(--warning) / 0.08)', border: '1px solid hsl(var(--warning) / 0.35)', color: 'hsl(var(--foreground))' }}>You were signed out after a period of inactivity. Sign in to pick up where you left off.</p>
+              )}
+              {error && (
               <div
                 className="mb-5 px-4 py-3 rounded-xl text-sm"
                 style={{

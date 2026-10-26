@@ -9,6 +9,7 @@ import type { ClinicalBrief } from '@/lib/clinical-brief';
 import { acuityMeta } from '@/components/clinical-brief-view';
 import { RequestClinician } from '@/components/request-clinician';
 import { VerifyEmailNudge } from '@/components/verify-email-nudge';
+import { IdleGuard } from '@/components/idle-guard';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -919,6 +920,7 @@ export default function PatientPortalPage() {
       </Helmet>
       <ProtectedRoute>
         <PortalContent />
+        <IdleGuard mode="patient" />
       </ProtectedRoute>
     </>
   );

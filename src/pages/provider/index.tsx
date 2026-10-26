@@ -8,6 +8,7 @@ import { provider } from 'virtual:content';
 import type { ClinicalBrief } from '@/lib/clinical-brief';
 import { ProviderNote } from '@/components/clinical-brief-view';
 import { MfaBanner } from '@/components/mfa-banner';
+import { IdleGuard } from '@/components/idle-guard';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -773,6 +774,7 @@ export default function ProviderDashboardPage() {
       </Helmet>
       <ProtectedRoute>
         <DashboardContent />
+        <IdleGuard mode="clinical" />
       </ProtectedRoute>
     </>
   );
