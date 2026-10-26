@@ -248,3 +248,18 @@ export const auditEvents = pgTable('audit_events', {
   meta: jsonb('meta'),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+// ─── Provider–patient assignment (minimum necessary) ─────────────────────────
+// With PROVIDER_SCOPE=assigned, a provider sees only patients assigned to them
+// here, or patients whose dispatched visit they accepted. Admins see all.
+export const patientAssignments = pgTable('patient_assignments', {
+  id: serial('id').primaryKey(),
+  providerUserId: varchar('provider_user_id', { length: 36 })
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  patientUserId: varchar('patient_user_id', { length: 36 })
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  assignedBy: varchar('assigned_by', { length: 36 }).references(() => user.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').defaultNow(),
+});

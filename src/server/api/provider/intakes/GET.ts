@@ -5,6 +5,7 @@ import { eq, desc, inArray } from 'drizzle-orm';
 import { getAuth } from '../../../../lib/auth/auth.js';
 import { audit } from '../../../lib/audit.js';
 import { mfaRequired } from '../../../lib/dispatch.js';
+import { visiblePatientIds, providerScope } from '../../../lib/scope.js';
 
 export default async function handler(req: Request, res: Response) {
   try {
@@ -21,8 +22,10 @@ export default async function handler(req: Request, res: Response) {
       return res.status(403).json({ error: 'Two-step verification is required for clinician access', code: 'mfa_required' });
     }
 
+    const allowed = await visiblePatientIds(session.user.id, !!dbUser[0].isAdmin);
+
     // Fetch all completed intakes with patient info
-    const intakes = await db
+    const intakesAll = await db
       .select({
         id: intakeSessions.id,
         status: intakeSessions.status,
@@ -41,6 +44,7 @@ export default async function handler(req: Request, res: Response) {
       .innerJoin(user, eq(intakeSessions.userId, user.id))
       .where(eq(intakeSessions.status, 'complete'))
       .orderBy(desc(intakeSessions.createdAt));
+    const intakes = allowed ? intakesAll.filter((i) => allowed.has(i.patientId)) : intakesAll;
 
     // Fetch profiles for all patients
     const patientIds = [...new Set(intakes.map((i) => i.patientId))];
@@ -61,7 +65,7 @@ export default async function handler(req: Request, res: Response) {
       profile: profileMap.get(intake.patientId) ?? null,
     }));
 
-    audit(req, { action: 'provider.intakes.list', actorUserId: session.user.id, actorRole: dbUser[0].isAdmin ? 'admin' : 'provider', resourceType: 'intake', meta: { count: result.length } });
+    audit(req, { action: 'provider.intakes.list', actorUserId: session.user.id, actorRole: dbUser[0].isAdmin ? 'admin' : 'provider', resourceType: 'intake', meta: { count: result.length, scope: providerScope() } });
     res.json(result);
   } catch (error) {
     console.error(

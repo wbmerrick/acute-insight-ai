@@ -333,6 +333,80 @@ function AccessRequestsPanel() {
 }
 
 
+
+// ─── Provider–patient assignments ────────────────────────────────────────────
+
+interface Assignment { id: number; providerId: string; providerName: string | null; providerEmail: string; patientId: string; patientName: string | null; patientEmail: string; createdAt: string | null }
+
+function AssignmentsPanel() {
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [rows, setRows] = useState<Assignment[] | null>(null);
+  const [scope, setScope] = useState<'all' | 'assigned'>('all');
+  const [providerId, setProviderId] = useState('');
+  const [patientId, setPatientId] = useState('');
+  const [err, setErr] = useState('');
+
+  async function load() {
+    try {
+      const [u, a] = await Promise.all([fetch('/api/admin/users'), fetch('/api/admin/assignments')]);
+      if (u.ok) setUsers((await u.json()) as AdminUser[]);
+      if (a.ok) { const d = (await a.json()) as { scope: 'all' | 'assigned'; assignments: Assignment[] }; setScope(d.scope); setRows(d.assignments); }
+    } catch { setErr('Could not load assignments.'); }
+  }
+  useEffect(() => { void load(); }, []);
+
+  async function change(remove: boolean, pId = providerId, ptId = patientId) {
+    setErr('');
+    const r = await fetch('/api/admin/assignments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ providerId: pId, patientId: ptId, remove }) });
+    if (!r.ok) { const d = (await r.json().catch(() => ({}))) as { error?: string }; setErr(d.error || 'Failed'); return; }
+    await load();
+  }
+
+  const providers = users.filter((u) => u.role === 'provider' || u.isAdmin);
+  const patients = users.filter((u) => u.role !== 'provider' && !u.isAdmin);
+  const sel: React.CSSProperties = { background: 'hsl(var(--surface-deeper))', border: '1px solid hsl(var(--border-subtle))', borderRadius: 10, padding: '8px 10px', color: 'hsl(var(--foreground))', fontSize: 14, minWidth: 220 };
+
+  return (
+    <section className="mt-10 rounded-2xl overflow-hidden" style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border-subtle) / 0.6)' }}>
+      <div className="px-6 py-4" style={{ borderBottom: '1px solid hsl(var(--border-subtle) / 0.5)' }}>
+        <h2 className="text-lg font-bold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>Provider–patient assignments</h2>
+        <p className="text-xs mt-0.5" style={{ color: 'hsl(var(--text-dim))' }}>
+          {scope === 'assigned'
+            ? 'Scope is ASSIGNED: a provider sees only patients assigned here, plus patients whose dispatched visit they accepted. Admins see all.'
+            : 'Scope is ALL (single-practice mode): every provider sees every intake. Set PROVIDER_SCOPE=assigned to enforce the assignments below.'}
+        </p>
+      </div>
+      <div className="px-6 py-4 flex flex-wrap items-end gap-3" style={{ borderBottom: '1px solid hsl(var(--border-subtle) / 0.3)' }}>
+        <label className="grid gap-1 text-xs" style={{ color: 'hsl(var(--text-dim))' }}>Provider
+          <select value={providerId} onChange={(e) => setProviderId(e.target.value)} style={sel}><option value="">—</option>{providers.map((u) => <option key={u.id} value={u.id}>{u.name || u.email}</option>)}</select>
+        </label>
+        <label className="grid gap-1 text-xs" style={{ color: 'hsl(var(--text-dim))' }}>Patient
+          <select value={patientId} onChange={(e) => setPatientId(e.target.value)} style={sel}><option value="">—</option>{patients.map((u) => <option key={u.id} value={u.id}>{u.name || u.email}</option>)}</select>
+        </label>
+        <button type="button" disabled={!providerId || !patientId} onClick={() => void change(false)} className="text-sm font-semibold px-4 py-2 rounded-lg disabled:opacity-50" style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))', fontFamily: 'var(--font-heading)' }}>Assign</button>
+        {err && <span className="text-xs" style={{ color: 'hsl(var(--destructive))' }}>{err}</span>}
+      </div>
+      {rows === null ? <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--text-dim))' }}>Loading…</p> : rows.length === 0 ? (
+        <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--text-dim))' }}>No assignments yet.</p>
+      ) : (
+        <table className="w-full text-sm">
+          <thead><tr style={{ borderBottom: '1px solid hsl(var(--border-subtle) / 0.5)' }}>{['Provider', 'Patient', 'Since', ''].map((h) => <th key={h} className="text-left font-semibold px-6 py-3" style={{ color: 'hsl(var(--text-dim))' }}>{h}</th>)}</tr></thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.id} style={{ borderBottom: '1px solid hsl(var(--border-subtle) / 0.3)' }}>
+                <td className="px-6 py-3 text-foreground">{r.providerName || r.providerEmail}</td>
+                <td className="px-6 py-3 text-foreground">{r.patientName || r.patientEmail}</td>
+                <td className="px-6 py-3 vitals text-xs" style={{ color: 'hsl(var(--text-dimmer))' }}>{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—'}</td>
+                <td className="px-6 py-3 text-right"><button type="button" onClick={() => void change(true, r.providerId, r.patientId)} className="text-xs hover:underline" style={{ color: 'hsl(var(--text-dim))' }}>Remove</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  );
+}
+
 // ─── Audit trail ─────────────────────────────────────────────────────────────
 
 interface AuditRow {
@@ -941,6 +1015,7 @@ export default function AdminProvidersPage() {
           </motion.div>
 
           <AccessRequestsPanel />
+          <AssignmentsPanel />
           <AuditPanel />
           <IdleGuard mode="clinical" />
         </main>

@@ -17411,10 +17411,10 @@ var require_get_intrinsic = __commonJS({
     };
     var getBaseIntrinsic = function getBaseIntrinsic2(name, allowMissing) {
       var intrinsicName = name;
-      var alias;
+      var alias2;
       if (hasOwn(LEGACY_ALIASES, intrinsicName)) {
-        alias = LEGACY_ALIASES[intrinsicName];
-        intrinsicName = "%" + alias[0] + "%";
+        alias2 = LEGACY_ALIASES[intrinsicName];
+        intrinsicName = "%" + alias2[0] + "%";
       }
       if (hasOwn(INTRINSICS, intrinsicName)) {
         var value = INTRINSICS[intrinsicName];
@@ -17425,7 +17425,7 @@ var require_get_intrinsic = __commonJS({
           throw new $TypeError("intrinsic " + name + " exists, but is not available. Please file an issue!");
         }
         return {
-          alias,
+          alias: alias2,
           name: intrinsicName,
           value
         };
@@ -17448,10 +17448,10 @@ var require_get_intrinsic = __commonJS({
       var intrinsicRealName = intrinsic.name;
       var value = intrinsic.value;
       var skipFurtherCaching = false;
-      var alias = intrinsic.alias;
-      if (alias) {
-        intrinsicBaseName = alias[0];
-        $spliceApply(parts, $concat([0, 1], alias));
+      var alias2 = intrinsic.alias;
+      if (alias2) {
+        intrinsicBaseName = alias2[0];
+        $spliceApply(parts, $concat([0, 1], alias2));
       }
       for (var i = 1, isOwn = true; i < parts.length; i += 1) {
         var part = parts[i];
@@ -20952,7 +20952,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler39) {
+    Route.prototype.all = function all(handler41) {
       const callbacks = flatten2.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -20970,7 +20970,7 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler39) {
+      Route.prototype[method] = function(handler41) {
         const callbacks = flatten2.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -21173,17 +21173,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler39) {
+    Router.prototype.use = function use2(handler41) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler39 !== "function") {
-        let arg = handler39;
+      if (typeof handler41 !== "function") {
+        let arg = handler41;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler39;
+          path2 = handler41;
         }
       }
       const callbacks = flatten2.call(slice.call(arguments, offset), Infinity);
@@ -28388,11 +28388,11 @@ var init_alias_node = __esm({
       is(node2) {
         return node2.kind === "AliasNode";
       },
-      create(node2, alias) {
+      create(node2, alias2) {
         return freeze({
           kind: "AliasNode",
           node: node2,
-          alias
+          alias: alias2
         });
       }
     });
@@ -29177,8 +29177,8 @@ function parseStringReference(ref) {
 function parseAliasedStringReference(ref) {
   const ALIAS_SEPARATOR = " as ";
   if (ref.includes(ALIAS_SEPARATOR)) {
-    const [columnRef, alias] = ref.split(ALIAS_SEPARATOR).map(trim);
-    return AliasNode.create(parseStringReference(columnRef), IdentifierNode.create(alias));
+    const [columnRef, alias2] = ref.split(ALIAS_SEPARATOR).map(trim);
+    return AliasNode.create(parseStringReference(columnRef), IdentifierNode.create(alias2));
   } else {
     return parseStringReference(ref);
   }
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler39 = connection.cancelQuery;
-    if (!handler39) {
+    const handler41 = connection.cancelQuery;
+    if (!handler41) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler39.bind(connection);
+    return handler41.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler39 = connection.killSession;
-    if (!handler39) {
+    const handler41 = connection.killSession;
+    if (!handler41) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler39.bind(connection);
+    return handler41.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -36325,8 +36325,8 @@ var init_expression_wrapper = __esm({
       get expressionType() {
         return void 0;
       }
-      as(alias) {
-        return new AliasedExpressionWrapper(this, alias);
+      as(alias2) {
+        return new AliasedExpressionWrapper(this, alias2);
       }
       or(...args) {
         return new OrWrapper(OrNode.create(this.#node, parseValueBinaryOperationOrExpression(args)));
@@ -36362,9 +36362,9 @@ var init_expression_wrapper = __esm({
     AliasedExpressionWrapper = class {
       #expr;
       #alias;
-      constructor(expr, alias) {
+      constructor(expr, alias2) {
         this.#expr = expr;
-        this.#alias = alias;
+        this.#alias = alias2;
       }
       /** @private */
       get expression() {
@@ -36387,8 +36387,8 @@ var init_expression_wrapper = __esm({
       get expressionType() {
         return void 0;
       }
-      as(alias) {
-        return new AliasedExpressionWrapper(this, alias);
+      as(alias2) {
+        return new AliasedExpressionWrapper(this, alias2);
       }
       or(...args) {
         return new _OrWrapper(OrNode.create(this.#node, parseValueBinaryOperationOrExpression(args)));
@@ -36415,8 +36415,8 @@ var init_expression_wrapper = __esm({
       get expressionType() {
         return void 0;
       }
-      as(alias) {
-        return new AliasedExpressionWrapper(this, alias);
+      as(alias2) {
+        return new AliasedExpressionWrapper(this, alias2);
       }
       and(...args) {
         return new _AndWrapper(AndNode.create(this.#node, parseValueBinaryOperationOrExpression(args)));
@@ -36721,8 +36721,8 @@ var init_select_query_builder = __esm({
           queryNode: SelectQueryNode.cloneWithSetOperations(this.#props.queryNode, parseSetOperations("except", expression, true))
         });
       }
-      as(alias) {
-        return new AliasedSelectQueryBuilderImpl(this, alias);
+      as(alias2) {
+        return new AliasedSelectQueryBuilderImpl(this, alias2);
       }
       clearSelect() {
         return new _a5({
@@ -36845,9 +36845,9 @@ var init_select_query_builder = __esm({
     AliasedSelectQueryBuilderImpl = class {
       #queryBuilder;
       #alias;
-      constructor(queryBuilder, alias) {
+      constructor(queryBuilder, alias2) {
         this.#queryBuilder = queryBuilder;
-        this.#alias = alias;
+        this.#alias = alias2;
       }
       get expression() {
         return this.#queryBuilder;
@@ -36984,8 +36984,8 @@ var init_aggregate_function_builder = __esm({
        * from "person"
        * ```
        */
-      as(alias) {
-        return new AliasedAggregateFunctionBuilder(this, alias);
+      as(alias2) {
+        return new AliasedAggregateFunctionBuilder(this, alias2);
       }
       /**
        * Adds a `distinct` clause inside the function.
@@ -37160,9 +37160,9 @@ var init_aggregate_function_builder = __esm({
     AliasedAggregateFunctionBuilder = class {
       #aggregateFunctionBuilder;
       #alias;
-      constructor(aggregateFunctionBuilder, alias) {
+      constructor(aggregateFunctionBuilder, alias2) {
         this.#aggregateFunctionBuilder = aggregateFunctionBuilder;
-        this.#alias = alias;
+        this.#alias = alias2;
       }
       /** @private */
       get expression() {
@@ -37618,8 +37618,8 @@ var init_json_path_builder = __esm({
       get expressionType() {
         return void 0;
       }
-      as(alias) {
-        return new AliasedJSONPathBuilder(this, alias);
+      as(alias2) {
+        return new AliasedJSONPathBuilder(this, alias2);
       }
       /**
        * Change the output type of the json path.
@@ -37640,9 +37640,9 @@ var init_json_path_builder = __esm({
     AliasedJSONPathBuilder = class {
       #jsonPath;
       #alias;
-      constructor(jsonPath, alias) {
+      constructor(jsonPath, alias2) {
         this.#jsonPath = jsonPath;
-        this.#alias = alias;
+        this.#alias = alias2;
       }
       /** @private */
       get expression() {
@@ -37968,8 +37968,8 @@ var init_dynamic_table_builder = __esm({
       constructor(table2) {
         this.#table = table2;
       }
-      as(alias) {
-        return new AliasedDynamicTableBuilder(this.#table, alias);
+      as(alias2) {
+        return new AliasedDynamicTableBuilder(this.#table, alias2);
       }
     };
     AliasedDynamicTableBuilder = class {
@@ -37981,9 +37981,9 @@ var init_dynamic_table_builder = __esm({
       get alias() {
         return this.#alias;
       }
-      constructor(table2, alias) {
+      constructor(table2, alias2) {
         this.#table = table2;
-        this.#alias = alias;
+        this.#alias = alias2;
       }
       toOperationNode() {
         return AliasNode.create(parseTable(this.#table), IdentifierNode.create(this.#alias));
@@ -38012,8 +38012,8 @@ function parseTableExpression(table2) {
 function parseAliasedTable(from) {
   const ALIAS_SEPARATOR = " as ";
   if (from.includes(ALIAS_SEPARATOR)) {
-    const [table2, alias] = from.split(ALIAS_SEPARATOR).map(trim2);
-    return AliasNode.create(parseTable(table2), IdentifierNode.create(alias));
+    const [table2, alias2] = from.split(ALIAS_SEPARATOR).map(trim2);
+    return AliasNode.create(parseTable(table2), IdentifierNode.create(alias2));
   } else {
     return parseTable(from);
   }
@@ -43514,8 +43514,8 @@ var init_raw_builder = __esm({
       get isRawBuilder() {
         return true;
       }
-      as(alias) {
-        return new AliasedRawBuilderImpl(this, alias);
+      as(alias2) {
+        return new AliasedRawBuilderImpl(this, alias2);
       }
       $castTo() {
         return new _RawBuilderImpl({ ...this.#props });
@@ -43553,9 +43553,9 @@ var init_raw_builder = __esm({
     AliasedRawBuilderImpl = class {
       #rawBuilder;
       #alias;
-      constructor(rawBuilder, alias) {
+      constructor(rawBuilder, alias2) {
         this.#rawBuilder = rawBuilder;
-        this.#alias = alias;
+        this.#alias = alias2;
       }
       get expression() {
         return this.#rawBuilder;
@@ -65064,7 +65064,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler39 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler41 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65084,7 +65084,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler39(internalContext).catch(async (e) => {
+    const response = await handler41(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65114,20 +65114,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler39) => {
+  return (path2, options, handler41) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler39);
+    }, handler41);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler39) {
+function createMiddleware(optionsOrHandler, handler41) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler39;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler41;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65155,14 +65155,14 @@ function createMiddleware(optionsOrHandler, handler39) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler39) {
+  function fn(optionsOrHandler, handler41) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler39) throw new Error("Middleware handler is required");
+    if (!handler41) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler39);
+    }, handler41);
   }
   return fn;
 };
@@ -65602,16 +65602,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler39 = route.data;
+    const handler41 = route.data;
     try {
-      const allowedMediaTypes = handler39.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler41.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler39.options.disableBody ? void 0 : await getBody(handler39.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler41.options.disableBody ? void 0 : await getBody(handler41.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65626,7 +65626,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler39(context2);
+      return await handler41(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65683,11 +65683,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler39 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler41 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler39(ctx));
+      return await runWithEndpointContext(ctx, () => handler41(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75826,8 +75826,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler39 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler39(request));
+      const { handler: handler41 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler41(request));
     },
     api,
     options,
@@ -76478,12 +76478,12 @@ var PgEnumColumn = class extends PgColumn {
 // node_modules/drizzle-orm/subquery.js
 var Subquery = class {
   static [entityKind] = "Subquery";
-  constructor(sql3, fields, alias, isWith = false, usedTables = []) {
+  constructor(sql3, fields, alias2, isWith = false, usedTables = []) {
     this._ = {
       brand: "Subquery",
       sql: sql3,
       selectedFields: fields,
-      alias,
+      alias: alias2,
       isWith,
       usedTables
     };
@@ -76807,11 +76807,11 @@ var SQL = class _SQL {
   getSQL() {
     return this;
   }
-  as(alias) {
-    if (alias === void 0) {
+  as(alias2) {
+    if (alias2 === void 0) {
       return this;
     }
-    return new _SQL.Aliased(this, alias);
+    return new _SQL.Aliased(this, alias2);
   }
   mapWith(decoder2) {
     this.decoder = typeof decoder2 === "function" ? { mapFromDriverValue: decoder2 } : decoder2;
@@ -77007,8 +77007,8 @@ var ColumnAliasProxyHandler = class {
   }
 };
 var TableAliasProxyHandler = class {
-  constructor(alias, replaceOriginalName) {
-    this.alias = alias;
+  constructor(alias2, replaceOriginalName) {
+    this.alias = alias2;
     this.replaceOriginalName = replaceOriginalName;
   }
   static [entityKind] = "TableAliasProxyHandler";
@@ -77051,8 +77051,8 @@ var TableAliasProxyHandler = class {
   }
 };
 var RelationTableAliasProxyHandler = class {
-  constructor(alias) {
-    this.alias = alias;
+  constructor(alias2) {
+    this.alias = alias2;
   }
   static [entityKind] = "RelationTableAliasProxyHandler";
   get(target, prop) {
@@ -77071,19 +77071,19 @@ function aliasedTableColumn(column, tableAlias) {
     new ColumnAliasProxyHandler(new Proxy(column.table, new TableAliasProxyHandler(tableAlias, false)))
   );
 }
-function mapColumnsInAliasedSQLToAlias(query, alias) {
-  return new SQL.Aliased(mapColumnsInSQLToAlias(query.sql, alias), query.fieldAlias);
+function mapColumnsInAliasedSQLToAlias(query, alias2) {
+  return new SQL.Aliased(mapColumnsInSQLToAlias(query.sql, alias2), query.fieldAlias);
 }
-function mapColumnsInSQLToAlias(query, alias) {
+function mapColumnsInSQLToAlias(query, alias2) {
   return sql2.join(query.queryChunks.map((c) => {
     if (is(c, Column)) {
-      return aliasedTableColumn(c, alias);
+      return aliasedTableColumn(c, alias2);
     }
     if (is(c, SQL)) {
-      return mapColumnsInSQLToAlias(c, alias);
+      return mapColumnsInSQLToAlias(c, alias2);
     }
     if (is(c, SQL.Aliased)) {
-      return mapColumnsInAliasedSQLToAlias(c, alias);
+      return mapColumnsInAliasedSQLToAlias(c, alias2);
     }
     return c;
   }));
@@ -81013,8 +81013,8 @@ var PgDialect = class {
     const tableName = table2[PgTable.Symbol.Name];
     const tableSchema = table2[PgTable.Symbol.Schema];
     const origTableName = table2[PgTable.Symbol.OriginalName];
-    const alias = tableName === origTableName ? void 0 : tableName;
-    const tableSql = sql2`${tableSchema ? sql2`${sql2.identifier(tableSchema)}.` : void 0}${sql2.identifier(origTableName)}${alias && sql2` ${sql2.identifier(alias)}`}`;
+    const alias2 = tableName === origTableName ? void 0 : tableName;
+    const tableSql = sql2`${tableSchema ? sql2`${sql2.identifier(tableSchema)}.` : void 0}${sql2.identifier(origTableName)}${alias2 && sql2` ${sql2.identifier(alias2)}`}`;
     const setSql = this.buildUpdateSet(table2, set);
     const fromSql = from && sql2.join([sql2.raw(" from "), this.buildFromTable(from)]);
     const joinsSql = this.buildJoins(joins);
@@ -81098,17 +81098,17 @@ var PgDialect = class {
         const tableName = table2[PgTable.Symbol.Name];
         const tableSchema = table2[PgTable.Symbol.Schema];
         const origTableName = table2[PgTable.Symbol.OriginalName];
-        const alias = tableName === origTableName ? void 0 : joinMeta.alias;
+        const alias2 = tableName === origTableName ? void 0 : joinMeta.alias;
         joinsArray.push(
-          sql2`${sql2.raw(joinMeta.joinType)} join${lateralSql} ${tableSchema ? sql2`${sql2.identifier(tableSchema)}.` : void 0}${sql2.identifier(origTableName)}${alias && sql2` ${sql2.identifier(alias)}`}${onSql}`
+          sql2`${sql2.raw(joinMeta.joinType)} join${lateralSql} ${tableSchema ? sql2`${sql2.identifier(tableSchema)}.` : void 0}${sql2.identifier(origTableName)}${alias2 && sql2` ${sql2.identifier(alias2)}`}${onSql}`
         );
       } else if (is(table2, View)) {
         const viewName = table2[ViewBaseConfig].name;
         const viewSchema = table2[ViewBaseConfig].schema;
         const origViewName = table2[ViewBaseConfig].originalName;
-        const alias = viewName === origViewName ? void 0 : joinMeta.alias;
+        const alias2 = viewName === origViewName ? void 0 : joinMeta.alias;
         joinsArray.push(
-          sql2`${sql2.raw(joinMeta.joinType)} join${lateralSql} ${viewSchema ? sql2`${sql2.identifier(viewSchema)}.` : void 0}${sql2.identifier(origViewName)}${alias && sql2` ${sql2.identifier(alias)}`}${onSql}`
+          sql2`${sql2.raw(joinMeta.joinType)} join${lateralSql} ${viewSchema ? sql2`${sql2.identifier(viewSchema)}.` : void 0}${sql2.identifier(origViewName)}${alias2 && sql2` ${sql2.identifier(alias2)}`}${onSql}`
         );
       } else {
         joinsArray.push(
@@ -81150,7 +81150,7 @@ var PgDialect = class {
     const fieldsList = fieldsFlat ?? orderSelectedFields(fields);
     for (const f of fieldsList) {
       if (is(f.field, Column) && getTableName(f.field.table) !== (is(table2, Subquery) ? table2._.alias : is(table2, PgViewBase) ? table2[ViewBaseConfig].name : is(table2, SQL) ? void 0 : getTableName(table2)) && !((table22) => joins?.some(
-        ({ alias }) => alias === (table22[Table.Symbol.IsAlias] ? getTableName(table22) : table22[Table.Symbol.BaseName])
+        ({ alias: alias2 }) => alias2 === (table22[Table.Symbol.IsAlias] ? getTableName(table22) : table22[Table.Symbol.BaseName])
       ))(f.field.table)) {
         const tableName = getTableName(f.field.table);
         throw new Error(
@@ -82757,15 +82757,15 @@ var PgSelectQueryBuilderBase = class extends TypedQueryBuilder {
     const { typings: _typings, ...rest } = this.dialect.sqlToQuery(this.getSQL());
     return rest;
   }
-  as(alias) {
+  as(alias2) {
     const usedTables = [];
     usedTables.push(...extractUsedTable(this.config.table));
     if (this.config.joins) {
       for (const it of this.config.joins) usedTables.push(...extractUsedTable(it.table));
     }
     return new Proxy(
-      new Subquery(this.getSQL(), this.config.fields, alias, false, [...new Set(usedTables)]),
-      new SelectionProxyHandler({ alias, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
+      new Subquery(this.getSQL(), this.config.fields, alias2, false, [...new Set(usedTables)]),
+      new SelectionProxyHandler({ alias: alias2, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
     );
   }
   /** @internal */
@@ -82866,7 +82866,7 @@ var QueryBuilder = class {
     this.dialect = is(dialect, PgDialect) ? dialect : void 0;
     this.dialectConfig = is(dialect, PgDialect) ? void 0 : dialect;
   }
-  $with = (alias, selection) => {
+  $with = (alias2, selection) => {
     const queryBuilder = this;
     const as = (qb) => {
       if (typeof qb === "function") {
@@ -82876,10 +82876,10 @@ var QueryBuilder = class {
         new WithSubquery(
           qb.getSQL(),
           selection ?? ("getSelectedFields" in qb ? qb.getSelectedFields() ?? {} : {}),
-          alias,
+          alias2,
           true
         ),
-        new SelectionProxyHandler({ alias, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
+        new SelectionProxyHandler({ alias: alias2, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
       );
     };
     return { as };
@@ -83773,7 +83773,7 @@ var PgDatabase = class {
    * const result = await db.with(sq).select({ name: sq.name }).from(sq);
    * ```
    */
-  $with = (alias, selection) => {
+  $with = (alias2, selection) => {
     const self2 = this;
     const as = (qb) => {
       if (typeof qb === "function") {
@@ -83783,10 +83783,10 @@ var PgDatabase = class {
         new WithSubquery(
           qb.getSQL(),
           selection ?? ("getSelectedFields" in qb ? qb.getSelectedFields() ?? {} : {}),
-          alias,
+          alias2,
           true
         ),
-        new SelectionProxyHandler({ alias, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
+        new SelectionProxyHandler({ alias: alias2, sqlAliasedBehavior: "alias", sqlBehavior: "error" })
       );
     };
     return { as };
@@ -84010,6 +84010,11 @@ async function hashQuery(sql3, params) {
   const hashArray = [...new Uint8Array(hashBuffer)];
   const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   return hashHex;
+}
+
+// node_modules/drizzle-orm/pg-core/alias.js
+function alias(table2, alias2) {
+  return new Proxy(table2, new TableAliasProxyHandler(alias2, false));
 }
 
 // node_modules/drizzle-orm/pg-core/session.js
@@ -84530,6 +84535,7 @@ __export(schema_exports, {
   clinicianOnlineLog: () => clinicianOnlineLog,
   clinicianProfiles: () => clinicianProfiles,
   intakeSessions: () => intakeSessions,
+  patientAssignments: () => patientAssignments,
   patientProfiles: () => patientProfiles,
   session: () => session,
   twoFactor: () => twoFactor2,
@@ -84729,6 +84735,13 @@ var auditEvents = pgTable("audit_events", {
   ip: varchar("ip", { length: 64 }),
   userAgent: varchar("user_agent", { length: 255 }),
   meta: jsonb("meta"),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var patientAssignments = pgTable("patient_assignments", {
+  id: serial("id").primaryKey(),
+  providerUserId: varchar("provider_user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
+  patientUserId: varchar("patient_user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
+  assignedBy: varchar("assigned_by", { length: 36 }).references(() => user.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow()
 });
 
@@ -85355,6 +85368,19 @@ function logErr(event, error3) {
   console.error(JSON.stringify({ event, error: error3 instanceof Error ? error3.message : String(error3) }));
 }
 
+// src/server/lib/scope.ts
+function providerScope() {
+  return process.env.PROVIDER_SCOPE === "assigned" ? "assigned" : "all";
+}
+async function visiblePatientIds(providerUserId, isAdmin) {
+  if (isAdmin || providerScope() === "all") return null;
+  const [assigned, treated] = await Promise.all([
+    db.select({ id: patientAssignments.patientUserId }).from(patientAssignments).where(eq(patientAssignments.providerUserId, providerUserId)),
+    db.select({ id: visits.patientUserId }).from(visits).where(or(eq(visits.clinicianUserId, providerUserId)))
+  ]);
+  return /* @__PURE__ */ new Set([...assigned.map((r) => r.id), ...treated.map((r) => r.id)]);
+}
+
 // src/server/api/provider/intakes/GET.ts
 async function handler9(req, res) {
   try {
@@ -85367,7 +85393,8 @@ async function handler9(req, res) {
     if (mfaRequired() && !dbUser[0].twoFactorEnabled) {
       return res.status(403).json({ error: "Two-step verification is required for clinician access", code: "mfa_required" });
     }
-    const intakes = await db.select({
+    const allowed = await visiblePatientIds(session2.user.id, !!dbUser[0].isAdmin);
+    const intakesAll = await db.select({
       id: intakeSessions.id,
       status: intakeSessions.status,
       chiefComplaint: intakeSessions.chiefComplaint,
@@ -85381,6 +85408,7 @@ async function handler9(req, res) {
       patientName: user.name,
       patientEmail: user.email
     }).from(intakeSessions).innerJoin(user, eq(intakeSessions.userId, user.id)).where(eq(intakeSessions.status, "complete")).orderBy(desc(intakeSessions.createdAt));
+    const intakes = allowed ? intakesAll.filter((i) => allowed.has(i.patientId)) : intakesAll;
     const patientIds = [...new Set(intakes.map((i) => i.patientId))];
     const profiles = patientIds.length > 0 ? await db.select().from(patientProfiles).where(inArray(patientProfiles.userId, patientIds)) : [];
     const profileMap = new Map(profiles.map((p) => [p.userId, p]));
@@ -85390,7 +85418,7 @@ async function handler9(req, res) {
       createdAt: intake.createdAt ? intake.createdAt.toISOString() : (/* @__PURE__ */ new Date()).toISOString(),
       profile: profileMap.get(intake.patientId) ?? null
     }));
-    audit(req, { action: "provider.intakes.list", actorUserId: session2.user.id, actorRole: dbUser[0].isAdmin ? "admin" : "provider", resourceType: "intake", meta: { count: result.length } });
+    audit(req, { action: "provider.intakes.list", actorUserId: session2.user.id, actorRole: dbUser[0].isAdmin ? "admin" : "provider", resourceType: "intake", meta: { count: result.length, scope: providerScope() } });
     res.json(result);
   } catch (error3) {
     console.error(
@@ -86411,6 +86439,49 @@ async function handler18(req, res) {
   }
 }
 
+// src/server/api/admin/assignments/GET.ts
+async function handler19(req, res) {
+  try {
+    const session2 = await getAuth().api.getSession({ headers: new Headers(req.headers) });
+    if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
+    const [me] = await db.select({ isAdmin: user.isAdmin }).from(user).where(eq(user.id, session2.user.id)).limit(1);
+    if (!me?.isAdmin) return res.status(403).json({ error: "Admin only" });
+    const provider = alias(user, "provider");
+    const patient = alias(user, "patient");
+    const rows = await db.select({ id: patientAssignments.id, providerId: provider.id, providerName: provider.name, providerEmail: provider.email, patientId: patient.id, patientName: patient.name, patientEmail: patient.email, createdAt: patientAssignments.createdAt }).from(patientAssignments).innerJoin(provider, eq(provider.id, patientAssignments.providerUserId)).innerJoin(patient, eq(patient.id, patientAssignments.patientUserId)).orderBy(desc(patientAssignments.createdAt)).limit(500);
+    res.json({ scope: providerScope(), assignments: rows.map((r) => ({ ...r, createdAt: r.createdAt ? r.createdAt.toISOString() : null })) });
+  } catch (error3) {
+    console.error(JSON.stringify({ event: "admin.assignments.get.error", error: error3 instanceof Error ? error3.message : String(error3) }));
+    res.status(500).json({ error: "Failed to load assignments" });
+  }
+}
+
+// src/server/api/admin/assignments/POST.ts
+async function handler20(req, res) {
+  try {
+    const session2 = await getAuth().api.getSession({ headers: new Headers(req.headers) });
+    if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
+    const [me] = await db.select({ isAdmin: user.isAdmin }).from(user).where(eq(user.id, session2.user.id)).limit(1);
+    if (!me?.isAdmin) return res.status(403).json({ error: "Admin only" });
+    const { providerId, patientId, remove } = req.body ?? {};
+    if (!providerId || !patientId) return res.status(400).json({ error: "providerId and patientId required" });
+    const [prov] = await db.select({ role: user.role, isAdmin: user.isAdmin }).from(user).where(eq(user.id, providerId)).limit(1);
+    if (!prov || prov.role !== "provider" && !prov.isAdmin) return res.status(400).json({ error: "Target is not a provider" });
+    const [pt] = await db.select({ id: user.id }).from(user).where(eq(user.id, patientId)).limit(1);
+    if (!pt) return res.status(404).json({ error: "Patient not found" });
+    if (remove) {
+      await db.delete(patientAssignments).where(and(eq(patientAssignments.providerUserId, providerId), eq(patientAssignments.patientUserId, patientId)));
+    } else {
+      await db.insert(patientAssignments).values({ providerUserId: providerId, patientUserId: patientId, assignedBy: session2.user.id }).onConflictDoNothing();
+    }
+    audit(req, { action: remove ? "admin.assignment.remove" : "admin.assignment.add", actorUserId: session2.user.id, actorRole: "admin", resourceType: "user", resourceId: providerId, patientUserId: patientId });
+    res.json({ ok: true });
+  } catch (error3) {
+    console.error(JSON.stringify({ event: "admin.assignments.post.error", error: error3 instanceof Error ? error3.message : String(error3) }));
+    res.status(500).json({ error: "Failed to update assignment" });
+  }
+}
+
 // src/server/lib/rate-limit.ts
 var store = /* @__PURE__ */ new Map();
 var lastSweep = Date.now();
@@ -86451,7 +86522,7 @@ function rateLimit(opts) {
 var byIp = (req) => `ip:${clientIp(req)}`;
 
 // src/server/api/dispatch/me/GET.ts
-async function handler19(req, res) {
+async function handler21(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -86474,7 +86545,7 @@ async function handler19(req, res) {
 
 // src/server/api/dispatch/me/PUT.ts
 var CREDENTIALS = /* @__PURE__ */ new Set(["MD", "DO", "NP", "PA"]);
-async function handler20(req, res) {
+async function handler22(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -86534,7 +86605,7 @@ async function handler20(req, res) {
 }
 
 // src/server/api/dispatch/queue/GET.ts
-async function handler21(req, res) {
+async function handler23(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -86737,7 +86808,7 @@ async function createTransfer(accountId, amountCents, visitId) {
 
 // src/server/api/dispatch/visits/POST.ts
 var CLINICIAN_TEXT_WINDOW_MS = 10 * 60 * 1e3;
-async function handler22(req, res) {
+async function handler24(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -86811,7 +86882,7 @@ async function notifyClinicians(acuity, state, base) {
 }
 
 // src/server/api/dispatch/visits/[id]/GET.ts
-async function handler23(req, res) {
+async function handler25(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -86850,7 +86921,7 @@ async function handler23(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/accept/POST.ts
-async function handler24(req, res) {
+async function handler26(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -86895,7 +86966,7 @@ async function handler24(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/release/POST.ts
-async function handler25(req, res) {
+async function handler27(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -86912,7 +86983,7 @@ async function handler25(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/complete/POST.ts
-async function handler26(req, res) {
+async function handler28(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -86942,7 +87013,7 @@ async function handler26(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/cancel/POST.ts
-async function handler27(req, res) {
+async function handler29(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -86967,13 +87038,13 @@ async function handler27(req, res) {
 }
 
 // src/server/api/dispatch/pricing/GET.ts
-function handler28(_req, res) {
+function handler30(_req, res) {
   res.json(pricing());
 }
 
 // src/server/api/dispatch/sweep/GET.ts
 var HOLD_HOURS = Number(process.env.VISIT_HOLD_HOURS ?? 4);
-async function handler29(req, res) {
+async function handler31(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -87041,7 +87112,7 @@ function rate(n, d) {
 }
 
 // src/server/api/dispatch/metrics/GET.ts
-async function handler30(req, res) {
+async function handler32(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87104,7 +87175,7 @@ async function handler30(req, res) {
 }
 
 // src/server/api/dispatch/earnings/GET.ts
-async function handler31(req, res) {
+async function handler33(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87126,7 +87197,7 @@ async function handler31(req, res) {
 }
 
 // src/server/api/dispatch/connect/onboard/POST.ts
-async function handler32(req, res) {
+async function handler34(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87148,7 +87219,7 @@ async function handler32(req, res) {
 }
 
 // src/server/api/stripe/webhook/POST.ts
-async function handler33(req, res) {
+async function handler35(req, res) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) return res.status(503).json({ error: "Webhook not configured" });
   const raw = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
@@ -87184,7 +87255,7 @@ async function handler33(req, res) {
 }
 
 // src/server/api/companion/checkins/GET.ts
-async function handler34(req, res) {
+async function handler36(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87213,7 +87284,7 @@ async function handler34(req, res) {
 }
 
 // src/server/api/companion/checkins/[id]/answer/POST.ts
-async function handler35(req, res) {
+async function handler37(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87240,7 +87311,7 @@ async function handler35(req, res) {
 
 // src/server/api/companion/run/GET.ts
 var EXPIRE_AFTER_DAYS = Number(process.env.CHECKIN_EXPIRE_DAYS ?? 7);
-async function handler36(req, res) {
+async function handler38(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -87274,7 +87345,7 @@ async function handler36(req, res) {
 }
 
 // src/server/api/provider/checkins/GET.ts
-async function handler37(req, res) {
+async function handler39(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87291,7 +87362,9 @@ async function handler37(req, res) {
       patientEmail: user.email,
       patientId: user.id
     }).from(checkins).innerJoin(intakeSessions, eq(intakeSessions.id, checkins.intakeSessionId)).innerJoin(user, eq(user.id, checkins.patientUserId)).where(and(eq(checkins.status, "escalated"), isNull2(checkins.acknowledgedAt))).orderBy(desc(checkins.answeredAt)).limit(50);
-    res.json(rows.map((r) => ({ ...r, answeredAt: r.answeredAt ? r.answeredAt.toISOString() : null })));
+    const allowed = await visiblePatientIds(ctx.userId, ctx.isAdmin);
+    const scoped = allowed ? rows.filter((r) => allowed.has(r.patientId)) : rows;
+    res.json(scoped.map((r) => ({ ...r, answeredAt: r.answeredAt ? r.answeredAt.toISOString() : null })));
   } catch (error3) {
     logErr("provider.checkins.error", error3);
     res.status(500).json({ error: "Failed to load escalations" });
@@ -87299,7 +87372,7 @@ async function handler37(req, res) {
 }
 
 // src/server/api/provider/checkins/[id]/acknowledge/POST.ts
-async function handler38(req, res) {
+async function handler40(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87458,7 +87531,7 @@ function normalizeCommerceApiBaseUrlEnv() {
 normalizeCommerceApiBaseUrlEnv();
 var app = (0, import_express.default)();
 app.set("trust proxy", true);
-app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler33);
+app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler35);
 app.use(import_express.default.json());
 app.use(import_express.default.urlencoded({ extended: true }));
 app.get("/api/auth/:action", handler);
@@ -87486,25 +87559,27 @@ app.post("/api/access-request", rlAccess, handler15);
 app.post("/api/speak", rlSpeak, handler16);
 app.get("/api/admin/access-requests", handler17);
 app.get("/api/admin/audit", handler18);
-app.get("/api/dispatch/me", handler19);
-app.put("/api/dispatch/me", handler20);
-app.get("/api/dispatch/queue", handler21);
-app.post("/api/dispatch/visits", rlRequest, handler22);
-app.get("/api/dispatch/visits/:id", handler23);
-app.post("/api/dispatch/visits/:id/accept", handler24);
-app.post("/api/dispatch/visits/:id/release", handler25);
-app.post("/api/dispatch/visits/:id/complete", handler26);
-app.post("/api/dispatch/visits/:id/cancel", handler27);
-app.get("/api/dispatch/pricing", handler28);
-app.get("/api/dispatch/sweep", handler29);
-app.get("/api/dispatch/metrics", handler30);
-app.get("/api/dispatch/earnings", handler31);
-app.post("/api/dispatch/connect/onboard", handler32);
-app.get("/api/companion/checkins", handler34);
-app.post("/api/companion/checkins/:id/answer", rlAnswer, handler35);
-app.get("/api/companion/run", handler36);
-app.get("/api/provider/checkins", handler37);
-app.post("/api/provider/checkins/:id/acknowledge", handler38);
+app.get("/api/admin/assignments", handler19);
+app.post("/api/admin/assignments", handler20);
+app.get("/api/dispatch/me", handler21);
+app.put("/api/dispatch/me", handler22);
+app.get("/api/dispatch/queue", handler23);
+app.post("/api/dispatch/visits", rlRequest, handler24);
+app.get("/api/dispatch/visits/:id", handler25);
+app.post("/api/dispatch/visits/:id/accept", handler26);
+app.post("/api/dispatch/visits/:id/release", handler27);
+app.post("/api/dispatch/visits/:id/complete", handler28);
+app.post("/api/dispatch/visits/:id/cancel", handler29);
+app.get("/api/dispatch/pricing", handler30);
+app.get("/api/dispatch/sweep", handler31);
+app.get("/api/dispatch/metrics", handler32);
+app.get("/api/dispatch/earnings", handler33);
+app.post("/api/dispatch/connect/onboard", handler34);
+app.get("/api/companion/checkins", handler36);
+app.post("/api/companion/checkins/:id/answer", rlAnswer, handler37);
+app.get("/api/companion/run", handler38);
+app.get("/api/provider/checkins", handler39);
+app.post("/api/provider/checkins/:id/acknowledge", handler40);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;

@@ -3,6 +3,7 @@ import { eq, desc, isNull, and } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
 import { checkins, intakeSessions, user } from '../../../db/schema.js';
 import { requireClinician, logErr } from '../../../lib/dispatch.js';
+import { visiblePatientIds } from '../../../lib/scope.js';
 
 /** Escalated check-ins nobody has acknowledged yet — the provider's "needs attention" list. */
 export default async function handler(req: Request, res: Response) {
@@ -29,7 +30,9 @@ export default async function handler(req: Request, res: Response) {
       .where(and(eq(checkins.status, 'escalated'), isNull(checkins.acknowledgedAt)))
       .orderBy(desc(checkins.answeredAt))
       .limit(50);
-    res.json(rows.map((r) => ({ ...r, answeredAt: r.answeredAt ? r.answeredAt.toISOString() : null })));
+    const allowed = await visiblePatientIds(ctx.userId, ctx.isAdmin);
+    const scoped = allowed ? rows.filter((r) => allowed.has(r.patientId)) : rows;
+    res.json(scoped.map((r) => ({ ...r, answeredAt: r.answeredAt ? r.answeredAt.toISOString() : null })));
   } catch (error) {
     logErr('provider.checkins.error', error);
     res.status(500).json({ error: 'Failed to load escalations' });
