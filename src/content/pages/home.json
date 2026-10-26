@@ -1,110 +1,110 @@
 {
   "hero": {
-    "badge": "Now in clinical beta",
+    "badge": "Clinical beta · Tennessee",
     "headline1": "Healthcare",
     "headline2": "That",
     "headlineAccent": "Thinks",
     "headline3": "Ahead.",
-    "subhead": "Acute Insight AI replaces paper forms and clunky portals with a conversational intake that adapts to each patient — talk or type, and it comes out clinically structured.",
+    "subhead": "Tell Ace what's wrong — by voice or text. You get a clear next step, and when a clinician is what you need, a licensed one who's online in your state takes your visit with your story already in front of them.",
     "ctaPrimary": "Start your intake",
-    "ctaSecondary": "For providers",
+    "ctaSecondary": "For clinicians",
     "stats": [
       {
         "id": "stat-1",
         "value": "Minutes",
-        "label": "to complete, by design"
+        "label": "to tell your story, not forms"
       },
       {
         "id": "stat-2",
-        "value": "Adaptive",
-        "label": "questions that follow your answers"
+        "value": "Licensed",
+        "label": "clinicians, matched to your state"
       },
       {
         "id": "stat-3",
-        "value": "Instant",
-        "label": "provider brief on submit"
+        "value": "Briefed",
+        "label": "before they ever call you"
       }
     ]
   },
   "howItWorks": {
     "eyebrow": "How It Works",
-    "headline": "Ask. Understand. Inform.",
-    "subhead": "Three intelligent steps that transform patient history into clinical clarity — before the appointment begins.",
+    "headline": "Ask. Triage. Connect.",
+    "subhead": "Three steps from \"something's wrong\" to a clinician who already knows what you said.",
     "steps": [
       {
         "id": "step-1",
         "step": "01",
         "title": "Ask",
         "subtitle": "Talk or type",
-        "description": "Patients tell their story in their own words — by voice or text. Ace asks the right follow-ups based on each answer, and skips what doesn't apply — no irrelevant questions, no dead ends."
+        "description": "Tell Ace what's going on in your own words. It asks the follow-ups a good clinician would, skips what doesn't apply, and stops when it has enough."
       },
       {
         "id": "step-2",
         "step": "02",
-        "title": "Understand",
-        "subtitle": "AI pattern recognition",
-        "description": "Responses are analyzed in real-time against clinical frameworks. The system identifies patterns, flags risk factors, and builds a structured medical history automatically."
+        "title": "Triage",
+        "subtitle": "A clear next step",
+        "description": "You get a suggested next step — self-care, a telehealth visit, same-day care, or 911 — with a plain-language reason and a safety net. Emergencies go straight to 911, never to a queue."
       },
       {
         "id": "step-3",
         "step": "03",
-        "title": "Inform",
-        "subtitle": "Instant provider brief",
-        "description": "Providers receive a concise, structured summary before the visit — chief complaint, relevant history, medications, and AI-flagged considerations. Walk in prepared."
+        "title": "Connect",
+        "subtitle": "A clinician who's online now",
+        "description": "For anything short of an emergency, request a clinician. Licensed clinicians online in your state see your brief — plan first, then the details — and the first to accept calls you. Ace checks back in two days later."
       }
     ]
   },
   "features": {
     "eyebrow": "Built Different",
-    "headline": "Precision at every step.",
+    "headline": "Built so no one starts from zero.",
     "rows": [
       {
         "id": "feat-1",
         "stat": "Adaptive",
-        "title": "AI-Adaptive Questioning",
-        "description": "The intake follows your answers the way a good triage conversation would. Chronic condition history triggers targeted follow-ups; straightforward concerns move quickly. No one answers questions that don't apply to them."
+        "title": "A conversation, not a form",
+        "description": "The intake follows your answers the way a good triage conversation would. Chronic history triggers targeted follow-ups; simple concerns move quickly. No one answers questions that don't apply to them."
       },
       {
         "id": "feat-2",
-        "stat": "Conversational",
-        "title": "Built for Completion",
-        "description": "Patients talk or type, whichever is easier — no wall of form fields. And the intake knows when it has enough: it stops asking instead of burning patients out."
+        "stat": "Matched",
+        "title": "Only clinicians licensed where you are",
+        "description": "You tell us the state you're in. Only clinicians licensed there — and set to take your level of concern — can see or accept your visit. The system won't let anyone cross that line."
       },
       {
         "id": "feat-3",
-        "stat": "Instant",
-        "title": "Instant Provider Briefing",
-        "description": "The moment a patient submits their intake, a structured clinical summary with flagged considerations is waiting in the provider dashboard. No chart-digging, no surprises — just focused, informed care from the first hello."
+        "stat": "Briefed",
+        "title": "The note is drafted before the call",
+        "description": "The clinician opens a draft brief built from your words: the plan first, then assessment, what to check, and your history. They review it, edit it, and decide. Ace doesn't diagnose, order, or prescribe."
       },
       {
         "id": "feat-4",
         "stat": "Private",
-        "title": "Private by Design",
-        "description": "Patient data is encrypted in transit, protected by role-based access, and never sold or shared. We're building toward full HIPAA-ready infrastructure ahead of general availability — and we'll tell you exactly where we stand."
+        "title": "Private by design",
+        "description": "Encrypted in transit, role-based access, two-step verification for clinicians, an append-only record of who viewed what. We're building toward full HIPAA-ready infrastructure ahead of general availability — and we'll tell you exactly where we stand."
       }
     ]
   },
   "providers": {
     "eyebrow": "For Clinicians",
-    "headline1": "Walk in knowing",
-    "headlineAccent": "everything.",
-    "subhead": "Before you enter the room, Acute Insight has already gathered, structured, and summarized your patient's history. Spend your time on care — not data collection.",
+    "headline1": "Go online.",
+    "headlineAccent": "Take a visit.",
+    "subhead": "Set your states and the acuity you'll accept. When a patient in your state needs you, you get a text, open a brief that's already written, call them, decide, and mark it complete. No clinic, no schedule, no front desk.",
     "benefits": [
       {
         "id": "ben-1",
-        "text": "Structured patient summary delivered pre-visit"
+        "text": "Draft note waiting before you pick up the phone — plan first, then the rest"
       },
       {
         "id": "ben-2",
-        "text": "AI-flagged red-flag symptoms and severity escalations"
+        "text": "Only patients in states where you're licensed, only acuity you've opted into"
       },
       {
         "id": "ben-3",
-        "text": "Complete intake history for every patient"
+        "text": "Emergencies routed to 911 before they reach any queue"
       },
       {
         "id": "ben-4",
-        "text": "Emergency screening before cases reach your queue"
+        "text": "Ace follows up at 48 hours and flags you if they get worse"
       }
     ],
     "cta": "Request early access"
@@ -112,16 +112,16 @@
   "ctaSection": {
     "patients": {
       "eyebrow": "For patients",
-      "headline1": "Ready to transform",
-      "headline2": "your intake?",
-      "body": "Complete your medical history in minutes — no typing marathon, no paper, no waiting room clipboard.",
-      "cta": "Start your intake"
+      "headline1": "Something's wrong?",
+      "headline2": "Just ask.",
+      "body": "Tell Ace what's going on. Get a next step in minutes, and a licensed clinician on the phone when that's what you need.",
+      "cta": "Start with Ace"
     },
     "clinicians": {
       "eyebrow": "For clinicians",
-      "headline1": "Built for",
-      "headline2": "clinicians.",
-      "body": "Structured summaries, flagged risks, and a dashboard that runs in any browser. No integration required to start.",
+      "headline1": "Off-week?",
+      "headline2": "Go online.",
+      "body": "Pick your states, pick your acuity, take visits when you want to. The brief is written before you call.",
       "cta": "Request early access"
     }
   }
