@@ -141,6 +141,8 @@ export const clinicianProfiles = pgTable('clinician_profiles', {
   maxAcuity: varchar('max_acuity', { length: 16 }).default('urgent'), // highest acuity accepted: urgent | telehealth | routine
   phone: varchar('phone', { length: 32 }),
   notifySms: boolean('notify_sms').default(true), // text me when a visit lands in my states while I'm online
+  stripeAccountId: varchar('stripe_account_id', { length: 80 }), // Stripe Connect Express account
+  payoutsEnabled: boolean('payouts_enabled').default(false), // set by the account.updated webhook
   online: boolean('online').default(false),
   lastSeenAt: timestamp('last_seen_at'),
   createdAt: timestamp('created_at').defaultNow(),
@@ -171,6 +173,10 @@ export const visits = pgTable('visits', {
   amountCents: integer('amount_cents'),
   stripeCheckoutId: varchar('stripe_checkout_id', { length: 80 }),
   stripePaymentIntent: varchar('stripe_payment_intent', { length: 80 }),
+  // Clinician payout for this visit (set on complete when a payout rate is configured)
+  payoutCents: integer('payout_cents'),
+  payoutStatus: varchar('payout_status', { length: 16 }).default('none'), // none | owed | transferred | failed
+  stripeTransferId: varchar('stripe_transfer_id', { length: 80 }),
   clinicianUserId: varchar('clinician_user_id', { length: 36 }).references(() => user.id, {
     onDelete: 'set null',
   }),

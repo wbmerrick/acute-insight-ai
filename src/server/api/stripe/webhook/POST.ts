@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
-import { visits } from '../../../db/schema.js';
+import { visits, clinicianProfiles } from '../../../db/schema.js';
 import { verifyWebhook } from '../../../lib/stripe.js';
 import { logErr } from '../../../lib/dispatch.js';
 import { notifyClinicians } from '../../dispatch/visits/POST.js';
@@ -40,6 +40,9 @@ export default async function handler(req: Request, res: Response) {
         const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
         void notifyClinicians(v.acuity, v.patientState, base);
       }
+    } else if (event.type === 'account.updated' && typeof obj.id === 'string') {
+      const enabled = obj.payouts_enabled === true && obj.charges_enabled !== false;
+      await db.update(clinicianProfiles).set({ payoutsEnabled: enabled }).where(eq(clinicianProfiles.stripeAccountId, obj.id));
     } else if ((event.type === 'checkout.session.expired' || event.type === 'checkout.session.async_payment_failed') && Number.isInteger(visitId)) {
       await db
         .update(visits)

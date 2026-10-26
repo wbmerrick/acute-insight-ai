@@ -484,6 +484,75 @@ function OpsPanel() {
   );
 }
 
+
+// ─── Earnings (only when payout rates are configured) ────────────────────────
+
+interface Earnings {
+  configured: boolean;
+  connectEnabled: boolean;
+  stripeAccountId: string | null;
+  payoutsEnabled: boolean;
+  totals: { owedCents: number; transferredCents: number; visits: number };
+  visits: { id: number; acuity: Acuity; state: string; completedAt: string | null; payoutCents: number | null; payoutStatus: string | null }[];
+}
+const usd = (c: number) => (c % 100 === 0 ? `$${(c / 100).toLocaleString()}` : `$${(c / 100).toFixed(2)}`);
+
+function EarningsPanel() {
+  const [e, setE] = useState<Earnings | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    api<Earnings>('/api/dispatch/earnings').then((d) => { if (!cancelled) setE(d); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+  if (!e || !e.configured) return null;
+  async function setup() {
+    setBusy(true); setErr('');
+    try {
+      const d = await api<{ url: string }>('/api/dispatch/connect/onboard', { method: 'POST' });
+      window.location.assign(d.url);
+    } catch (x) {
+      setErr(x instanceof Error ? x.message : 'Could not start payout setup');
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="rounded-2xl p-5" style={{ background: 'hsl(var(--card))', border: `1px solid hsl(var(--border-subtle) / 0.4)` }}>
+      <p className="text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'hsl(var(--text-dimmer))', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Earnings</p>
+      <div className="flex items-baseline justify-between gap-3 mt-1">
+        <h2 className="text-lg font-semibold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>{usd(e.totals.owedCents)} owed</h2>
+        <span className="text-xs" style={{ color: 'hsl(var(--text-dim))' }}>{usd(e.totals.transferredCents)} paid out · {e.totals.visits} completed visit{e.totals.visits === 1 ? '' : 's'}</span>
+      </div>
+      {e.connectEnabled ? (
+        e.payoutsEnabled ? (
+          <p className="text-xs mt-2" style={{ color: 'hsl(var(--primary))' }}>Payouts are set up. Owed amounts transfer automatically.</p>
+        ) : (
+          <div className="mt-3">
+            <p className="text-sm" style={{ color: 'hsl(var(--text-dim))' }}>{e.stripeAccountId ? 'Finish your payout setup to receive what you are owed.' : 'Set up payouts to receive what you are owed. Takes a few minutes with Stripe.'}</p>
+            <button type="button" disabled={busy} onClick={() => void setup()} className="mt-2 text-sm font-semibold px-4 py-2 rounded-lg disabled:opacity-50" style={{ background: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))', fontFamily: 'var(--font-heading)' }}>
+              {busy ? 'Opening…' : e.stripeAccountId ? 'Continue payout setup' : 'Set up payouts'}
+            </button>
+            {err && <p className="text-xs mt-2" style={{ color: 'hsl(var(--destructive))' }}>{err}</p>}
+          </div>
+        )
+      ) : (
+        <p className="text-xs mt-2" style={{ color: 'hsl(var(--text-dim))' }}>Your ledger accrues now; payouts switch on once the practice entity is set up.</p>
+      )}
+      {e.visits.length > 0 && (
+        <div className="mt-3 grid gap-1 text-xs" style={{ color: 'hsl(var(--text-dim))' }}>
+          {e.visits.slice(0, 5).map((v) => (
+            <div key={v.id} className="flex justify-between">
+              <span>{v.completedAt ? new Date(v.completedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''} · {ACUITY_LABEL[v.acuity] ?? v.acuity} · {v.state}</span>
+              <span style={{ color: v.payoutStatus === 'transferred' ? 'hsl(var(--primary))' : 'hsl(var(--foreground))' }}>{v.payoutCents ? usd(v.payoutCents) : '—'}{v.payoutStatus === 'transferred' ? ' paid' : v.payoutStatus === 'owed' ? '' : v.payoutStatus === 'failed' ? ' failed' : ' (unpaid visit)'}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 const POLL_MS = 5000;
@@ -594,6 +663,7 @@ function ClinicianContent() {
           <div className="grid lg:grid-cols-[380px_1fr] gap-6 items-start">
             <div className="grid gap-5">
               <AvailabilityPanel me={me} onChange={(m) => { setMe(m); void refresh(); }} />
+              <EarningsPanel />
 
               <div>
                 <div className="flex items-baseline justify-between mb-3">

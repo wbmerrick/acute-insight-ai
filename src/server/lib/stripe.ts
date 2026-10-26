@@ -151,3 +151,48 @@ export function signForTest(rawBody: string, secret: string, now = Date.now()): 
   const v1 = createHmac('sha256', secret).update(`${t}.${rawBody}`).digest('hex');
   return `t=${t},v1=${v1}`;
 }
+
+// ─── Clinician payouts (Stripe Connect Express) ──────────────────────────────
+// Gated separately from charging: STRIPE_CONNECT_ENABLED=true. Until the
+// physician-owned entity exists, nothing here runs — the ledger still accrues.
+
+export function connectEnabled(): boolean {
+  return stripeConfigured() && process.env.STRIPE_CONNECT_ENABLED === 'true';
+}
+
+/** Payout to the clinician for a visit of this acuity, from env; null = no payout configured. */
+export function payoutCentsFor(acuity: string, env: NodeJS.ProcessEnv = process.env): number | null {
+  const raw = env[`CLINICIAN_PAYOUT_${acuity.toUpperCase()}_CENTS`];
+  if (!raw) return null;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+
+export function payoutsConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
+  return ['urgent', 'telehealth', 'routine', 'selfcare'].some((a) => payoutCentsFor(a, env) !== null);
+}
+
+export async function createConnectAccount(email: string, userId: string): Promise<{ id: string }> {
+  return stripePost<{ id: string }>('/accounts', {
+    type: 'express',
+    country: 'US',
+    email,
+    capabilities: { transfers: { requested: true } },
+    business_type: 'individual',
+    metadata: { user_id: userId },
+  }, `connect-account-${userId}`);
+}
+
+export async function createAccountLink(accountId: string, refreshUrl: string, returnUrl: string): Promise<{ url: string }> {
+  return stripePost<{ url: string }>('/account_links', { account: accountId, refresh_url: refreshUrl, return_url: returnUrl, type: 'account_onboarding' });
+}
+
+export async function createTransfer(accountId: string, amountCents: number, visitId: number): Promise<{ id: string }> {
+  return stripePost<{ id: string }>('/transfers', {
+    amount: amountCents,
+    currency: 'usd',
+    destination: accountId,
+    description: `Acute Insight visit #${visitId}`,
+    metadata: { visit_id: String(visitId) },
+  }, `transfer-visit-${visitId}`);
+}

@@ -40,3 +40,14 @@ describe('stripe helpers', () => {
     expect(formatUsd(2950)).toBe('$29.50');
   });
 });
+
+describe('payouts', () => {
+  it('payout rates come only from env', async () => {
+    const { payoutCentsFor, payoutsConfigured, connectEnabled } = await import('./stripe.js');
+    expect(payoutCentsFor('routine', {})).toBeNull();
+    expect(payoutCentsFor('routine', { CLINICIAN_PAYOUT_ROUTINE_CENTS: '2500' })).toBe(2500);
+    expect(payoutsConfigured({})).toBe(false);
+    expect(payoutsConfigured({ CLINICIAN_PAYOUT_URGENT_CENTS: '5500' })).toBe(true);
+    expect(connectEnabled()).toBe(false);
+  });
+});

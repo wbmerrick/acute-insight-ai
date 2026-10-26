@@ -4,6 +4,7 @@ import { db } from '../../../../../db/client.js';
 import { visits, intakeSessions } from '../../../../../db/schema.js';
 import { requireClinician, logErr } from '../../../../../lib/dispatch.js';
 import { scheduleCheckin } from '../../../../../lib/companion.js';
+import { payoutCentsFor } from '../../../../../lib/stripe.js';
 
 export default async function handler(req: Request, res: Response) {
   try {
@@ -16,7 +17,7 @@ export default async function handler(req: Request, res: Response) {
       .update(visits)
       .set({ status: 'completed', completedAt: new Date() })
       .where(and(eq(visits.id, id), eq(visits.status, 'accepted'), eq(visits.clinicianUserId, ctx.userId)))
-      .returning({ id: visits.id, intakeSessionId: visits.intakeSessionId, patientUserId: visits.patientUserId });
+      .returning({ id: visits.id, intakeSessionId: visits.intakeSessionId, patientUserId: visits.patientUserId, acuity: visits.acuity, paymentStatus: visits.paymentStatus });
     if (!done) return res.status(404).json({ error: 'No active visit to complete' });
 
     // Stamp the intake with who saw the patient so the portal timeline shows it.
@@ -24,6 +25,12 @@ export default async function handler(req: Request, res: Response) {
     if (name) {
       await db.update(intakeSessions).set({ providerName: name }).where(eq(intakeSessions.id, done.intakeSessionId));
     }
+    // Ledger: a captured (paid) visit earns the clinician the configured payout.
+    const payout = payoutCentsFor(done.acuity);
+    if (payout && done.paymentStatus === 'captured') {
+      await db.update(visits).set({ payoutCents: payout, payoutStatus: 'owed' }).where(eq(visits.id, done.id));
+    }
+
     // Ace checks in 48h after every completed visit.
     try {
       await scheduleCheckin(done.intakeSessionId, done.patientUserId, 'post_visit');

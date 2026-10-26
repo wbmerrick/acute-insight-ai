@@ -30,6 +30,8 @@ import dispatch__visits__id__cancel__post from "./api/dispatch/visits/[id]/cance
 import dispatch__pricing__get from "./api/dispatch/pricing/GET";
 import dispatch__sweep__get from "./api/dispatch/sweep/GET";
 import dispatch__metrics__get from "./api/dispatch/metrics/GET";
+import dispatch__earnings__get from "./api/dispatch/earnings/GET";
+import dispatch__connect__onboard__post from "./api/dispatch/connect/onboard/POST";
 import stripe__webhook__post from "./api/stripe/webhook/POST";
 import companion__checkins__get from "./api/companion/checkins/GET";
 import companion__checkins__id__answer__post from "./api/companion/checkins/[id]/answer/POST";
@@ -312,6 +314,8 @@ app.post("/api/dispatch/visits/:id/cancel", dispatch__visits__id__cancel__post);
 app.get("/api/dispatch/pricing", dispatch__pricing__get);
 app.get("/api/dispatch/sweep", dispatch__sweep__get);
 app.get("/api/dispatch/metrics", dispatch__metrics__get);
+app.get("/api/dispatch/earnings", dispatch__earnings__get);
+app.post("/api/dispatch/connect/onboard", dispatch__connect__onboard__post);
 app.get("/api/companion/checkins", companion__checkins__get);
 app.post("/api/companion/checkins/:id/answer", companion__checkins__id__answer__post);
 app.get("/api/companion/run", companion__run__get);

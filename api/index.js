@@ -20952,7 +20952,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler36) {
+    Route.prototype.all = function all(handler38) {
       const callbacks = flatten2.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -20970,7 +20970,7 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler36) {
+      Route.prototype[method] = function(handler38) {
         const callbacks = flatten2.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -21173,17 +21173,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler36) {
+    Router.prototype.use = function use2(handler38) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler36 !== "function") {
-        let arg = handler36;
+      if (typeof handler38 !== "function") {
+        let arg = handler38;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler36;
+          path2 = handler38;
         }
       }
       const callbacks = flatten2.call(slice.call(arguments, offset), Infinity);
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler36 = connection.cancelQuery;
-    if (!handler36) {
+    const handler38 = connection.cancelQuery;
+    if (!handler38) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler36.bind(connection);
+    return handler38.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler36 = connection.killSession;
-    if (!handler36) {
+    const handler38 = connection.killSession;
+    if (!handler38) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler36.bind(connection);
+    return handler38.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -65039,7 +65039,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler36 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler38 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65059,7 +65059,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler36(internalContext).catch(async (e) => {
+    const response = await handler38(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65089,20 +65089,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler36) => {
+  return (path2, options, handler38) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler36);
+    }, handler38);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler36) {
+function createMiddleware(optionsOrHandler, handler38) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler36;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler38;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65130,14 +65130,14 @@ function createMiddleware(optionsOrHandler, handler36) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler36) {
+  function fn(optionsOrHandler, handler38) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler36) throw new Error("Middleware handler is required");
+    if (!handler38) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler36);
+    }, handler38);
   }
   return fn;
 };
@@ -65577,16 +65577,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler36 = route.data;
+    const handler38 = route.data;
     try {
-      const allowedMediaTypes = handler36.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler38.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler36.options.disableBody ? void 0 : await getBody(handler36.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler38.options.disableBody ? void 0 : await getBody(handler38.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65601,7 +65601,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler36(context2);
+      return await handler38(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65658,11 +65658,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler36 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler38 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler36(ctx));
+      return await runWithEndpointContext(ctx, () => handler38(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75796,8 +75796,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler36 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler36(request));
+      const { handler: handler38 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler38(request));
     },
     api,
     options,
@@ -83458,6 +83458,10 @@ var clinicianProfiles = pgTable("clinician_profiles", {
   phone: varchar("phone", { length: 32 }),
   notifySms: boolean4("notify_sms").default(true),
   // text me when a visit lands in my states while I'm online
+  stripeAccountId: varchar("stripe_account_id", { length: 80 }),
+  // Stripe Connect Express account
+  payoutsEnabled: boolean4("payouts_enabled").default(false),
+  // set by the account.updated webhook
   online: boolean4("online").default(false),
   lastSeenAt: timestamp("last_seen_at"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -83479,6 +83483,11 @@ var visits = pgTable("visits", {
   amountCents: integer2("amount_cents"),
   stripeCheckoutId: varchar("stripe_checkout_id", { length: 80 }),
   stripePaymentIntent: varchar("stripe_payment_intent", { length: 80 }),
+  // Clinician payout for this visit (set on complete when a payout rate is configured)
+  payoutCents: integer2("payout_cents"),
+  payoutStatus: varchar("payout_status", { length: 16 }).default("none"),
+  // none | owed | transferred | failed
+  stripeTransferId: varchar("stripe_transfer_id", { length: 80 }),
   clinicianUserId: varchar("clinician_user_id", { length: 36 }).references(() => user.id, {
     onDelete: "set null"
   }),
@@ -85290,6 +85299,40 @@ function verifyWebhook(rawBody, sigHeader, secret, toleranceSec = 300, now2 = Da
   const b = Buffer.from(v1);
   return a.length === b.length && timingSafeEqual2(a, b);
 }
+function connectEnabled() {
+  return stripeConfigured() && process.env.STRIPE_CONNECT_ENABLED === "true";
+}
+function payoutCentsFor(acuity, env3 = process.env) {
+  const raw = env3[`CLINICIAN_PAYOUT_${acuity.toUpperCase()}_CENTS`];
+  if (!raw) return null;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+function payoutsConfigured(env3 = process.env) {
+  return ["urgent", "telehealth", "routine", "selfcare"].some((a) => payoutCentsFor(a, env3) !== null);
+}
+async function createConnectAccount(email3, userId) {
+  return stripePost("/accounts", {
+    type: "express",
+    country: "US",
+    email: email3,
+    capabilities: { transfers: { requested: true } },
+    business_type: "individual",
+    metadata: { user_id: userId }
+  }, `connect-account-${userId}`);
+}
+async function createAccountLink(accountId, refreshUrl, returnUrl) {
+  return stripePost("/account_links", { account: accountId, refresh_url: refreshUrl, return_url: returnUrl, type: "account_onboarding" });
+}
+async function createTransfer(accountId, amountCents, visitId) {
+  return stripePost("/transfers", {
+    amount: amountCents,
+    currency: "usd",
+    destination: accountId,
+    description: `Acute Insight visit #${visitId}`,
+    metadata: { visit_id: String(visitId) }
+  }, `transfer-visit-${visitId}`);
+}
 
 // src/server/api/dispatch/visits/POST.ts
 var CLINICIAN_TEXT_WINDOW_MS = 10 * 60 * 1e3;
@@ -85470,11 +85513,15 @@ async function handler25(req, res) {
     if (!ctx) return;
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid visit id" });
-    const [done] = await db.update(visits).set({ status: "completed", completedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, id), eq(visits.status, "accepted"), eq(visits.clinicianUserId, ctx.userId))).returning({ id: visits.id, intakeSessionId: visits.intakeSessionId, patientUserId: visits.patientUserId });
+    const [done] = await db.update(visits).set({ status: "completed", completedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, id), eq(visits.status, "accepted"), eq(visits.clinicianUserId, ctx.userId))).returning({ id: visits.id, intakeSessionId: visits.intakeSessionId, patientUserId: visits.patientUserId, acuity: visits.acuity, paymentStatus: visits.paymentStatus });
     if (!done) return res.status(404).json({ error: "No active visit to complete" });
     const name = ctx.profile.displayName?.trim();
     if (name) {
       await db.update(intakeSessions).set({ providerName: name }).where(eq(intakeSessions.id, done.intakeSessionId));
+    }
+    const payout = payoutCentsFor(done.acuity);
+    if (payout && done.paymentStatus === "captured") {
+      await db.update(visits).set({ payoutCents: payout, payoutStatus: "owed" }).where(eq(visits.id, done.id));
     }
     try {
       await scheduleCheckin(done.intakeSessionId, done.patientUserId, "post_visit");
@@ -85537,8 +85584,25 @@ async function handler28(req, res) {
         }
       }
     }
-    console.log(JSON.stringify({ event: "dispatch.sweep", cancelled: stale.length, released, holdHours: HOLD_HOURS }));
-    res.json({ ok: true, cancelled: stale.length, released });
+    let transferred = 0;
+    if (connectEnabled()) {
+      const owed = await db.select({ id: visits.id, cents: visits.payoutCents, clinicianUserId: visits.clinicianUserId }).from(visits).where(eq(visits.payoutStatus, "owed")).limit(100);
+      for (const v of owed) {
+        if (!v.cents || !v.clinicianUserId) continue;
+        const [c] = await db.select({ acct: clinicianProfiles.stripeAccountId, ready: clinicianProfiles.payoutsEnabled }).from(clinicianProfiles).where(eq(clinicianProfiles.userId, v.clinicianUserId)).limit(1);
+        if (!c?.acct || !c.ready) continue;
+        try {
+          const t = await createTransfer(c.acct, v.cents, v.id);
+          await db.update(visits).set({ payoutStatus: "transferred", stripeTransferId: t.id }).where(and(eq(visits.id, v.id), eq(visits.payoutStatus, "owed")));
+          transferred++;
+        } catch (err) {
+          logErr("dispatch.sweep.transfer_failed", err);
+          await db.update(visits).set({ payoutStatus: "failed" }).where(eq(visits.id, v.id));
+        }
+      }
+    }
+    console.log(JSON.stringify({ event: "dispatch.sweep", cancelled: stale.length, released, transferred, holdHours: HOLD_HOURS }));
+    res.json({ ok: true, cancelled: stale.length, released, transferred });
   } catch (error3) {
     logErr("dispatch.sweep.error", error3);
     res.status(500).json({ error: "Sweep failed" });
@@ -85632,8 +85696,52 @@ async function handler29(req, res) {
   }
 }
 
-// src/server/api/stripe/webhook/POST.ts
+// src/server/api/dispatch/earnings/GET.ts
 async function handler30(req, res) {
+  try {
+    const ctx = await requireClinician(req, res);
+    if (!ctx) return;
+    const configured = payoutsConfigured();
+    const rows = configured ? await db.select({ id: visits.id, acuity: visits.acuity, state: visits.patientState, completedAt: visits.completedAt, payoutCents: visits.payoutCents, payoutStatus: visits.payoutStatus, paymentStatus: visits.paymentStatus }).from(visits).where(and(eq(visits.clinicianUserId, ctx.userId), eq(visits.status, "completed"))).orderBy(desc(visits.completedAt)).limit(200) : [];
+    const sum = (st) => rows.filter((r) => r.payoutStatus === st).reduce((s, r) => s + (r.payoutCents ?? 0), 0);
+    res.json({
+      configured,
+      connectEnabled: connectEnabled(),
+      stripeAccountId: ctx.profile.stripeAccountId,
+      payoutsEnabled: !!ctx.profile.payoutsEnabled,
+      totals: { owedCents: sum("owed"), transferredCents: sum("transferred"), visits: rows.length },
+      visits: rows.map((r) => ({ ...r, completedAt: r.completedAt ? r.completedAt.toISOString() : null }))
+    });
+  } catch (error3) {
+    logErr("dispatch.earnings.error", error3);
+    res.status(500).json({ error: "Failed to load earnings" });
+  }
+}
+
+// src/server/api/dispatch/connect/onboard/POST.ts
+async function handler31(req, res) {
+  try {
+    const ctx = await requireClinician(req, res);
+    if (!ctx) return;
+    if (!connectEnabled()) return res.status(503).json({ error: "Payouts are not enabled yet" });
+    let accountId = ctx.profile.stripeAccountId;
+    if (!accountId) {
+      const [u] = await db.select({ email: user.email }).from(user).where(eq(user.id, ctx.userId)).limit(1);
+      const acct = await createConnectAccount(u?.email ?? "", ctx.userId);
+      accountId = acct.id;
+      await db.update(clinicianProfiles).set({ stripeAccountId: accountId }).where(eq(clinicianProfiles.userId, ctx.userId));
+    }
+    const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
+    const link = await createAccountLink(accountId, `${base}/clinician?connect=refresh`, `${base}/clinician?connect=done`);
+    res.json({ ok: true, url: link.url });
+  } catch (error3) {
+    logErr("dispatch.connect.onboard.error", error3);
+    res.status(500).json({ error: "Could not start payout setup" });
+  }
+}
+
+// src/server/api/stripe/webhook/POST.ts
+async function handler32(req, res) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) return res.status(503).json({ error: "Webhook not configured" });
   const raw = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
@@ -85655,6 +85763,9 @@ async function handler30(req, res) {
         const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
         void notifyClinicians(v.acuity, v.patientState, base);
       }
+    } else if (event.type === "account.updated" && typeof obj.id === "string") {
+      const enabled = obj.payouts_enabled === true && obj.charges_enabled !== false;
+      await db.update(clinicianProfiles).set({ payoutsEnabled: enabled }).where(eq(clinicianProfiles.stripeAccountId, obj.id));
     } else if ((event.type === "checkout.session.expired" || event.type === "checkout.session.async_payment_failed") && Number.isInteger(visitId)) {
       await db.update(visits).set({ status: "cancelled", paymentStatus: "failed" }).where(and(eq(visits.id, visitId), eq(visits.status, "pending_payment")));
     }
@@ -85666,7 +85777,7 @@ async function handler30(req, res) {
 }
 
 // src/server/api/companion/checkins/GET.ts
-async function handler31(req, res) {
+async function handler33(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -85695,7 +85806,7 @@ async function handler31(req, res) {
 }
 
 // src/server/api/companion/checkins/[id]/answer/POST.ts
-async function handler32(req, res) {
+async function handler34(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -85722,7 +85833,7 @@ async function handler32(req, res) {
 
 // src/server/api/companion/run/GET.ts
 var EXPIRE_AFTER_DAYS = Number(process.env.CHECKIN_EXPIRE_DAYS ?? 7);
-async function handler33(req, res) {
+async function handler35(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -85756,7 +85867,7 @@ async function handler33(req, res) {
 }
 
 // src/server/api/provider/checkins/GET.ts
-async function handler34(req, res) {
+async function handler36(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85781,7 +85892,7 @@ async function handler34(req, res) {
 }
 
 // src/server/api/provider/checkins/[id]/acknowledge/POST.ts
-async function handler35(req, res) {
+async function handler37(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85939,7 +86050,7 @@ function normalizeCommerceApiBaseUrlEnv() {
 normalizeCommerceApiBaseUrlEnv();
 var app = (0, import_express.default)();
 app.set("trust proxy", true);
-app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler30);
+app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler32);
 app.use(import_express.default.json());
 app.use(import_express.default.urlencoded({ extended: true }));
 app.get("/api/auth/:action", handler);
@@ -85971,11 +86082,13 @@ app.post("/api/dispatch/visits/:id/cancel", handler26);
 app.get("/api/dispatch/pricing", handler27);
 app.get("/api/dispatch/sweep", handler28);
 app.get("/api/dispatch/metrics", handler29);
-app.get("/api/companion/checkins", handler31);
-app.post("/api/companion/checkins/:id/answer", handler32);
-app.get("/api/companion/run", handler33);
-app.get("/api/provider/checkins", handler34);
-app.post("/api/provider/checkins/:id/acknowledge", handler35);
+app.get("/api/dispatch/earnings", handler30);
+app.post("/api/dispatch/connect/onboard", handler31);
+app.get("/api/companion/checkins", handler33);
+app.post("/api/companion/checkins/:id/answer", handler34);
+app.get("/api/companion/run", handler35);
+app.get("/api/provider/checkins", handler36);
+app.post("/api/provider/checkins/:id/acknowledge", handler37);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;
