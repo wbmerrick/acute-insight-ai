@@ -6,7 +6,7 @@ import { getAuth } from '../../../../../lib/auth/auth.js';
 import { aiAvailable, generateClinicalBrief } from '../../../../lib/ai.js';
 import { buildTemplateClinicalBrief } from '../../../../lib/intake-fallback.js';
 import { ACUITY_LEVELS } from '../../../../../lib/clinical-brief.js';
-import { scheduleCheckin, intakeCheckinReason, resolveCheckin } from '../../../../lib/companion.js';
+import { scheduleCheckin, intakeCheckinReason, resolveCheckin, notifyClinicianOfEscalation } from '../../../../lib/companion.js';
 
 interface QAPair {
   questionId: string;
@@ -86,7 +86,7 @@ export default async function handler(req: Request, res: Response) {
       );
 
     // Companion: this intake either answers a check-in (and may escalate) or earns one.
-    let checkin: { escalated: boolean; note: string | null } | null = null;
+    let checkin: { escalated: boolean; note: string | null; intakeSessionId?: number } | null = null;
     try {
       if (Number.isInteger(checkinId)) {
         checkin = await resolveCheckin({
@@ -96,6 +96,14 @@ export default async function handler(req: Request, res: Response) {
           followupBrief: brief,
           outcome: outcome ?? null,
         });
+        if (checkin?.escalated && checkin.intakeSessionId) {
+          void notifyClinicianOfEscalation({
+            intakeSessionId: checkin.intakeSessionId,
+            patientUserId: session.user.id,
+            followupLevel: brief.disposition.level,
+            base: process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`,
+          });
+        }
       } else {
         const reason = intakeCheckinReason(brief.disposition.level);
         if (reason) await scheduleCheckin(intakeId, session.user.id, reason);

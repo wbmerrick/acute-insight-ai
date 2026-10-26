@@ -14,6 +14,7 @@ export default async function handler(req: Request, res: Response) {
       online: !!p.online,
       phone: p.phone,
       notifySms: p.notifySms !== false,
+      isAdmin: ctx.isAdmin,
     });
   } catch (error) {
     logErr('dispatch.me.get.error', error);

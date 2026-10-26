@@ -17,6 +17,7 @@ interface Me {
   online: boolean;
   phone: string | null;
   notifySms: boolean;
+  isAdmin?: boolean;
 }
 
 interface QueueItem {
@@ -407,6 +408,82 @@ function ActiveVisitPanel({ visit, now, onDone }: { visit: ActiveVisit; now: num
   );
 }
 
+
+// ─── Operations panel (admin) — the numbers the marketplace lives on ─────────
+
+interface Metrics {
+  windowDays: number;
+  visits: { requested: number; queuedNow: number; accepted: number; completed: number; cancelled: number; acceptanceRate: number | null; byAcuity: Record<string, number>; byState: Record<string, number> };
+  wait: { medianMin: number | null; p90Min: number | null; n: number };
+  visitLength: { medianMin: number | null; n: number };
+  supply: { onlineNow: number; onlineHours: number; visitsPerOnlineHour: number | null };
+  revenue: { capturedCents: number };
+  companion: { sent: number; answered: number; escalated: number; responseRate: number | null };
+}
+
+const fmtMin = (m: number | null) => (m === null ? '—' : m < 1 ? '<1 min' : m < 90 ? `${Math.round(m)} min` : `${(m / 60).toFixed(1)} h`);
+const fmtPct = (r: number | null) => (r === null ? '—' : `${Math.round(r * 100)}%`);
+
+function Stat({ label, value, sub, warn }: { label: string; value: string; sub?: string; warn?: boolean }) {
+  return (
+    <div className="rounded-xl px-4 py-3" style={{ background: 'hsl(var(--surface-deeper))', border: `1px solid hsl(var(--border-subtle) / 0.4)` }}>
+      <p className="text-xs" style={{ color: 'hsl(var(--text-dim))' }}>{label}</p>
+      <p className="text-xl font-semibold mt-0.5" style={{ fontFamily: 'var(--font-heading)', color: warn ? 'hsl(var(--warning))' : 'hsl(var(--foreground))' }}>{value}</p>
+      {sub && <p className="text-[11px] mt-0.5" style={{ fontFamily: 'var(--font-mono)', color: 'hsl(var(--text-dimmer))' }}>{sub}</p>}
+    </div>
+  );
+}
+
+function OpsPanel() {
+  const [days, setDays] = useState(7);
+  const [m, setM] = useState<Metrics | null>(null);
+  const [err, setErr] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    api<Metrics>(`/api/dispatch/metrics?days=${days}`).then((d) => { if (!cancelled) setM(d); }).catch((e) => { if (!cancelled) setErr(e instanceof Error ? e.message : 'Failed'); });
+    return () => { cancelled = true; };
+  }, [days]);
+  if (err) return <p className="text-xs" style={{ color: 'hsl(var(--destructive))' }}>{err}</p>;
+  if (!m) return null;
+  const none = m.visits.requested === 0;
+  return (
+    <div className="rounded-2xl p-5" style={{ background: 'hsl(var(--card))', border: `1px solid hsl(var(--border-subtle) / 0.4)` }}>
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <div>
+          <p className="text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'hsl(var(--text-dimmer))', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Operations</p>
+          <h2 className="text-base font-semibold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>How the marketplace is running</h2>
+        </div>
+        <div className="flex gap-1">
+          {[1, 7, 30].map((d) => (
+            <button key={d} type="button" onClick={() => setDays(d)} className="text-xs px-2.5 py-1 rounded-md" style={{ fontFamily: 'var(--font-mono)', background: days === d ? 'hsl(var(--primary) / 0.15)' : 'transparent', color: days === d ? 'hsl(var(--primary))' : 'hsl(var(--text-dim))', border: `1px solid ${days === d ? 'hsl(var(--primary) / 0.4)' : 'hsl(var(--border-subtle) / 0.4)'}` }}>
+              {d}d
+            </button>
+          ))}
+        </div>
+      </div>
+      {none ? (
+        <p className="text-sm" style={{ color: 'hsl(var(--text-dim))' }}>No visit requests in the last {m.windowDays} day{m.windowDays === 1 ? '' : 's'}. Numbers appear here as real visits happen — nothing is estimated.</p>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2">
+            <Stat label="Median wait to clinician" value={fmtMin(m.wait.medianMin)} sub={`p90 ${fmtMin(m.wait.p90Min)} · n=${m.wait.n}`} warn={m.wait.medianMin !== null && m.wait.medianMin > 10} />
+            <Stat label="Visits per online hour" value={m.supply.visitsPerOnlineHour === null ? '—' : String(m.supply.visitsPerOnlineHour)} sub={`${m.supply.onlineHours} clinician-hours online`} />
+            <Stat label="Acceptance rate" value={fmtPct(m.visits.acceptanceRate)} sub={`${m.visits.accepted} of ${m.visits.requested} requested`} />
+            <Stat label="Completed" value={String(m.visits.completed)} sub={`${m.visits.cancelled} cancelled · ${m.visits.queuedNow} waiting now`} />
+            <Stat label="Median visit length" value={fmtMin(m.visitLength.medianMin)} sub={`n=${m.visitLength.n}`} />
+            <Stat label="Captured" value={m.revenue.capturedCents ? `$${(m.revenue.capturedCents / 100).toLocaleString()}` : '$0'} sub={m.revenue.capturedCents ? 'paid visits' : 'payments not yet enabled or no paid visits'} />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <Stat label="Ace check-ins answered" value={fmtPct(m.companion.responseRate)} sub={`${m.companion.answered} of ${m.companion.sent} sent`} />
+            <Stat label="Escalated after care" value={String(m.companion.escalated)} warn={m.companion.escalated > 0} />
+            <Stat label="Online now" value={String(m.supply.onlineNow)} sub={Object.entries(m.visits.byState).map(([k, v]) => `${k} ${v}`).join(' · ') || undefined} />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 const POLL_MS = 5000;
@@ -546,6 +623,7 @@ function ClinicianContent() {
             </div>
 
             <div>
+              {me.isAdmin && <div className="mb-6"><OpsPanel /></div>}
               {active.length === 0 ? (
                 <div className="rounded-2xl p-10 text-center" style={{ background: 'hsl(var(--card))', border: `1px solid hsl(var(--border-subtle) / 0.4)` }}>
                   <p className="text-base font-semibold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>No active visit</p>

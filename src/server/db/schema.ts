@@ -205,3 +205,13 @@ export const checkins = pgTable('checkins', {
   acknowledgedAt: timestamp('acknowledged_at'),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+// ─── Dispatch: online sessions (for "visits per online clinician-hour") ──────
+export const clinicianOnlineLog = pgTable('clinician_online_log', {
+  id: serial('id').primaryKey(),
+  userId: varchar('user_id', { length: 36 })
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  wentOnlineAt: timestamp('went_online_at').notNull(),
+  wentOfflineAt: timestamp('went_offline_at'), // null while still online
+});

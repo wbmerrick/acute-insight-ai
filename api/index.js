@@ -20952,7 +20952,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler35) {
+    Route.prototype.all = function all(handler36) {
       const callbacks = flatten2.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -20970,7 +20970,7 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler35) {
+      Route.prototype[method] = function(handler36) {
         const callbacks = flatten2.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -21173,17 +21173,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler35) {
+    Router.prototype.use = function use2(handler36) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler35 !== "function") {
-        let arg = handler35;
+      if (typeof handler36 !== "function") {
+        let arg = handler36;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler35;
+          path2 = handler36;
         }
       }
       const callbacks = flatten2.call(slice.call(arguments, offset), Infinity);
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler35 = connection.cancelQuery;
-    if (!handler35) {
+    const handler36 = connection.cancelQuery;
+    if (!handler36) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler35.bind(connection);
+    return handler36.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler35 = connection.killSession;
-    if (!handler35) {
+    const handler36 = connection.killSession;
+    if (!handler36) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler35.bind(connection);
+    return handler36.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -65039,7 +65039,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler35 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler36 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65059,7 +65059,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler35(internalContext).catch(async (e) => {
+    const response = await handler36(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65089,20 +65089,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler35) => {
+  return (path2, options, handler36) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler35);
+    }, handler36);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler35) {
+function createMiddleware(optionsOrHandler, handler36) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler35;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler36;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65130,14 +65130,14 @@ function createMiddleware(optionsOrHandler, handler35) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler35) {
+  function fn(optionsOrHandler, handler36) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler35) throw new Error("Middleware handler is required");
+    if (!handler36) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler35);
+    }, handler36);
   }
   return fn;
 };
@@ -65577,16 +65577,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler35 = route.data;
+    const handler36 = route.data;
     try {
-      const allowedMediaTypes = handler35.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler36.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler35.options.disableBody ? void 0 : await getBody(handler35.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler36.options.disableBody ? void 0 : await getBody(handler36.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65601,7 +65601,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler35(context2);
+      return await handler36(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65658,11 +65658,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler35 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler36 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler35(ctx));
+      return await runWithEndpointContext(ctx, () => handler36(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75796,8 +75796,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler35 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler35(request));
+      const { handler: handler36 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler36(request));
     },
     api,
     options,
@@ -83345,6 +83345,7 @@ __export(schema_exports, {
   accessRequests: () => accessRequests,
   account: () => account,
   checkins: () => checkins,
+  clinicianOnlineLog: () => clinicianOnlineLog,
   clinicianProfiles: () => clinicianProfiles,
   intakeSessions: () => intakeSessions,
   patientProfiles: () => patientProfiles,
@@ -83505,6 +83506,13 @@ var checkins = pgTable("checkins", {
   acknowledgedBy: varchar("acknowledged_by", { length: 36 }).references(() => user.id, { onDelete: "set null" }),
   acknowledgedAt: timestamp("acknowledged_at"),
   createdAt: timestamp("created_at").defaultNow()
+});
+var clinicianOnlineLog = pgTable("clinician_online_log", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
+  wentOnlineAt: timestamp("went_online_at").notNull(),
+  wentOfflineAt: timestamp("went_offline_at")
+  // null while still online
 });
 
 // src/server/db/client.ts
@@ -84375,6 +84383,71 @@ function buildTemplateClinicalBrief(chiefComplaint, responses) {
   };
 }
 
+// src/server/lib/sms.ts
+function smsAvailable() {
+  return !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM);
+}
+function toE164(raw) {
+  if (!raw) return null;
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  if (raw.trim().startsWith("+") && digits.length >= 11 && digits.length <= 15) return `+${digits}`;
+  return null;
+}
+var sendSms = async (to, body) => {
+  if (!smsAvailable()) {
+    console.log(JSON.stringify({ event: "sms.skipped", reason: "twilio_not_configured", to: mask(to) }));
+    return false;
+  }
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  const from = process.env.TWILIO_FROM;
+  try {
+    const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+      method: "POST",
+      headers: {
+        Authorization: "Basic " + Buffer.from(`${sid}:${token}`).toString("base64"),
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({ To: to, From: from, Body: body }).toString()
+    });
+    if (!res.ok) {
+      const text2 = await res.text().catch(() => "");
+      console.error(JSON.stringify({ event: "sms.failed", status: res.status, to: mask(to), detail: text2.slice(0, 200) }));
+      return false;
+    }
+    console.log(JSON.stringify({ event: "sms.sent", to: mask(to) }));
+    return true;
+  } catch (err) {
+    console.error(JSON.stringify({ event: "sms.error", to: mask(to), error: err instanceof Error ? err.message : String(err) }));
+    return false;
+  }
+};
+function mask(to) {
+  return to.length > 4 ? `${"*".repeat(to.length - 4)}${to.slice(-4)}` : "****";
+}
+var ACUITY_WORD = {
+  urgent: "Urgent",
+  telehealth: "Telehealth",
+  routine: "Routine",
+  selfcare: "Self-care"
+};
+function newVisitText(acuity, state, base) {
+  return `Acute Insight: ${ACUITY_WORD[acuity] ?? "New"} visit waiting in ${state}. First to accept takes it: ${base}/clinician`;
+}
+function acceptedText(clinicianName, credential) {
+  const who = clinicianName ? `${clinicianName}${credential ? `, ${credential}` : ""}` : "A clinician";
+  return `Acute Insight: ${who} accepted your visit and will call you at this number shortly. Keep your phone nearby. If you get worse, call 911.`;
+}
+var lastSent = /* @__PURE__ */ new Map();
+function shouldThrottle(key, windowMs, now2 = Date.now()) {
+  const prev = lastSent.get(key);
+  if (prev !== void 0 && now2 - prev < windowMs) return true;
+  lastSent.set(key, now2);
+  return false;
+}
+
 // src/server/lib/companion.ts
 var HOURS = 3600 * 1e3;
 function checkinDelayMs(reason) {
@@ -84430,7 +84503,38 @@ async function resolveCheckin(opts) {
     outcome: outcome ?? void 0,
     escalationNote: note
   }).where(eq(checkins.id, c.id));
-  return { escalated: escalate, note };
+  return { escalated: escalate, note, intakeSessionId: c.intakeSessionId };
+}
+var ESCALATION_TEXT_WINDOW_MS = 15 * 60 * 1e3;
+function escalationText(visitDate, followupLevel, base) {
+  const level = followupLevel ? ACUITY_LABEL[followupLevel] ?? followupLevel : null;
+  const tri = level ? ` Follow-up triaged ${level}.` : "";
+  return `Acute Insight: a patient you saw on ${visitDate} reports they are worse.${tri} Review: ${base}/provider`;
+}
+async function notifyClinicianOfEscalation(opts) {
+  if (!smsAvailable()) return { texted: 0, to: "none" };
+  try {
+    const [intake] = await db.select({ createdAt: intakeSessions.createdAt }).from(intakeSessions).where(eq(intakeSessions.id, opts.intakeSessionId)).limit(1);
+    const when = intake?.createdAt ? intake.createdAt.toLocaleDateString("en-US", { month: "long", day: "numeric" }) : "a recent date";
+    const text2 = escalationText(when, opts.followupLevel, opts.base);
+    const [visit] = await db.select({ clinicianUserId: visits.clinicianUserId }).from(visits).where(eq(visits.intakeSessionId, opts.intakeSessionId)).limit(1);
+    if (visit?.clinicianUserId) {
+      const [c] = await db.select({ phone: clinicianProfiles.phone, notify: clinicianProfiles.notifySms }).from(clinicianProfiles).where(eq(clinicianProfiles.userId, visit.clinicianUserId)).limit(1);
+      if (c?.phone && c.notify !== false && !shouldThrottle(`esc:${visit.clinicianUserId}:${opts.intakeSessionId}`, ESCALATION_TEXT_WINDOW_MS)) {
+        const ok2 = await sendSms(c.phone, text2);
+        if (ok2) return { texted: 1, to: "treating" };
+      }
+    }
+    const [p] = await db.select({ state: patientProfiles.state }).from(patientProfiles).where(eq(patientProfiles.userId, opts.patientUserId)).limit(1);
+    if (!p?.state) return { texted: 0, to: "none" };
+    const online = await db.select({ userId: clinicianProfiles.userId, phone: clinicianProfiles.phone, licenses: clinicianProfiles.stateLicenses, notify: clinicianProfiles.notifySms }).from(clinicianProfiles).where(eq(clinicianProfiles.online, true));
+    const targets = online.filter((c) => c.phone && c.notify !== false && Array.isArray(c.licenses) && c.licenses.includes(p.state) && !shouldThrottle(`esc:${c.userId}:${opts.intakeSessionId}`, ESCALATION_TEXT_WINDOW_MS));
+    const results = await Promise.all(targets.map((c) => sendSms(c.phone, text2)));
+    return { texted: results.filter(Boolean).length, to: "online" };
+  } catch (err) {
+    console.error(JSON.stringify({ event: "companion.escalation_sms.error", error: err instanceof Error ? err.message : String(err) }));
+    return { texted: 0, to: "none" };
+  }
 }
 
 // src/server/api/intake/[id]/complete/POST.ts
@@ -84491,6 +84595,14 @@ async function handler11(req, res) {
           followupBrief: brief,
           outcome: outcome ?? null
         });
+        if (checkin?.escalated && checkin.intakeSessionId) {
+          void notifyClinicianOfEscalation({
+            intakeSessionId: checkin.intakeSessionId,
+            patientUserId: session2.user.id,
+            followupLevel: brief.disposition.level,
+            base: process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`
+          });
+        }
       } else {
         const reason = intakeCheckinReason(brief.disposition.level);
         if (reason) await scheduleCheckin(intakeId, session2.user.id, reason);
@@ -84944,77 +85056,13 @@ async function handler18(req, res) {
       maxAcuity: p.maxAcuity ?? "urgent",
       online: !!p.online,
       phone: p.phone,
-      notifySms: p.notifySms !== false
+      notifySms: p.notifySms !== false,
+      isAdmin: ctx.isAdmin
     });
   } catch (error3) {
     logErr("dispatch.me.get.error", error3);
     res.status(500).json({ error: "Failed to load clinician profile" });
   }
-}
-
-// src/server/lib/sms.ts
-function smsAvailable() {
-  return !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM);
-}
-function toE164(raw) {
-  if (!raw) return null;
-  const digits = raw.replace(/\D/g, "");
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  if (raw.trim().startsWith("+") && digits.length >= 11 && digits.length <= 15) return `+${digits}`;
-  return null;
-}
-var sendSms = async (to, body) => {
-  if (!smsAvailable()) {
-    console.log(JSON.stringify({ event: "sms.skipped", reason: "twilio_not_configured", to: mask(to) }));
-    return false;
-  }
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_FROM;
-  try {
-    const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
-      method: "POST",
-      headers: {
-        Authorization: "Basic " + Buffer.from(`${sid}:${token}`).toString("base64"),
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: new URLSearchParams({ To: to, From: from, Body: body }).toString()
-    });
-    if (!res.ok) {
-      const text2 = await res.text().catch(() => "");
-      console.error(JSON.stringify({ event: "sms.failed", status: res.status, to: mask(to), detail: text2.slice(0, 200) }));
-      return false;
-    }
-    console.log(JSON.stringify({ event: "sms.sent", to: mask(to) }));
-    return true;
-  } catch (err) {
-    console.error(JSON.stringify({ event: "sms.error", to: mask(to), error: err instanceof Error ? err.message : String(err) }));
-    return false;
-  }
-};
-function mask(to) {
-  return to.length > 4 ? `${"*".repeat(to.length - 4)}${to.slice(-4)}` : "****";
-}
-var ACUITY_WORD = {
-  urgent: "Urgent",
-  telehealth: "Telehealth",
-  routine: "Routine",
-  selfcare: "Self-care"
-};
-function newVisitText(acuity, state, base) {
-  return `Acute Insight: ${ACUITY_WORD[acuity] ?? "New"} visit waiting in ${state}. First to accept takes it: ${base}/clinician`;
-}
-function acceptedText(clinicianName, credential) {
-  const who = clinicianName ? `${clinicianName}${credential ? `, ${credential}` : ""}` : "A clinician";
-  return `Acute Insight: ${who} accepted your visit and will call you at this number shortly. Keep your phone nearby. If you get worse, call 911.`;
-}
-var lastSent = /* @__PURE__ */ new Map();
-function shouldThrottle(key, windowMs, now2 = Date.now()) {
-  const prev = lastSent.get(key);
-  if (prev !== void 0 && now2 - prev < windowMs) return true;
-  lastSent.set(key, now2);
-  return false;
 }
 
 // src/server/api/dispatch/me/PUT.ts
@@ -85054,6 +85102,14 @@ async function handler19(req, res) {
       patch.lastSeenAt = /* @__PURE__ */ new Date();
     }
     const [updated] = await db.update(clinicianProfiles).set(patch).where(eq(clinicianProfiles.userId, ctx.userId)).returning();
+    if (typeof patch.online === "boolean" && patch.online !== !!ctx.profile.online) {
+      const now2 = /* @__PURE__ */ new Date();
+      if (patch.online) {
+        await db.insert(clinicianOnlineLog).values({ userId: ctx.userId, wentOnlineAt: now2 });
+      } else {
+        await db.update(clinicianOnlineLog).set({ wentOfflineAt: now2 }).where(and(eq(clinicianOnlineLog.userId, ctx.userId), isNull2(clinicianOnlineLog.wentOfflineAt)));
+      }
+    }
     res.json({
       displayName: updated.displayName,
       credential: updated.credential,
@@ -85489,8 +85545,95 @@ async function handler28(req, res) {
   }
 }
 
-// src/server/api/stripe/webhook/POST.ts
+// src/server/lib/metrics.ts
+function percentile(values, p) {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const idx = (sorted.length - 1) * p;
+  const lo = Math.floor(idx);
+  const hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
+}
+var median = (v) => percentile(v, 0.5);
+function onlineHours(sessions, from, to) {
+  let ms = 0;
+  for (const s of sessions) {
+    const a = Math.max(s.start.getTime(), from.getTime());
+    const b = Math.min((s.end ?? to).getTime(), to.getTime());
+    if (b > a) ms += b - a;
+  }
+  return ms / 36e5;
+}
+function rate(n, d) {
+  return d > 0 ? n / d : null;
+}
+
+// src/server/api/dispatch/metrics/GET.ts
 async function handler29(req, res) {
+  try {
+    const ctx = await requireClinician(req, res);
+    if (!ctx) return;
+    const days = Math.min(90, Math.max(1, Number(req.query.days ?? 7) || 7));
+    const to = /* @__PURE__ */ new Date();
+    const from = new Date(to.getTime() - days * 86400 * 1e3);
+    const vs = await db.select({ status: visits.status, acuity: visits.acuity, queuedAt: visits.queuedAt, acceptedAt: visits.acceptedAt, completedAt: visits.completedAt, paymentStatus: visits.paymentStatus, amountCents: visits.amountCents, state: visits.patientState }).from(visits).where(gte(visits.createdAt, from));
+    const requested = vs.length;
+    const paidOrFree = vs.filter((v) => v.status !== "pending_payment");
+    const accepted = vs.filter((v) => v.acceptedAt);
+    const completed = vs.filter((v) => v.status === "completed");
+    const cancelled = vs.filter((v) => v.status === "cancelled");
+    const queuedNow = vs.filter((v) => v.status === "queued").length;
+    const waitsMin = accepted.filter((v) => v.queuedAt).map((v) => (v.acceptedAt.getTime() - v.queuedAt.getTime()) / 6e4);
+    const visitMin = completed.filter((v) => v.acceptedAt).map((v) => (v.completedAt.getTime() - v.acceptedAt.getTime()) / 6e4);
+    const capturedCents = vs.filter((v) => v.paymentStatus === "captured").reduce((s, v) => s + (v.amountCents ?? 0), 0);
+    const sessions = await db.select({ start: clinicianOnlineLog.wentOnlineAt, end: clinicianOnlineLog.wentOfflineAt }).from(clinicianOnlineLog).where(or(isNull2(clinicianOnlineLog.wentOfflineAt), gte(clinicianOnlineLog.wentOfflineAt, from)));
+    const hours = onlineHours(sessions, from, to);
+    const onlineCount = (await db.select({ id: clinicianProfiles.id }).from(clinicianProfiles).where(eq(clinicianProfiles.online, true))).length;
+    const cs = await db.select({ status: checkins.status, outcome: checkins.outcome, sentAt: checkins.sentAt }).from(checkins).where(gte(checkins.createdAt, from));
+    const sent = cs.filter((c) => c.sentAt).length;
+    const answered = cs.filter((c) => c.status === "answered" || c.status === "escalated").length;
+    const escalated = cs.filter((c) => c.status === "escalated").length;
+    const byAcuity = {};
+    for (const v of paidOrFree) byAcuity[v.acuity] = (byAcuity[v.acuity] ?? 0) + 1;
+    const byState = {};
+    for (const v of paidOrFree) byState[v.state] = (byState[v.state] ?? 0) + 1;
+    res.json({
+      windowDays: days,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      visits: {
+        requested,
+        queuedNow,
+        accepted: accepted.length,
+        completed: completed.length,
+        cancelled: cancelled.length,
+        acceptanceRate: rate(accepted.length, paidOrFree.length),
+        byAcuity,
+        byState
+      },
+      wait: {
+        medianMin: median(waitsMin),
+        p90Min: percentile(waitsMin, 0.9),
+        n: waitsMin.length
+      },
+      visitLength: { medianMin: median(visitMin), n: visitMin.length },
+      supply: {
+        onlineNow: onlineCount,
+        onlineHours: Math.round(hours * 10) / 10,
+        visitsPerOnlineHour: hours > 0 ? Math.round(completed.length / hours * 100) / 100 : null
+      },
+      revenue: { capturedCents },
+      companion: { sent, answered, escalated, responseRate: rate(answered, sent) }
+    });
+  } catch (error3) {
+    logErr("dispatch.metrics.error", error3);
+    res.status(500).json({ error: "Failed to compute metrics" });
+  }
+}
+
+// src/server/api/stripe/webhook/POST.ts
+async function handler30(req, res) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) return res.status(503).json({ error: "Webhook not configured" });
   const raw = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
@@ -85523,7 +85666,7 @@ async function handler29(req, res) {
 }
 
 // src/server/api/companion/checkins/GET.ts
-async function handler30(req, res) {
+async function handler31(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -85552,7 +85695,7 @@ async function handler30(req, res) {
 }
 
 // src/server/api/companion/checkins/[id]/answer/POST.ts
-async function handler31(req, res) {
+async function handler32(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -85568,6 +85711,9 @@ async function handler31(req, res) {
     }).where(and(eq(checkins.id, id), eq(checkins.patientUserId, userId), inArray(checkins.status, ["scheduled", "sent"]))).returning({ id: checkins.id, status: checkins.status, intakeSessionId: checkins.intakeSessionId });
     if (!row) return res.status(404).json({ error: "No open check-in" });
     res.json({ ok: true, ...row });
+    if (outcome === "worse") {
+      void notifyClinicianOfEscalation({ intakeSessionId: row.intakeSessionId, patientUserId: userId, base: process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}` });
+    }
   } catch (error3) {
     logErr("companion.answer.error", error3);
     res.status(500).json({ error: "Failed to record answer" });
@@ -85576,7 +85722,7 @@ async function handler31(req, res) {
 
 // src/server/api/companion/run/GET.ts
 var EXPIRE_AFTER_DAYS = Number(process.env.CHECKIN_EXPIRE_DAYS ?? 7);
-async function handler32(req, res) {
+async function handler33(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -85610,7 +85756,7 @@ async function handler32(req, res) {
 }
 
 // src/server/api/provider/checkins/GET.ts
-async function handler33(req, res) {
+async function handler34(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85635,7 +85781,7 @@ async function handler33(req, res) {
 }
 
 // src/server/api/provider/checkins/[id]/acknowledge/POST.ts
-async function handler34(req, res) {
+async function handler35(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85793,7 +85939,7 @@ function normalizeCommerceApiBaseUrlEnv() {
 normalizeCommerceApiBaseUrlEnv();
 var app = (0, import_express.default)();
 app.set("trust proxy", true);
-app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler29);
+app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler30);
 app.use(import_express.default.json());
 app.use(import_express.default.urlencoded({ extended: true }));
 app.get("/api/auth/:action", handler);
@@ -85824,11 +85970,12 @@ app.post("/api/dispatch/visits/:id/complete", handler25);
 app.post("/api/dispatch/visits/:id/cancel", handler26);
 app.get("/api/dispatch/pricing", handler27);
 app.get("/api/dispatch/sweep", handler28);
-app.get("/api/companion/checkins", handler30);
-app.post("/api/companion/checkins/:id/answer", handler31);
-app.get("/api/companion/run", handler32);
-app.get("/api/provider/checkins", handler33);
-app.post("/api/provider/checkins/:id/acknowledge", handler34);
+app.get("/api/dispatch/metrics", handler29);
+app.get("/api/companion/checkins", handler31);
+app.post("/api/companion/checkins/:id/answer", handler32);
+app.get("/api/companion/run", handler33);
+app.get("/api/provider/checkins", handler34);
+app.post("/api/provider/checkins/:id/acknowledge", handler35);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;

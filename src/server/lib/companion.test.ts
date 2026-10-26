@@ -30,3 +30,12 @@ describe('companion rules', () => {
     expect(escalationNote('routine', 'telehealth', 'same')).toBe('Follow-up triaged Telehealth (was Routine).');
   });
 });
+
+describe('escalation text', () => {
+  it('is PHI-free: date + acuity word + link only', async () => {
+    const { escalationText } = await import('./companion.js');
+    const t = escalationText('October 26', 'urgent', 'https://acuteinsight.ai');
+    expect(t).toBe('Acute Insight: a patient you saw on October 26 reports they are worse. Follow-up triaged Urgent. Review: https://acuteinsight.ai/provider');
+    expect(escalationText('October 26', null, 'https://x')).not.toContain('triaged');
+  });
+});

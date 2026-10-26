@@ -81,7 +81,7 @@ export async function resolveCheckin(opts: {
   followupIntakeId: number;
   followupBrief: ClinicalBrief;
   outcome?: 'better' | 'same' | 'worse' | null;
-}): Promise<{ escalated: boolean; note: string | null } | null> {
+}): Promise<{ escalated: boolean; note: string | null; intakeSessionId: number } | null> {
   const [c] = await db
     .select({ id: checkins.id, intakeSessionId: checkins.intakeSessionId, status: checkins.status, outcome: checkins.outcome })
     .from(checkins)
@@ -107,5 +107,54 @@ export async function resolveCheckin(opts: {
     })
     .where(eq(checkins.id, c.id));
 
-  return { escalated: escalate, note };
+  return { escalated: escalate, note, intakeSessionId: c.intakeSessionId };
+}
+
+// ─── Escalation alerts to clinicians ─────────────────────────────────────────
+// Text the clinician who completed the visit; if nobody did (or they opted out),
+// text the online clinicians licensed in the patient's state. PHI-free: a date
+// and an acuity word, never a complaint or a name.
+
+import { clinicianProfiles, visits, patientProfiles } from '../db/schema.js';
+import { sendSms, smsAvailable, shouldThrottle } from './sms.js';
+
+const ESCALATION_TEXT_WINDOW_MS = 15 * 60 * 1000;
+
+export function escalationText(visitDate: string, followupLevel: string | null | undefined, base: string): string {
+  const level = followupLevel ? (ACUITY_LABEL[followupLevel as Acuity] ?? followupLevel) : null;
+  const tri = level ? ` Follow-up triaged ${level}.` : '';
+  return `Acute Insight: a patient you saw on ${visitDate} reports they are worse.${tri} Review: ${base}/provider`;
+}
+
+export async function notifyClinicianOfEscalation(opts: { intakeSessionId: number; patientUserId: string; followupLevel?: string | null; base: string }) {
+  if (!smsAvailable()) return { texted: 0, to: 'none' as const };
+  try {
+    const [intake] = await db.select({ createdAt: intakeSessions.createdAt }).from(intakeSessions).where(eq(intakeSessions.id, opts.intakeSessionId)).limit(1);
+    const when = intake?.createdAt ? intake.createdAt.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'a recent date';
+    const text = escalationText(when, opts.followupLevel, opts.base);
+
+    // 1. the treating clinician
+    const [visit] = await db.select({ clinicianUserId: visits.clinicianUserId }).from(visits).where(eq(visits.intakeSessionId, opts.intakeSessionId)).limit(1);
+    if (visit?.clinicianUserId) {
+      const [c] = await db.select({ phone: clinicianProfiles.phone, notify: clinicianProfiles.notifySms }).from(clinicianProfiles).where(eq(clinicianProfiles.userId, visit.clinicianUserId)).limit(1);
+      if (c?.phone && c.notify !== false && !shouldThrottle(`esc:${visit.clinicianUserId}:${opts.intakeSessionId}`, ESCALATION_TEXT_WINDOW_MS)) {
+        const ok = await sendSms(c.phone, text);
+        if (ok) return { texted: 1, to: 'treating' as const };
+      }
+    }
+
+    // 2. fallback: online clinicians licensed in the patient's state
+    const [p] = await db.select({ state: patientProfiles.state }).from(patientProfiles).where(eq(patientProfiles.userId, opts.patientUserId)).limit(1);
+    if (!p?.state) return { texted: 0, to: 'none' as const };
+    const online = await db
+      .select({ userId: clinicianProfiles.userId, phone: clinicianProfiles.phone, licenses: clinicianProfiles.stateLicenses, notify: clinicianProfiles.notifySms })
+      .from(clinicianProfiles)
+      .where(eq(clinicianProfiles.online, true));
+    const targets = online.filter((c) => c.phone && c.notify !== false && Array.isArray(c.licenses) && c.licenses.includes(p.state!) && !shouldThrottle(`esc:${c.userId}:${opts.intakeSessionId}`, ESCALATION_TEXT_WINDOW_MS));
+    const results = await Promise.all(targets.map((c) => sendSms(c.phone!, text)));
+    return { texted: results.filter(Boolean).length, to: 'online' as const };
+  } catch (err) {
+    console.error(JSON.stringify({ event: 'companion.escalation_sms.error', error: err instanceof Error ? err.message : String(err) }));
+    return { texted: 0, to: 'none' as const };
+  }
 }

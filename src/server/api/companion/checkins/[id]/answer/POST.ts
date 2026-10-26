@@ -3,6 +3,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '../../../../../db/client.js';
 import { checkins } from '../../../../../db/schema.js';
 import { requirePatient, logErr } from '../../../../../lib/dispatch.js';
+import { notifyClinicianOfEscalation } from '../../../../../lib/companion.js';
 
 /**
  * One-tap answer. "better" closes the loop. "same" and "worse" are recorded and
@@ -31,6 +32,9 @@ export default async function handler(req: Request, res: Response) {
       .returning({ id: checkins.id, status: checkins.status, intakeSessionId: checkins.intakeSessionId });
     if (!row) return res.status(404).json({ error: 'No open check-in' });
     res.json({ ok: true, ...row });
+    if (outcome === 'worse') {
+      void notifyClinicianOfEscalation({ intakeSessionId: row.intakeSessionId, patientUserId: userId, base: process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}` });
+    }
   } catch (error) {
     logErr('companion.answer.error', error);
     res.status(500).json({ error: 'Failed to record answer' });

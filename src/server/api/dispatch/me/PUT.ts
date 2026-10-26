@@ -1,7 +1,8 @@
 import type { Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
-import { clinicianProfiles } from '../../../db/schema.js';
+import { clinicianProfiles, clinicianOnlineLog } from '../../../db/schema.js';
+import { and, isNull } from 'drizzle-orm';
 import { requireClinician, isUsState, SCOPE_OPTIONS, logErr } from '../../../lib/dispatch.js';
 import type { Acuity } from '../../../../lib/clinical-brief.js';
 import { toE164 } from '../../../lib/sms.js';
@@ -51,6 +52,16 @@ export default async function handler(req: Request, res: Response) {
       .set(patch)
       .where(eq(clinicianProfiles.userId, ctx.userId))
       .returning();
+
+    // Online-session log — the honest denominator for "visits per online hour".
+    if (typeof patch.online === 'boolean' && patch.online !== !!ctx.profile.online) {
+      const now = new Date();
+      if (patch.online) {
+        await db.insert(clinicianOnlineLog).values({ userId: ctx.userId, wentOnlineAt: now });
+      } else {
+        await db.update(clinicianOnlineLog).set({ wentOfflineAt: now }).where(and(eq(clinicianOnlineLog.userId, ctx.userId), isNull(clinicianOnlineLog.wentOfflineAt)));
+      }
+    }
 
     res.json({
       displayName: updated.displayName,
