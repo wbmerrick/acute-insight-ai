@@ -3,6 +3,7 @@ import { db } from '../../../db/client.js';
 import { intakeSessions, user, patientProfiles } from '../../../db/schema.js';
 import { eq, desc, inArray } from 'drizzle-orm';
 import { getAuth } from '../../../../lib/auth/auth.js';
+import { audit } from '../../../lib/audit.js';
 
 export default async function handler(req: Request, res: Response) {
   try {
@@ -56,6 +57,7 @@ export default async function handler(req: Request, res: Response) {
       profile: profileMap.get(intake.patientId) ?? null,
     }));
 
+    audit(req, { action: 'provider.intakes.list', actorUserId: session.user.id, actorRole: dbUser[0].isAdmin ? 'admin' : 'provider', resourceType: 'intake', meta: { count: result.length } });
     res.json(result);
   } catch (error) {
     console.error(

@@ -3,6 +3,7 @@ import { db } from '../../../../../db/client.js';
 import { user } from '../../../../../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { getAuth } from '../../../../../../lib/auth/auth.js';
+import { audit } from '../../../../../lib/audit.js';
 
 export default async function handler(req: Request, res: Response) {
   try {
@@ -33,6 +34,7 @@ export default async function handler(req: Request, res: Response) {
 
     await db.update(user).set({ role: role as string }).where(eq(user.id, targetId as string));
 
+    audit(req, { action: 'admin.role.change', actorUserId: session.user.id, actorRole: 'admin', resourceType: 'user', resourceId: String(targetId), meta: { from: target.role ?? null, to: role } });
     res.json({ ok: true, id: targetId, role });
   } catch (error) {
     console.error(JSON.stringify({ event: 'api.error', route: 'admin/users/[id]/role/PUT.ts', error: error instanceof Error ? error.message : String(error) }));

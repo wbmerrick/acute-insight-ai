@@ -6,6 +6,7 @@ import { requirePatient, isUsState, DISPATCHABLE, logErr } from '../../../lib/di
 import type { ClinicalBrief, Acuity } from '../../../../lib/clinical-brief.js';
 import { sendSms, newVisitText, shouldThrottle, smsAvailable } from '../../../lib/sms.js';
 import { stripeConfigured, priceCentsFor, createVisitCheckout } from '../../../lib/stripe.js';
+import { audit } from '../../../lib/audit.js';
 import { ACUITY_LABEL } from '../../../../lib/clinical-brief.js';
 import { user as userTable } from '../../../db/schema.js';
 
@@ -72,6 +73,7 @@ export default async function handler(req: Request, res: Response) {
         .values({ intakeSessionId: id, patientUserId: userId, acuity, patientState: st, chiefComplaint: intake.chiefComplaint, status: 'pending_payment', paymentStatus: 'pending', amountCents: price })
         .returning({ id: visits.id });
       const checkout = await checkoutFor(created.id, price, acuity, userId, base);
+      audit(req, { action: 'visit.request', actorUserId: userId, actorRole: 'patient', resourceType: 'visit', resourceId: created.id, patientUserId: userId, meta: { acuity, state: st, paid: true } });
       return res.json({ ok: true, visitId: created.id, status: 'pending_payment', checkoutUrl: checkout.url, amountCents: price });
     }
 
@@ -81,6 +83,7 @@ export default async function handler(req: Request, res: Response) {
       .values({ intakeSessionId: id, patientUserId: userId, acuity, patientState: st, chiefComplaint: intake.chiefComplaint })
       .returning({ id: visits.id });
 
+    audit(req, { action: 'visit.request', actorUserId: userId, actorRole: 'patient', resourceType: 'visit', resourceId: created.id, patientUserId: userId, meta: { acuity, state: st, paid: false } });
     res.json({ ok: true, visitId: created.id, status: 'queued' });
 
     // Fire-and-forget: text every online, opted-in clinician licensed in this state.

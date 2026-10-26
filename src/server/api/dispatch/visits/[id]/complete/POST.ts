@@ -5,6 +5,7 @@ import { visits, intakeSessions } from '../../../../../db/schema.js';
 import { requireClinician, logErr } from '../../../../../lib/dispatch.js';
 import { scheduleCheckin } from '../../../../../lib/companion.js';
 import { payoutCentsFor } from '../../../../../lib/stripe.js';
+import { audit } from '../../../../../lib/audit.js';
 
 export default async function handler(req: Request, res: Response) {
   try {
@@ -38,6 +39,7 @@ export default async function handler(req: Request, res: Response) {
       logErr('dispatch.complete.schedule_checkin_failed', err);
     }
 
+    audit(req, { action: 'visit.complete', actorUserId: ctx.userId, actorRole: ctx.isAdmin ? 'admin' : 'provider', resourceType: 'visit', resourceId: id, patientUserId: done.patientUserId, meta: { acuity: done.acuity, payoutBooked: !!(payout && done.paymentStatus === 'captured') } });
     res.json({ ok: true });
   } catch (error) {
     logErr('dispatch.complete.error', error);

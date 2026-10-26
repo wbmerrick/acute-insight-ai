@@ -7,6 +7,7 @@ import { aiAvailable, generateClinicalBrief } from '../../../../lib/ai.js';
 import { buildTemplateClinicalBrief } from '../../../../lib/intake-fallback.js';
 import { ACUITY_LEVELS } from '../../../../../lib/clinical-brief.js';
 import { scheduleCheckin, intakeCheckinReason, resolveCheckin, notifyClinicianOfEscalation } from '../../../../lib/companion.js';
+import { audit } from '../../../../lib/audit.js';
 
 interface QAPair {
   questionId: string;
@@ -112,6 +113,7 @@ export default async function handler(req: Request, res: Response) {
       console.error(JSON.stringify({ event: 'intake.complete.checkin_failed', error: err instanceof Error ? err.message : String(err) }));
     }
 
+    audit(req, { action: 'intake.complete', actorUserId: session.user.id, actorRole: 'patient', resourceType: 'intake', resourceId: intakeId, patientUserId: session.user.id, meta: { acuity: brief.disposition.level, checkinId: checkinId ?? null, escalated: checkin?.escalated ?? null } });
     res.json({ ok: true, aiSummary: brief.summary, aiFlags: brief.flags, disposition: brief.disposition, checkin });
   } catch (error) {
     console.error(

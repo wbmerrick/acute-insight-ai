@@ -331,6 +331,88 @@ function AccessRequestsPanel() {
   );
 }
 
+
+// ─── Audit trail ─────────────────────────────────────────────────────────────
+
+interface AuditRow {
+  id: number;
+  actorUserId: string | null;
+  actorRole: string | null;
+  action: string;
+  resourceType: string | null;
+  resourceId: string | null;
+  patientUserId: string | null;
+  ip: string | null;
+  meta: Record<string, unknown> | null;
+  createdAt: string | null;
+}
+
+function AuditPanel() {
+  const [rows, setRows] = useState<AuditRow[] | null>(null);
+  const [error, setError] = useState('');
+  const [filter, setFilter] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/admin/audit');
+        if (!res.ok) throw new Error(String(res.status));
+        const data = (await res.json()) as AuditRow[];
+        if (!cancelled) setRows(data);
+      } catch {
+        if (!cancelled) setError('Could not load the audit trail.');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const shown = (rows ?? []).filter((r) => !filter || r.action.includes(filter) || (r.patientUserId ?? '').includes(filter) || (r.actorUserId ?? '').includes(filter));
+  const short = (id: string | null) => (id ? id.slice(0, 8) : '—');
+
+  return (
+    <section className="mt-10 rounded-2xl overflow-hidden" style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border-subtle) / 0.6)' }}>
+      <div className="px-6 py-4 flex items-center justify-between gap-3 flex-wrap" style={{ borderBottom: '1px solid hsl(var(--border-subtle) / 0.5)' }}>
+        <div>
+          <h2 className="text-lg font-bold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>Audit trail</h2>
+          <p className="text-xs mt-0.5" style={{ color: 'hsl(var(--text-dim))' }}>Who touched which record. Append-only; ids and actions, never clinical text. Last 100.</p>
+        </div>
+        <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by action or id…" className="rounded-lg px-3 py-1.5 text-sm text-foreground outline-none" style={{ background: 'hsl(var(--surface-deeper))', border: '1px solid hsl(var(--border-subtle))', minWidth: 220 }} />
+      </div>
+      {error && <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--destructive))' }}>{error}</p>}
+      {!error && rows === null && <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--text-dim))' }}>Loading…</p>}
+      {!error && rows !== null && shown.length === 0 && <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--text-dim))' }}>No events{filter ? ' match' : ' yet'}.</p>}
+      {!error && shown.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ borderBottom: '1px solid hsl(var(--border-subtle) / 0.5)' }}>
+                {['When', 'Action', 'Actor', 'Role', 'Resource', 'Patient', 'IP', 'Details'].map((h) => (
+                  <th key={h} className="text-left font-semibold px-4 py-3" style={{ color: 'hsl(var(--text-dim))' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((r) => (
+                <tr key={r.id} style={{ borderBottom: '1px solid hsl(var(--border-subtle) / 0.3)' }}>
+                  <td className="px-4 py-2 whitespace-nowrap vitals text-xs" style={{ color: 'hsl(var(--text-dimmer))' }}>{r.createdAt ? new Date(r.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—'}</td>
+                  <td className="px-4 py-2 font-medium text-foreground vitals text-xs">{r.action}</td>
+                  <td className="px-4 py-2 vitals text-xs" style={{ color: 'hsl(var(--text-dim))' }} title={r.actorUserId ?? ''}>{short(r.actorUserId)}</td>
+                  <td className="px-4 py-2 text-xs" style={{ color: 'hsl(var(--text-dim))' }}>{r.actorRole ?? '—'}</td>
+                  <td className="px-4 py-2 vitals text-xs" style={{ color: 'hsl(var(--text-dim))' }}>{r.resourceType ? `${r.resourceType} #${r.resourceId ?? ''}` : '—'}</td>
+                  <td className="px-4 py-2 vitals text-xs" style={{ color: 'hsl(var(--text-dim))' }} title={r.patientUserId ?? ''}>{short(r.patientUserId)}</td>
+                  <td className="px-4 py-2 vitals text-xs" style={{ color: 'hsl(var(--text-dimmer))' }}>{r.ip ?? '—'}</td>
+                  <td className="px-4 py-2 vitals text-xs max-w-[260px] truncate" style={{ color: 'hsl(var(--text-dimmer))' }}>{r.meta ? Object.entries(r.meta).map(([k, v]) => `${k}=${String(v)}`).join(' ') : ''}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function AdminProvidersPage() {
   const { session: sessionData, isPending } = useSession();
   const navigate = useNavigate();
@@ -858,6 +940,7 @@ export default function AdminProvidersPage() {
           </motion.div>
 
           <AccessRequestsPanel />
+          <AuditPanel />
         </main>
       </div>
 

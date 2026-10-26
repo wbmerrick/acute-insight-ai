@@ -20952,7 +20952,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler38) {
+    Route.prototype.all = function all(handler39) {
       const callbacks = flatten2.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -20970,7 +20970,7 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler38) {
+      Route.prototype[method] = function(handler39) {
         const callbacks = flatten2.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -21173,17 +21173,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler38) {
+    Router.prototype.use = function use2(handler39) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler38 !== "function") {
-        let arg = handler38;
+      if (typeof handler39 !== "function") {
+        let arg = handler39;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler38;
+          path2 = handler39;
         }
       }
       const callbacks = flatten2.call(slice.call(arguments, offset), Infinity);
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler38 = connection.cancelQuery;
-    if (!handler38) {
+    const handler39 = connection.cancelQuery;
+    if (!handler39) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler38.bind(connection);
+    return handler39.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler38 = connection.killSession;
-    if (!handler38) {
+    const handler39 = connection.killSession;
+    if (!handler39) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler38.bind(connection);
+    return handler39.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -60459,7 +60459,7 @@ function isRecursive(inst, stack, resolve) {
     return PROVEN;
   stack.add(inst);
   let result = NONE;
-  const check2 = (child) => {
+  const check3 = (child) => {
     if (result !== PROVEN && child?._zod) {
       const answer = isRecursive(child, stack, resolve);
       if (answer > result)
@@ -60488,32 +60488,32 @@ function isRecursive(inst, stack, resolve) {
     case "object": {
       const raw = rawShape(def);
       merge2(raw ? shape(raw, true) : ASSUMED);
-      check2(def.catchall);
+      check3(def.catchall);
       break;
     }
     case "array":
-      check2(def.element);
+      check3(def.element);
       break;
     case "tuple":
       for (const el of def.items)
-        check2(el);
-      check2(def.rest);
+        check3(el);
+      check3(def.rest);
       break;
     case "record":
     case "map":
-      check2(def.keyType);
-      check2(def.valueType);
+      check3(def.keyType);
+      check3(def.valueType);
       break;
     case "set":
-      check2(def.valueType);
+      check3(def.valueType);
       break;
     case "union":
       for (const el of def.options)
-        check2(el);
+        check3(el);
       break;
     case "intersection":
-      check2(def.left);
-      check2(def.right);
+      check3(def.left);
+      check3(def.right);
       break;
     case "optional":
     case "nullable":
@@ -60524,15 +60524,15 @@ function isRecursive(inst, stack, resolve) {
     case "nonoptional":
     case "promise":
     case "success":
-      check2(def.innerType);
+      check3(def.innerType);
       break;
     case "pipe":
-      check2(def.in);
-      check2(def.out);
+      check3(def.in);
+      check3(def.out);
       break;
     case "function":
-      check2(def.input);
-      check2(def.output);
+      check3(def.input);
+      check3(def.output);
       break;
     // `$ZodLazy` caches its inner on the def, so a resolved edge is followed exactly
     case "lazy": {
@@ -60573,10 +60573,10 @@ function isRecursive(inst, stack, resolve) {
         if (!value || typeof value !== "object")
           continue;
         if (value._zod)
-          check2(value);
+          check3(value);
         else if (Array.isArray(value))
           for (const el of value)
-            check2(el);
+            check3(el);
       }
     }
   }
@@ -62549,8 +62549,8 @@ var ZodType = /* @__PURE__ */ $constructor("ZodType", (inst, def) => {
     reg.add(this, meta2);
     return this;
   },
-  refine(check2, params) {
-    return this.check(refine(check2, params));
+  refine(check3, params) {
+    return this.check(refine(check3, params));
   },
   superRefine(refinement, params) {
     return this.check(superRefine(refinement, params));
@@ -64416,12 +64416,12 @@ async function hasRequestState() {
   return (await ensureAsyncStorage2()).getStore() !== void 0;
 }
 async function getCurrentRequestState() {
-  const store = (await ensureAsyncStorage2()).getStore();
-  if (!store) throw new Error("No request state found. Please make sure you are calling this function within a `runWithRequestState` callback.");
-  return store;
+  const store2 = (await ensureAsyncStorage2()).getStore();
+  if (!store2) throw new Error("No request state found. Please make sure you are calling this function within a `runWithRequestState` callback.");
+  return store2;
 }
-async function runWithRequestState(store, fn) {
-  return (await ensureAsyncStorage2()).run(store, fn);
+async function runWithRequestState(store2, fn) {
+  return (await ensureAsyncStorage2()).run(store2, fn);
 }
 function defineRequestState(initFn) {
   const ref = Object.freeze({});
@@ -64430,13 +64430,13 @@ function defineRequestState(initFn) {
       return ref;
     },
     async get() {
-      const store = await getCurrentRequestState();
-      if (!store.has(ref)) {
+      const store2 = await getCurrentRequestState();
+      if (!store2.has(ref)) {
         const initialValue = await initFn();
-        store.set(ref, initialValue);
+        store2.set(ref, initialValue);
         return initialValue;
       }
-      return store.get(ref);
+      return store2.get(ref);
     },
     async set(value) {
       (await getCurrentRequestState()).set(ref, value);
@@ -64514,8 +64514,8 @@ var runWithTransaction = async (adapter, fn) => {
 };
 var queueAfterTransactionHook = async (hook) => {
   return ensureAsyncStorage3().then((als) => {
-    const store = als.getStore();
-    if (store) store.pendingHooks.push(hook);
+    const store2 = als.getStore();
+    if (store2) store2.pendingHooks.push(hook);
     else return hook();
   }).catch(() => {
     return hook();
@@ -65039,7 +65039,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler38 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler39 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65059,7 +65059,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler38(internalContext).catch(async (e) => {
+    const response = await handler39(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65089,20 +65089,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler38) => {
+  return (path2, options, handler39) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler38);
+    }, handler39);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler38) {
+function createMiddleware(optionsOrHandler, handler39) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler38;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler39;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65130,14 +65130,14 @@ function createMiddleware(optionsOrHandler, handler38) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler38) {
+  function fn(optionsOrHandler, handler39) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler38) throw new Error("Middleware handler is required");
+    if (!handler39) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler38);
+    }, handler39);
   }
   return fn;
 };
@@ -65577,16 +65577,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler38 = route.data;
+    const handler39 = route.data;
     try {
-      const allowedMediaTypes = handler38.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler39.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler38.options.disableBody ? void 0 : await getBody(handler38.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler39.options.disableBody ? void 0 : await getBody(handler39.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65601,7 +65601,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler38(context2);
+      return await handler39(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65658,11 +65658,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler38 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler39 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler38(ctx));
+      return await runWithEndpointContext(ctx, () => handler39(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75796,8 +75796,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler38 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler38(request));
+      const { handler: handler39 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler39(request));
     },
     api,
     options,
@@ -83344,6 +83344,7 @@ var schema_exports = {};
 __export(schema_exports, {
   accessRequests: () => accessRequests,
   account: () => account,
+  auditEvents: () => auditEvents,
   checkins: () => checkins,
   clinicianOnlineLog: () => clinicianOnlineLog,
   clinicianProfiles: () => clinicianProfiles,
@@ -83522,6 +83523,22 @@ var clinicianOnlineLog = pgTable("clinician_online_log", {
   wentOnlineAt: timestamp("went_online_at").notNull(),
   wentOfflineAt: timestamp("went_offline_at")
   // null while still online
+});
+var auditEvents = pgTable("audit_events", {
+  id: serial("id").primaryKey(),
+  actorUserId: varchar("actor_user_id", { length: 36 }),
+  actorRole: varchar("actor_role", { length: 16 }),
+  // patient | provider | admin | system | anon
+  action: varchar("action", { length: 64 }).notNull(),
+  // e.g. intake.complete, visit.accept, brief.view
+  resourceType: varchar("resource_type", { length: 32 }),
+  resourceId: varchar("resource_id", { length: 64 }),
+  patientUserId: varchar("patient_user_id", { length: 36 }),
+  // whose record this touched
+  ip: varchar("ip", { length: 64 }),
+  userAgent: varchar("user_agent", { length: 255 }),
+  meta: jsonb("meta"),
+  createdAt: timestamp("created_at").defaultNow()
 });
 
 // src/server/db/client.ts
@@ -83866,6 +83883,36 @@ async function handler8(req, res) {
   }
 }
 
+// src/server/lib/audit.ts
+function clientIp(req) {
+  const xf = req.headers["x-forwarded-for"];
+  const first = Array.isArray(xf) ? xf[0] : (xf ?? "").split(",")[0];
+  return (first || req.ip || "").trim().slice(0, 64);
+}
+function safeMeta(meta2) {
+  if (!meta2) return null;
+  const out = {};
+  for (const [k, v] of Object.entries(meta2)) {
+    if (typeof v === "string" && v.length > 64) continue;
+    out[k] = v;
+  }
+  return Object.keys(out).length ? out : null;
+}
+function audit(req, input) {
+  const row = {
+    actorUserId: input.actorUserId ?? null,
+    actorRole: input.actorRole ?? (input.actorUserId ? "patient" : "anon"),
+    action: input.action.slice(0, 64),
+    resourceType: input.resourceType ?? null,
+    resourceId: input.resourceId == null ? null : String(input.resourceId).slice(0, 64),
+    patientUserId: input.patientUserId ?? null,
+    ip: req ? clientIp(req) : null,
+    userAgent: req ? String(req.headers["user-agent"] ?? "").slice(0, 255) : null,
+    meta: safeMeta(input.meta)
+  };
+  db.insert(auditEvents).values(row).catch((err) => console.error(JSON.stringify({ event: "audit.write_failed", action: row.action, error: err instanceof Error ? err.message : String(err) })));
+}
+
 // src/server/api/provider/intakes/GET.ts
 async function handler9(req, res) {
   try {
@@ -83898,6 +83945,7 @@ async function handler9(req, res) {
       createdAt: intake.createdAt ? intake.createdAt.toISOString() : (/* @__PURE__ */ new Date()).toISOString(),
       profile: profileMap.get(intake.patientId) ?? null
     }));
+    audit(req, { action: "provider.intakes.list", actorUserId: session2.user.id, actorRole: dbUser[0].isAdmin ? "admin" : "provider", resourceType: "intake", meta: { count: result.length } });
     res.json(result);
   } catch (error3) {
     console.error(
@@ -84619,6 +84667,7 @@ async function handler11(req, res) {
     } catch (err) {
       console.error(JSON.stringify({ event: "intake.complete.checkin_failed", error: err instanceof Error ? err.message : String(err) }));
     }
+    audit(req, { action: "intake.complete", actorUserId: session2.user.id, actorRole: "patient", resourceType: "intake", resourceId: intakeId, patientUserId: session2.user.id, meta: { acuity: brief.disposition.level, checkinId: checkinId ?? null, escalated: checkin?.escalated ?? null } });
     res.json({ ok: true, aiSummary: brief.summary, aiFlags: brief.flags, disposition: brief.disposition, checkin });
   } catch (error3) {
     console.error(
@@ -84765,6 +84814,7 @@ async function handler14(req, res) {
     const [target] = await db.select().from(user).where(eq(user.id, targetId)).limit(1);
     if (!target) return res.status(404).json({ error: "User not found" });
     await db.update(user).set({ role }).where(eq(user.id, targetId));
+    audit(req, { action: "admin.role.change", actorUserId: session2.user.id, actorRole: "admin", resourceType: "user", resourceId: String(targetId), meta: { from: target.role ?? null, to: role } });
     res.json({ ok: true, id: targetId, role });
   } catch (error3) {
     console.error(JSON.stringify({ event: "api.error", route: "admin/users/[id]/role/PUT.ts", error: error3 instanceof Error ? error3.message : String(error3) }));
@@ -84949,6 +84999,66 @@ async function handler17(req, res) {
   }
 }
 
+// src/server/api/admin/audit/GET.ts
+async function handler18(req, res) {
+  try {
+    const session2 = await getAuth().api.getSession({ headers: new Headers(req.headers) });
+    if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
+    const [me] = await db.select({ isAdmin: user.isAdmin }).from(user).where(eq(user.id, session2.user.id)).limit(1);
+    if (!me?.isAdmin) return res.status(403).json({ error: "Admin only" });
+    const { patient, actor, action, before } = req.query;
+    const conds = [];
+    if (patient) conds.push(eq(auditEvents.patientUserId, patient));
+    if (actor) conds.push(eq(auditEvents.actorUserId, actor));
+    if (action) conds.push(eq(auditEvents.action, action));
+    if (before && Number.isInteger(Number(before))) conds.push(lt(auditEvents.id, Number(before)));
+    const rows = await db.select().from(auditEvents).where(conds.length ? and(...conds) : void 0).orderBy(desc(auditEvents.id)).limit(100);
+    res.json(rows.map((r) => ({ ...r, createdAt: r.createdAt ? r.createdAt.toISOString() : null })));
+  } catch (error3) {
+    console.error(JSON.stringify({ event: "admin.audit.error", error: error3 instanceof Error ? error3.message : String(error3) }));
+    res.status(500).json({ error: "Failed to load audit log" });
+  }
+}
+
+// src/server/lib/rate-limit.ts
+var store = /* @__PURE__ */ new Map();
+var lastSweep = Date.now();
+function check2(key, limit, windowMs, now2 = Date.now()) {
+  if (now2 - lastSweep > 6e4) {
+    for (const [k, b2] of store) if (b2.hits.length === 0 || now2 - b2.hits[b2.hits.length - 1] > windowMs * 2) store.delete(k);
+    lastSweep = now2;
+  }
+  const b = store.get(key) ?? { hits: [] };
+  b.hits = b.hits.filter((t) => now2 - t < windowMs);
+  if (b.hits.length >= limit) {
+    store.set(key, b);
+    return { allowed: false, remaining: 0, resetMs: windowMs - (now2 - b.hits[0]) };
+  }
+  b.hits.push(now2);
+  store.set(key, b);
+  return { allowed: true, remaining: limit - b.hits.length, resetMs: windowMs - (now2 - b.hits[0]) };
+}
+function sessionKey(req) {
+  const raw = req.headers.cookie ?? "";
+  const m = /better-auth\.session_token=([^;]+)/.exec(raw);
+  return m ? `s:${m[1].slice(0, 32)}` : `ip:${clientIp(req)}`;
+}
+function rateLimit(opts) {
+  const keyFn = opts.key ?? sessionKey;
+  return (req, res, next) => {
+    const r = check2(`${opts.name}:${keyFn(req)}`, opts.limit, opts.windowMs);
+    res.setHeader("X-RateLimit-Limit", String(opts.limit));
+    res.setHeader("X-RateLimit-Remaining", String(r.remaining));
+    if (!r.allowed) {
+      res.setHeader("Retry-After", String(Math.ceil(r.resetMs / 1e3)));
+      console.warn(JSON.stringify({ event: "rate_limit.hit", name: opts.name, ip: clientIp(req) }));
+      return res.status(429).json({ error: "Too many requests \u2014 please wait a moment and try again." });
+    }
+    next();
+  };
+}
+var byIp = (req) => `ip:${clientIp(req)}`;
+
 // src/server/lib/dispatch.ts
 var US_STATES = [
   "AL",
@@ -85053,7 +85163,7 @@ function logErr(event, error3) {
 }
 
 // src/server/api/dispatch/me/GET.ts
-async function handler18(req, res) {
+async function handler19(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85076,7 +85186,7 @@ async function handler18(req, res) {
 
 // src/server/api/dispatch/me/PUT.ts
 var CREDENTIALS = /* @__PURE__ */ new Set(["MD", "DO", "NP", "PA"]);
-async function handler19(req, res) {
+async function handler20(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85119,6 +85229,7 @@ async function handler19(req, res) {
         await db.update(clinicianOnlineLog).set({ wentOfflineAt: now2 }).where(and(eq(clinicianOnlineLog.userId, ctx.userId), isNull2(clinicianOnlineLog.wentOfflineAt)));
       }
     }
+    audit(req, { action: typeof body.online === "boolean" ? body.online ? "clinician.online" : "clinician.offline" : "clinician.profile.update", actorUserId: ctx.userId, actorRole: ctx.isAdmin ? "admin" : "provider", resourceType: "clinician", resourceId: ctx.userId, meta: { states: updated.stateLicenses?.join(",") ?? null, scope: updated.maxAcuity ?? null } });
     res.json({
       displayName: updated.displayName,
       credential: updated.credential,
@@ -85135,7 +85246,7 @@ async function handler19(req, res) {
 }
 
 // src/server/api/dispatch/queue/GET.ts
-async function handler20(req, res) {
+async function handler21(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85167,6 +85278,7 @@ async function handler20(req, res) {
       patientState: visits.patientState,
       chiefComplaint: visits.chiefComplaint,
       status: visits.status,
+      patientUserId: visits.patientUserId,
       queuedAt: visits.queuedAt,
       acceptedAt: visits.acceptedAt,
       brief: intakeSessions.aiBrief,
@@ -85179,6 +85291,7 @@ async function handler20(req, res) {
       medications: patientProfiles.medications,
       allergies: patientProfiles.allergies
     }).from(visits).innerJoin(intakeSessions, eq(visits.intakeSessionId, intakeSessions.id)).innerJoin(user, eq(visits.patientUserId, user.id)).leftJoin(patientProfiles, eq(patientProfiles.userId, visits.patientUserId)).where(and(eq(visits.clinicianUserId, ctx.userId), eq(visits.status, "accepted"))).orderBy(desc(visits.acceptedAt)).limit(10);
+    for (const a of active) audit(req, { action: "brief.view", actorUserId: ctx.userId, actorRole: ctx.isAdmin ? "admin" : "provider", resourceType: "visit", resourceId: a.id, patientUserId: a.patientUserId, meta: { intakeSessionId: a.intakeSessionId } });
     const iso = (d) => d ? d.toISOString() : null;
     res.json({
       online: !!ctx.profile.online,
@@ -85336,7 +85449,7 @@ async function createTransfer(accountId, amountCents, visitId) {
 
 // src/server/api/dispatch/visits/POST.ts
 var CLINICIAN_TEXT_WINDOW_MS = 10 * 60 * 1e3;
-async function handler21(req, res) {
+async function handler22(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -85371,9 +85484,11 @@ async function handler21(req, res) {
     if (price) {
       const [created2] = await db.insert(visits).values({ intakeSessionId: id, patientUserId: userId, acuity, patientState: st, chiefComplaint: intake.chiefComplaint, status: "pending_payment", paymentStatus: "pending", amountCents: price }).returning({ id: visits.id });
       const checkout = await checkoutFor(created2.id, price, acuity, userId, base);
+      audit(req, { action: "visit.request", actorUserId: userId, actorRole: "patient", resourceType: "visit", resourceId: created2.id, patientUserId: userId, meta: { acuity, state: st, paid: true } });
       return res.json({ ok: true, visitId: created2.id, status: "pending_payment", checkoutUrl: checkout.url, amountCents: price });
     }
     const [created] = await db.insert(visits).values({ intakeSessionId: id, patientUserId: userId, acuity, patientState: st, chiefComplaint: intake.chiefComplaint }).returning({ id: visits.id });
+    audit(req, { action: "visit.request", actorUserId: userId, actorRole: "patient", resourceType: "visit", resourceId: created.id, patientUserId: userId, meta: { acuity, state: st, paid: false } });
     res.json({ ok: true, visitId: created.id, status: "queued" });
     void notifyClinicians(acuity, st, base);
   } catch (error3) {
@@ -85408,7 +85523,7 @@ async function notifyClinicians(acuity, state, base) {
 }
 
 // src/server/api/dispatch/visits/[id]/GET.ts
-async function handler22(req, res) {
+async function handler23(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -85447,7 +85562,7 @@ async function handler22(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/accept/POST.ts
-async function handler23(req, res) {
+async function handler24(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85472,6 +85587,7 @@ async function handler23(req, res) {
         logErr("dispatch.accept.capture_failed", err);
       }
     }
+    audit(req, { action: "visit.accept", actorUserId: ctx.userId, actorRole: ctx.isAdmin ? "admin" : "provider", resourceType: "visit", resourceId: id, patientUserId: visit.patientUserId, meta: { acuity: visit.acuity, state: visit.patientState } });
     res.json({ ok: true, id: accepted.id });
     if (smsAvailable()) {
       void (async () => {
@@ -85491,14 +85607,15 @@ async function handler23(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/release/POST.ts
-async function handler24(req, res) {
+async function handler25(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid visit id" });
-    const [released] = await db.update(visits).set({ status: "queued", clinicianUserId: null, acceptedAt: null }).where(and(eq(visits.id, id), eq(visits.status, "accepted"), eq(visits.clinicianUserId, ctx.userId))).returning({ id: visits.id });
+    const [released] = await db.update(visits).set({ status: "queued", clinicianUserId: null, acceptedAt: null }).where(and(eq(visits.id, id), eq(visits.status, "accepted"), eq(visits.clinicianUserId, ctx.userId))).returning({ id: visits.id, patientUserId: visits.patientUserId });
     if (!released) return res.status(404).json({ error: "No accepted visit to release" });
+    audit(req, { action: "visit.release", actorUserId: ctx.userId, actorRole: ctx.isAdmin ? "admin" : "provider", resourceType: "visit", resourceId: id, patientUserId: released.patientUserId });
     res.json({ ok: true });
   } catch (error3) {
     logErr("dispatch.release.error", error3);
@@ -85507,7 +85624,7 @@ async function handler24(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/complete/POST.ts
-async function handler25(req, res) {
+async function handler26(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85528,6 +85645,7 @@ async function handler25(req, res) {
     } catch (err) {
       logErr("dispatch.complete.schedule_checkin_failed", err);
     }
+    audit(req, { action: "visit.complete", actorUserId: ctx.userId, actorRole: ctx.isAdmin ? "admin" : "provider", resourceType: "visit", resourceId: id, patientUserId: done.patientUserId, meta: { acuity: done.acuity, payoutBooked: !!(payout && done.paymentStatus === "captured") } });
     res.json({ ok: true });
   } catch (error3) {
     logErr("dispatch.complete.error", error3);
@@ -85536,7 +85654,7 @@ async function handler25(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/cancel/POST.ts
-async function handler26(req, res) {
+async function handler27(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -85552,6 +85670,7 @@ async function handler26(req, res) {
         logErr("dispatch.cancel.release_failed", err);
       }
     }
+    audit(req, { action: "visit.cancel", actorUserId: userId, actorRole: "patient", resourceType: "visit", resourceId: id, patientUserId: userId, meta: { hadHold: v.paymentStatus === "authorized" } });
     res.json({ ok: true });
   } catch (error3) {
     logErr("dispatch.cancel.error", error3);
@@ -85560,13 +85679,13 @@ async function handler26(req, res) {
 }
 
 // src/server/api/dispatch/pricing/GET.ts
-function handler27(_req, res) {
+function handler28(_req, res) {
   res.json(pricing());
 }
 
 // src/server/api/dispatch/sweep/GET.ts
 var HOLD_HOURS = Number(process.env.VISIT_HOLD_HOURS ?? 4);
-async function handler28(req, res) {
+async function handler29(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -85634,7 +85753,7 @@ function rate(n, d) {
 }
 
 // src/server/api/dispatch/metrics/GET.ts
-async function handler29(req, res) {
+async function handler30(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85697,7 +85816,7 @@ async function handler29(req, res) {
 }
 
 // src/server/api/dispatch/earnings/GET.ts
-async function handler30(req, res) {
+async function handler31(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85719,7 +85838,7 @@ async function handler30(req, res) {
 }
 
 // src/server/api/dispatch/connect/onboard/POST.ts
-async function handler31(req, res) {
+async function handler32(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85741,7 +85860,7 @@ async function handler31(req, res) {
 }
 
 // src/server/api/stripe/webhook/POST.ts
-async function handler32(req, res) {
+async function handler33(req, res) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) return res.status(503).json({ error: "Webhook not configured" });
   const raw = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
@@ -85777,7 +85896,7 @@ async function handler32(req, res) {
 }
 
 // src/server/api/companion/checkins/GET.ts
-async function handler33(req, res) {
+async function handler34(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -85806,7 +85925,7 @@ async function handler33(req, res) {
 }
 
 // src/server/api/companion/checkins/[id]/answer/POST.ts
-async function handler34(req, res) {
+async function handler35(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -85833,7 +85952,7 @@ async function handler34(req, res) {
 
 // src/server/api/companion/run/GET.ts
 var EXPIRE_AFTER_DAYS = Number(process.env.CHECKIN_EXPIRE_DAYS ?? 7);
-async function handler35(req, res) {
+async function handler36(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -85867,7 +85986,7 @@ async function handler35(req, res) {
 }
 
 // src/server/api/provider/checkins/GET.ts
-async function handler36(req, res) {
+async function handler37(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -85892,14 +86011,15 @@ async function handler36(req, res) {
 }
 
 // src/server/api/provider/checkins/[id]/acknowledge/POST.ts
-async function handler37(req, res) {
+async function handler38(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid check-in id" });
-    const [row] = await db.update(checkins).set({ acknowledgedBy: ctx.userId, acknowledgedAt: /* @__PURE__ */ new Date() }).where(and(eq(checkins.id, id), eq(checkins.status, "escalated"), isNull2(checkins.acknowledgedAt))).returning({ id: checkins.id });
+    const [row] = await db.update(checkins).set({ acknowledgedBy: ctx.userId, acknowledgedAt: /* @__PURE__ */ new Date() }).where(and(eq(checkins.id, id), eq(checkins.status, "escalated"), isNull2(checkins.acknowledgedAt))).returning({ id: checkins.id, patientUserId: checkins.patientUserId });
     if (!row) return res.status(404).json({ error: "Nothing to acknowledge" });
+    audit(req, { action: "checkin.acknowledge", actorUserId: ctx.userId, actorRole: ctx.isAdmin ? "admin" : "provider", resourceType: "checkin", resourceId: id, patientUserId: row.patientUserId });
     res.json({ ok: true });
   } catch (error3) {
     logErr("provider.checkins.ack.error", error3);
@@ -86050,13 +86170,20 @@ function normalizeCommerceApiBaseUrlEnv() {
 normalizeCommerceApiBaseUrlEnv();
 var app = (0, import_express.default)();
 app.set("trust proxy", true);
-app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler32);
+app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler33);
 app.use(import_express.default.json());
 app.use(import_express.default.urlencoded({ extended: true }));
 app.get("/api/auth/:action", handler);
-app.post("/api/auth/:action", handler2);
+var MIN2 = 6e4;
+var rlAuth = rateLimit({ name: "auth", limit: 20, windowMs: 15 * MIN2, key: byIp });
+var rlChat = rateLimit({ name: "chat", limit: 60, windowMs: 10 * MIN2 });
+var rlSpeak = rateLimit({ name: "speak", limit: 60, windowMs: 10 * MIN2 });
+var rlRequest = rateLimit({ name: "visit-request", limit: 5, windowMs: 60 * MIN2 });
+var rlAnswer = rateLimit({ name: "checkin-answer", limit: 20, windowMs: 60 * MIN2 });
+var rlAccess = rateLimit({ name: "access-request", limit: 5, windowMs: 60 * MIN2, key: byIp });
+app.post("/api/auth/:action", rlAuth, handler2);
 app.get("/api/auth/:action/:detail", handler3);
-app.post("/api/auth/:action/:detail", handler4);
+app.post("/api/auth/:action/:detail", rlAuth, handler4);
 app.get("/api/health", handler5);
 app.get("/api/patient/intakes", handler6);
 app.get("/api/patient/profile", handler7);
@@ -86064,31 +86191,32 @@ app.put("/api/patient/profile", handler8);
 app.get("/api/provider/intakes", handler9);
 app.post("/api/intake/start", handler10);
 app.post("/api/intake/:id/complete", handler11);
-app.post("/api/intake/chat", handler12);
+app.post("/api/intake/chat", rlChat, handler12);
 app.get("/api/admin/users", handler13);
 app.put("/api/admin/users/:id/role", handler14);
-app.post("/api/access-request", handler15);
-app.post("/api/speak", handler16);
+app.post("/api/access-request", rlAccess, handler15);
+app.post("/api/speak", rlSpeak, handler16);
 app.get("/api/admin/access-requests", handler17);
-app.get("/api/dispatch/me", handler18);
-app.put("/api/dispatch/me", handler19);
-app.get("/api/dispatch/queue", handler20);
-app.post("/api/dispatch/visits", handler21);
-app.get("/api/dispatch/visits/:id", handler22);
-app.post("/api/dispatch/visits/:id/accept", handler23);
-app.post("/api/dispatch/visits/:id/release", handler24);
-app.post("/api/dispatch/visits/:id/complete", handler25);
-app.post("/api/dispatch/visits/:id/cancel", handler26);
-app.get("/api/dispatch/pricing", handler27);
-app.get("/api/dispatch/sweep", handler28);
-app.get("/api/dispatch/metrics", handler29);
-app.get("/api/dispatch/earnings", handler30);
-app.post("/api/dispatch/connect/onboard", handler31);
-app.get("/api/companion/checkins", handler33);
-app.post("/api/companion/checkins/:id/answer", handler34);
-app.get("/api/companion/run", handler35);
-app.get("/api/provider/checkins", handler36);
-app.post("/api/provider/checkins/:id/acknowledge", handler37);
+app.get("/api/admin/audit", handler18);
+app.get("/api/dispatch/me", handler19);
+app.put("/api/dispatch/me", handler20);
+app.get("/api/dispatch/queue", handler21);
+app.post("/api/dispatch/visits", rlRequest, handler22);
+app.get("/api/dispatch/visits/:id", handler23);
+app.post("/api/dispatch/visits/:id/accept", handler24);
+app.post("/api/dispatch/visits/:id/release", handler25);
+app.post("/api/dispatch/visits/:id/complete", handler26);
+app.post("/api/dispatch/visits/:id/cancel", handler27);
+app.get("/api/dispatch/pricing", handler28);
+app.get("/api/dispatch/sweep", handler29);
+app.get("/api/dispatch/metrics", handler30);
+app.get("/api/dispatch/earnings", handler31);
+app.post("/api/dispatch/connect/onboard", handler32);
+app.get("/api/companion/checkins", handler34);
+app.post("/api/companion/checkins/:id/answer", rlAnswer, handler35);
+app.get("/api/companion/run", handler36);
+app.get("/api/provider/checkins", handler37);
+app.post("/api/provider/checkins/:id/acknowledge", handler38);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;

@@ -5,6 +5,7 @@ import { visits, patientProfiles } from '../../../../../db/schema.js';
 import { requireClinician, licensesOf, scopeCovers, logErr } from '../../../../../lib/dispatch.js';
 import { sendSms, acceptedText, toE164, smsAvailable } from '../../../../../lib/sms.js';
 import { capturePayment } from '../../../../../lib/stripe.js';
+import { audit } from '../../../../../lib/audit.js';
 
 /** First clinician to accept wins. The UPDATE's WHERE status='queued' is the lock. */
 export default async function handler(req: Request, res: Response) {
@@ -45,6 +46,7 @@ export default async function handler(req: Request, res: Response) {
       }
     }
 
+    audit(req, { action: 'visit.accept', actorUserId: ctx.userId, actorRole: ctx.isAdmin ? 'admin' : 'provider', resourceType: 'visit', resourceId: id, patientUserId: visit.patientUserId, meta: { acuity: visit.acuity, state: visit.patientState } });
     res.json({ ok: true, id: accepted.id });
 
     // Tell the patient who is calling. Fire-and-forget, PHI-free.

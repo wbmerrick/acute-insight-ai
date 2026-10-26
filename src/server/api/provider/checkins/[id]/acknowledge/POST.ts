@@ -3,6 +3,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '../../../../../db/client.js';
 import { checkins } from '../../../../../db/schema.js';
 import { requireClinician, logErr } from '../../../../../lib/dispatch.js';
+import { audit } from '../../../../../lib/audit.js';
 
 export default async function handler(req: Request, res: Response) {
   try {
@@ -14,8 +15,9 @@ export default async function handler(req: Request, res: Response) {
       .update(checkins)
       .set({ acknowledgedBy: ctx.userId, acknowledgedAt: new Date() })
       .where(and(eq(checkins.id, id), eq(checkins.status, 'escalated'), isNull(checkins.acknowledgedAt)))
-      .returning({ id: checkins.id });
+      .returning({ id: checkins.id, patientUserId: checkins.patientUserId });
     if (!row) return res.status(404).json({ error: 'Nothing to acknowledge' });
+    audit(req, { action: 'checkin.acknowledge', actorUserId: ctx.userId, actorRole: ctx.isAdmin ? 'admin' : 'provider', resourceType: 'checkin', resourceId: id, patientUserId: row.patientUserId });
     res.json({ ok: true });
   } catch (error) {
     logErr('provider.checkins.ack.error', error);

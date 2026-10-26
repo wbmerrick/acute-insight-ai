@@ -6,6 +6,7 @@ import { and, isNull } from 'drizzle-orm';
 import { requireClinician, isUsState, SCOPE_OPTIONS, logErr } from '../../../lib/dispatch.js';
 import type { Acuity } from '../../../../lib/clinical-brief.js';
 import { toE164 } from '../../../lib/sms.js';
+import { audit } from '../../../lib/audit.js';
 
 const CREDENTIALS = new Set(['MD', 'DO', 'NP', 'PA']);
 
@@ -63,6 +64,7 @@ export default async function handler(req: Request, res: Response) {
       }
     }
 
+    audit(req, { action: typeof body.online === 'boolean' ? (body.online ? 'clinician.online' : 'clinician.offline') : 'clinician.profile.update', actorUserId: ctx.userId, actorRole: ctx.isAdmin ? 'admin' : 'provider', resourceType: 'clinician', resourceId: ctx.userId, meta: { states: (updated.stateLicenses as string[] | null)?.join(',') ?? null, scope: updated.maxAcuity ?? null } });
     res.json({
       displayName: updated.displayName,
       credential: updated.credential,

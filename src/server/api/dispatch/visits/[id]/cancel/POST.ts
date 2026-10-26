@@ -4,6 +4,7 @@ import { db } from '../../../../../db/client.js';
 import { visits } from '../../../../../db/schema.js';
 import { requirePatient, logErr } from '../../../../../lib/dispatch.js';
 import { releasePayment } from '../../../../../lib/stripe.js';
+import { audit } from '../../../../../lib/audit.js';
 
 /** Patient withdraws a request that nobody has accepted yet. Any card hold is released. */
 export default async function handler(req: Request, res: Response) {
@@ -28,6 +29,7 @@ export default async function handler(req: Request, res: Response) {
         logErr('dispatch.cancel.release_failed', err);
       }
     }
+    audit(req, { action: 'visit.cancel', actorUserId: userId, actorRole: 'patient', resourceType: 'visit', resourceId: id, patientUserId: userId, meta: { hadHold: v.paymentStatus === 'authorized' } });
     res.json({ ok: true });
   } catch (error) {
     logErr('dispatch.cancel.error', error);

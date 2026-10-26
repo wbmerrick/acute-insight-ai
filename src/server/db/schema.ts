@@ -221,3 +221,19 @@ export const clinicianOnlineLog = pgTable('clinician_online_log', {
   wentOnlineAt: timestamp('went_online_at').notNull(),
   wentOfflineAt: timestamp('went_offline_at'), // null while still online
 });
+
+// ─── Audit log — append-only record of who touched what ──────────────────────
+// Ids and action names only. Never request bodies, never clinical text.
+export const auditEvents = pgTable('audit_events', {
+  id: serial('id').primaryKey(),
+  actorUserId: varchar('actor_user_id', { length: 36 }),
+  actorRole: varchar('actor_role', { length: 16 }), // patient | provider | admin | system | anon
+  action: varchar('action', { length: 64 }).notNull(), // e.g. intake.complete, visit.accept, brief.view
+  resourceType: varchar('resource_type', { length: 32 }),
+  resourceId: varchar('resource_id', { length: 64 }),
+  patientUserId: varchar('patient_user_id', { length: 36 }), // whose record this touched
+  ip: varchar('ip', { length: 64 }),
+  userAgent: varchar('user_agent', { length: 255 }),
+  meta: jsonb('meta'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
