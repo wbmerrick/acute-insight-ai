@@ -19,6 +19,8 @@ export default async function handler(req: Request, res: Response) {
         visitState: visits.patientState,
         visitAcceptedAt: visits.acceptedAt,
         visitCompletedAt: visits.completedAt,
+        visitPaymentStatus: visits.paymentStatus,
+        visitAmountCents: visits.amountCents,
         clinicianName: clinicianProfiles.displayName,
         clinicianCredential: clinicianProfiles.credential,
       })
@@ -38,6 +40,8 @@ export default async function handler(req: Request, res: Response) {
               state: r.visitState,
               acceptedAt: r.visitAcceptedAt ? r.visitAcceptedAt.toISOString() : null,
               completedAt: r.visitCompletedAt ? r.visitCompletedAt.toISOString() : null,
+              paymentStatus: r.visitPaymentStatus,
+              amountCents: r.visitAmountCents,
               clinicianName: r.clinicianName,
               clinicianCredential: r.clinicianCredential,
             }

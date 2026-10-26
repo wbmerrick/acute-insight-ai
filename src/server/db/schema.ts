@@ -165,7 +165,12 @@ export const visits = pgTable('visits', {
   acuity: varchar('acuity', { length: 16 }).notNull(), // urgent | telehealth | routine | selfcare
   patientState: varchar('patient_state', { length: 2 }).notNull(),
   chiefComplaint: text('chief_complaint'),
-  status: varchar('status', { length: 16 }).default('queued'), // queued | accepted | completed | cancelled
+  status: varchar('status', { length: 16 }).default('queued'), // pending_payment | queued | accepted | completed | cancelled
+  // Payment (Stripe, env-gated). Card is authorized at request time, captured on accept, released on timeout/cancel.
+  paymentStatus: varchar('payment_status', { length: 16 }).default('none'), // none | pending | authorized | captured | released | failed
+  amountCents: integer('amount_cents'),
+  stripeCheckoutId: varchar('stripe_checkout_id', { length: 80 }),
+  stripePaymentIntent: varchar('stripe_payment_intent', { length: 80 }),
   clinicianUserId: varchar('clinician_user_id', { length: 36 }).references(() => user.id, {
     onDelete: 'set null',
   }),

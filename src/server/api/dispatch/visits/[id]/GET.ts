@@ -21,6 +21,8 @@ export default async function handler(req: Request, res: Response) {
         queuedAt: visits.queuedAt,
         acceptedAt: visits.acceptedAt,
         completedAt: visits.completedAt,
+        paymentStatus: visits.paymentStatus,
+        amountCents: visits.amountCents,
         clinicianName: clinicianProfiles.displayName,
         clinicianCredential: clinicianProfiles.credential,
       })

@@ -20583,7 +20583,7 @@ var require_dist3 = __commonJS({
           return;
         }
         const data = typeof path3 === "object" ? path3 : parse3(path3, options);
-        flatten(data.tokens, 0, [], (tokens) => {
+        flatten2(data.tokens, 0, [], (tokens) => {
           if (combinations >= 256) {
             throw new PathError("Too many path combinations", data.originalPath);
           }
@@ -20600,12 +20600,12 @@ var require_dist3 = __commonJS({
       pattern += end ? "$" : "(?=" + escape2(delimiter) + "|$)";
       return { regexp: new RegExp(pattern, sensitive ? "" : "i"), keys };
     }
-    function flatten(tokens, index, result, callback) {
+    function flatten2(tokens, index, result, callback) {
       while (index < tokens.length) {
         const token = tokens[index++];
         if (token.type === "group") {
           const len = result.length;
-          flatten(token.tokens, 0, result, (seq) => flatten(tokens, index, seq, callback));
+          flatten2(token.tokens, 0, result, (seq) => flatten2(tokens, index, seq, callback));
           result.length = len;
           continue;
         }
@@ -20880,7 +20880,7 @@ var require_route = __commonJS({
     var Layer = require_layer();
     var { METHODS } = __require("node:http");
     var slice = Array.prototype.slice;
-    var flatten = Array.prototype.flat;
+    var flatten2 = Array.prototype.flat;
     var methods2 = METHODS.map((method) => method.toLowerCase());
     module.exports = Route;
     function Route(path2) {
@@ -20952,8 +20952,8 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler26) {
-      const callbacks = flatten.call(slice.call(arguments), Infinity);
+    Route.prototype.all = function all(handler30) {
+      const callbacks = flatten2.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
       }
@@ -20970,8 +20970,8 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler26) {
-        const callbacks = flatten.call(slice.call(arguments), Infinity);
+      Route.prototype[method] = function(handler30) {
+        const callbacks = flatten2.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
         }
@@ -21004,7 +21004,7 @@ var require_router = __commonJS({
     var debug = require_src()("router");
     var deprecate2 = require_depd()("router");
     var slice = Array.prototype.slice;
-    var flatten = Array.prototype.flat;
+    var flatten2 = Array.prototype.flat;
     var methods2 = METHODS.map((method) => method.toLowerCase());
     module.exports = Router;
     module.exports.Route = Route;
@@ -21173,20 +21173,20 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler26) {
+    Router.prototype.use = function use2(handler30) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler26 !== "function") {
-        let arg = handler26;
+      if (typeof handler30 !== "function") {
+        let arg = handler30;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler26;
+          path2 = handler30;
         }
       }
-      const callbacks = flatten.call(slice.call(arguments, offset), Infinity);
+      const callbacks = flatten2.call(slice.call(arguments, offset), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
       }
@@ -21406,7 +21406,7 @@ var require_application = __commonJS({
     var once = require_once();
     var Router = require_router();
     var slice = Array.prototype.slice;
-    var flatten = Array.prototype.flat;
+    var flatten2 = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init2() {
@@ -21492,7 +21492,7 @@ var require_application = __commonJS({
           path2 = fn;
         }
       }
-      var fns = flatten.call(slice.call(arguments, offset), Infinity);
+      var fns = flatten2.call(slice.call(arguments, offset), Infinity);
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler26 = connection.cancelQuery;
-    if (!handler26) {
+    const handler30 = connection.cancelQuery;
+    if (!handler30) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler26.bind(connection);
+    return handler30.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler26 = connection.killSession;
-    if (!handler26) {
+    const handler30 = connection.killSession;
+    if (!handler30) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler26.bind(connection);
+    return handler30.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -65039,7 +65039,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler26 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler30 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65059,7 +65059,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler26(internalContext).catch(async (e) => {
+    const response = await handler30(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65089,20 +65089,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler26) => {
+  return (path2, options, handler30) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler26);
+    }, handler30);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler26) {
+function createMiddleware(optionsOrHandler, handler30) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler26;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler30;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65130,14 +65130,14 @@ function createMiddleware(optionsOrHandler, handler26) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler26) {
+  function fn(optionsOrHandler, handler30) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler26) throw new Error("Middleware handler is required");
+    if (!handler30) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler26);
+    }, handler30);
   }
   return fn;
 };
@@ -65577,16 +65577,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler26 = route.data;
+    const handler30 = route.data;
     try {
-      const allowedMediaTypes = handler26.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler30.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler26.options.disableBody ? void 0 : await getBody(handler26.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler30.options.disableBody ? void 0 : await getBody(handler30.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65601,7 +65601,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler26(context2);
+      return await handler30(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65658,11 +65658,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler26 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler30 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler26(ctx));
+      return await runWithEndpointContext(ctx, () => handler30(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75796,8 +75796,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler26 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler26(request));
+      const { handler: handler30 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler30(request));
     },
     api,
     options,
@@ -83470,7 +83470,13 @@ var visits = pgTable("visits", {
   patientState: varchar("patient_state", { length: 2 }).notNull(),
   chiefComplaint: text("chief_complaint"),
   status: varchar("status", { length: 16 }).default("queued"),
-  // queued | accepted | completed | cancelled
+  // pending_payment | queued | accepted | completed | cancelled
+  // Payment (Stripe, env-gated). Card is authorized at request time, captured on accept, released on timeout/cancel.
+  paymentStatus: varchar("payment_status", { length: 16 }).default("none"),
+  // none | pending | authorized | captured | released | failed
+  amountCents: integer2("amount_cents"),
+  stripeCheckoutId: varchar("stripe_checkout_id", { length: 80 }),
+  stripePaymentIntent: varchar("stripe_payment_intent", { length: 80 }),
   clinicianUserId: varchar("clinician_user_id", { length: 36 }).references(() => user.id, {
     onDelete: "set null"
   }),
@@ -83750,6 +83756,8 @@ async function handler6(req, res) {
       visitState: visits.patientState,
       visitAcceptedAt: visits.acceptedAt,
       visitCompletedAt: visits.completedAt,
+      visitPaymentStatus: visits.paymentStatus,
+      visitAmountCents: visits.amountCents,
       clinicianName: clinicianProfiles.displayName,
       clinicianCredential: clinicianProfiles.credential
     }).from(intakeSessions).leftJoin(visits, eq(visits.intakeSessionId, intakeSessions.id)).leftJoin(clinicianProfiles, eq(clinicianProfiles.userId, visits.clinicianUserId)).where(eq(intakeSessions.userId, session2.user.id)).orderBy(desc(intakeSessions.createdAt));
@@ -83762,6 +83770,8 @@ async function handler6(req, res) {
           state: r.visitState,
           acceptedAt: r.visitAcceptedAt ? r.visitAcceptedAt.toISOString() : null,
           completedAt: r.visitCompletedAt ? r.visitCompletedAt.toISOString() : null,
+          paymentStatus: r.visitPaymentStatus,
+          amountCents: r.visitAmountCents,
           clinicianName: r.clinicianName,
           clinicianCredential: r.clinicianCredential
         } : null
@@ -85025,6 +85035,110 @@ async function handler20(req, res) {
   }
 }
 
+// src/server/lib/stripe.ts
+import { createHmac, timingSafeEqual as timingSafeEqual2 } from "node:crypto";
+var API = process.env.STRIPE_API_BASE ?? "https://api.stripe.com/v1";
+function stripeConfigured() {
+  return !!process.env.STRIPE_SECRET_KEY;
+}
+function priceCentsFor(acuity, env3 = process.env) {
+  const key = `PRICE_${acuity.toUpperCase()}_CENTS`;
+  const raw = env3[key];
+  if (!raw) return null;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+function pricing(env3 = process.env) {
+  const configured = !!env3.STRIPE_SECRET_KEY;
+  const get = (a) => configured ? priceCentsFor(a, env3) : null;
+  return {
+    configured,
+    emergency: null,
+    urgent: get("urgent"),
+    telehealth: get("telehealth"),
+    routine: get("routine"),
+    selfcare: get("selfcare")
+  };
+}
+function flatten(obj, prefix = "", out = new URLSearchParams()) {
+  for (const [k, v] of Object.entries(obj)) {
+    const key = prefix ? `${prefix}[${k}]` : k;
+    if (v === void 0 || v === null) continue;
+    if (Array.isArray(v)) v.forEach((item, i) => typeof item === "object" ? flatten(item, `${key}[${i}]`, out) : out.append(`${key}[${i}]`, String(item)));
+    else if (typeof v === "object") flatten(v, key, out);
+    else out.append(key, String(v));
+  }
+  return out;
+}
+async function stripePost(path2, body, idempotencyKey) {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error("Stripe not configured");
+  const res = await fetch(`${API}${path2}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+      ...idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}
+    },
+    body: flatten(body).toString()
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`Stripe ${path2}: ${data.error?.message ?? res.status}`);
+  return data;
+}
+async function createVisitCheckout(opts) {
+  return stripePost(
+    "/checkout/sessions",
+    {
+      mode: "payment",
+      customer_email: opts.customerEmail,
+      success_url: opts.successUrl,
+      cancel_url: opts.cancelUrl,
+      client_reference_id: String(opts.visitId),
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: opts.amountCents,
+            product_data: {
+              name: `${opts.acuityLabel} visit \u2014 Acute Insight`,
+              description: "Your card is held now and charged only when a clinician accepts your visit."
+            }
+          }
+        }
+      ],
+      payment_intent_data: {
+        capture_method: "manual",
+        description: `Acute Insight visit #${opts.visitId}`,
+        metadata: { visit_id: String(opts.visitId) }
+      },
+      metadata: { visit_id: String(opts.visitId) },
+      expires_at: Math.floor(Date.now() / 1e3) + 30 * 60
+      // 30 min to finish checkout
+    },
+    `visit-${opts.visitId}-checkout`
+  );
+}
+async function capturePayment(paymentIntent) {
+  await stripePost(`/payment_intents/${paymentIntent}/capture`, {}, `capture-${paymentIntent}`);
+}
+async function releasePayment(paymentIntent) {
+  await stripePost(`/payment_intents/${paymentIntent}/cancel`, { cancellation_reason: "abandoned" }, `cancel-${paymentIntent}`);
+}
+function verifyWebhook(rawBody, sigHeader, secret, toleranceSec = 300, now2 = Date.now()) {
+  if (!sigHeader) return false;
+  const parts = Object.fromEntries(sigHeader.split(",").map((p) => p.split("=")));
+  const t = parts.t;
+  const v1 = parts.v1;
+  if (!t || !v1) return false;
+  if (Math.abs(now2 / 1e3 - Number(t)) > toleranceSec) return false;
+  const expected = createHmac("sha256", secret).update(`${t}.${rawBody}`).digest("hex");
+  const a = Buffer.from(expected);
+  const b = Buffer.from(v1);
+  return a.length === b.length && timingSafeEqual2(a, b);
+}
+
 // src/server/api/dispatch/visits/POST.ts
 var CLINICIAN_TEXT_WINDOW_MS = 10 * 60 * 1e3;
 async function handler21(req, res) {
@@ -85049,15 +85163,41 @@ async function handler21(req, res) {
     const [existing] = await db.select({ id: patientProfiles.id }).from(patientProfiles).where(eq(patientProfiles.userId, userId)).limit(1);
     if (existing) await db.update(patientProfiles).set(profilePatch).where(eq(patientProfiles.userId, userId));
     else await db.insert(patientProfiles).values({ userId, ...profilePatch });
-    const [prior] = await db.select({ id: visits.id, status: visits.status }).from(visits).where(eq(visits.intakeSessionId, id)).limit(1);
-    if (prior) return res.json({ ok: true, visitId: prior.id, status: prior.status });
+    const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
+    const price = stripeConfigured() ? priceCentsFor(acuity) : null;
+    const [prior] = await db.select({ id: visits.id, status: visits.status, checkout: visits.stripeCheckoutId, amount: visits.amountCents }).from(visits).where(eq(visits.intakeSessionId, id)).limit(1);
+    if (prior) {
+      if (prior.status === "pending_payment" && price) {
+        const checkout = await checkoutFor(prior.id, price, acuity, userId, base);
+        return res.json({ ok: true, visitId: prior.id, status: prior.status, checkoutUrl: checkout.url, amountCents: price });
+      }
+      return res.json({ ok: true, visitId: prior.id, status: prior.status });
+    }
+    if (price) {
+      const [created2] = await db.insert(visits).values({ intakeSessionId: id, patientUserId: userId, acuity, patientState: st, chiefComplaint: intake.chiefComplaint, status: "pending_payment", paymentStatus: "pending", amountCents: price }).returning({ id: visits.id });
+      const checkout = await checkoutFor(created2.id, price, acuity, userId, base);
+      return res.json({ ok: true, visitId: created2.id, status: "pending_payment", checkoutUrl: checkout.url, amountCents: price });
+    }
     const [created] = await db.insert(visits).values({ intakeSessionId: id, patientUserId: userId, acuity, patientState: st, chiefComplaint: intake.chiefComplaint }).returning({ id: visits.id });
     res.json({ ok: true, visitId: created.id, status: "queued" });
-    void notifyClinicians(acuity, st, `${req.protocol}://${req.hostname}`);
+    void notifyClinicians(acuity, st, base);
   } catch (error3) {
     logErr("dispatch.request.error", error3);
     res.status(500).json({ error: "Failed to request a clinician" });
   }
+}
+async function checkoutFor(visitId, amountCents, acuity, userId, base) {
+  const [u] = await db.select({ email: user.email }).from(user).where(eq(user.id, userId)).limit(1);
+  const checkout = await createVisitCheckout({
+    visitId,
+    amountCents,
+    acuityLabel: ACUITY_LABEL[acuity],
+    customerEmail: u?.email ?? "",
+    successUrl: `${base}/portal?visit=${visitId}&paid=1`,
+    cancelUrl: `${base}/portal?visit=${visitId}&cancelled=1`
+  });
+  await db.update(visits).set({ stripeCheckoutId: checkout.id, stripePaymentIntent: checkout.payment_intent ?? void 0 }).where(eq(visits.id, visitId));
+  return checkout;
 }
 async function notifyClinicians(acuity, state, base) {
   if (!smsAvailable()) return;
@@ -85087,6 +85227,8 @@ async function handler22(req, res) {
       queuedAt: visits.queuedAt,
       acceptedAt: visits.acceptedAt,
       completedAt: visits.completedAt,
+      paymentStatus: visits.paymentStatus,
+      amountCents: visits.amountCents,
       clinicianName: clinicianProfiles.displayName,
       clinicianCredential: clinicianProfiles.credential
     }).from(visits).leftJoin(clinicianProfiles, eq(clinicianProfiles.userId, visits.clinicianUserId)).where(and(eq(visits.id, id), eq(visits.patientUserId, userId))).limit(1);
@@ -85127,6 +85269,14 @@ async function handler23(req, res) {
     }
     const [accepted] = await db.update(visits).set({ status: "accepted", clinicianUserId: ctx.userId, acceptedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, id), eq(visits.status, "queued"))).returning({ id: visits.id });
     if (!accepted) return res.status(409).json({ error: "Another clinician already accepted this visit" });
+    if (visit.paymentStatus === "authorized" && visit.stripePaymentIntent) {
+      try {
+        await capturePayment(visit.stripePaymentIntent);
+        await db.update(visits).set({ paymentStatus: "captured" }).where(eq(visits.id, id));
+      } catch (err) {
+        logErr("dispatch.accept.capture_failed", err);
+      }
+    }
     res.json({ ok: true, id: accepted.id });
     if (smsAvailable()) {
       void (async () => {
@@ -85178,6 +85328,96 @@ async function handler25(req, res) {
   } catch (error3) {
     logErr("dispatch.complete.error", error3);
     res.status(500).json({ error: "Failed to complete visit" });
+  }
+}
+
+// src/server/api/dispatch/visits/[id]/cancel/POST.ts
+async function handler26(req, res) {
+  try {
+    const userId = await requirePatient(req, res);
+    if (!userId) return;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid visit id" });
+    const [v] = await db.update(visits).set({ status: "cancelled" }).where(and(eq(visits.id, id), eq(visits.patientUserId, userId), inArray(visits.status, ["queued", "pending_payment"]))).returning({ id: visits.id, paymentStatus: visits.paymentStatus, pi: visits.stripePaymentIntent });
+    if (!v) return res.status(409).json({ error: "This visit can no longer be cancelled" });
+    if (v.paymentStatus === "authorized" && v.pi) {
+      try {
+        await releasePayment(v.pi);
+        await db.update(visits).set({ paymentStatus: "released" }).where(eq(visits.id, id));
+      } catch (err) {
+        logErr("dispatch.cancel.release_failed", err);
+      }
+    }
+    res.json({ ok: true });
+  } catch (error3) {
+    logErr("dispatch.cancel.error", error3);
+    res.status(500).json({ error: "Failed to cancel" });
+  }
+}
+
+// src/server/api/dispatch/pricing/GET.ts
+function handler27(_req, res) {
+  res.json(pricing());
+}
+
+// src/server/api/dispatch/sweep/GET.ts
+var HOLD_HOURS = Number(process.env.VISIT_HOLD_HOURS ?? 4);
+async function handler28(req, res) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
+  try {
+    const cutoff = new Date(Date.now() - HOLD_HOURS * 3600 * 1e3);
+    const stale = await db.update(visits).set({ status: "cancelled" }).where(and(inArray(visits.status, ["queued", "pending_payment"]), lt(visits.queuedAt, cutoff))).returning({ id: visits.id, paymentStatus: visits.paymentStatus, pi: visits.stripePaymentIntent });
+    let released = 0;
+    for (const v of stale) {
+      if (v.paymentStatus === "authorized" && v.pi) {
+        try {
+          await releasePayment(v.pi);
+          await db.update(visits).set({ paymentStatus: "released" }).where(eq(visits.id, v.id));
+          released++;
+        } catch (err) {
+          logErr("dispatch.sweep.release_failed", err);
+        }
+      }
+    }
+    console.log(JSON.stringify({ event: "dispatch.sweep", cancelled: stale.length, released, holdHours: HOLD_HOURS }));
+    res.json({ ok: true, cancelled: stale.length, released });
+  } catch (error3) {
+    logErr("dispatch.sweep.error", error3);
+    res.status(500).json({ error: "Sweep failed" });
+  }
+}
+
+// src/server/api/stripe/webhook/POST.ts
+async function handler29(req, res) {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) return res.status(503).json({ error: "Webhook not configured" });
+  const raw = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
+  if (!verifyWebhook(raw, req.headers["stripe-signature"], secret)) {
+    return res.status(400).json({ error: "Bad signature" });
+  }
+  let event;
+  try {
+    event = JSON.parse(raw);
+  } catch {
+    return res.status(400).json({ error: "Bad payload" });
+  }
+  try {
+    const obj = event.data.object;
+    const visitId = Number(obj.metadata?.visit_id ?? obj.client_reference_id);
+    if (event.type === "checkout.session.completed" && Number.isInteger(visitId)) {
+      const [v] = await db.update(visits).set({ status: "queued", paymentStatus: "authorized", stripePaymentIntent: String(obj.payment_intent ?? ""), queuedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, visitId), eq(visits.status, "pending_payment"))).returning({ id: visits.id, acuity: visits.acuity, patientState: visits.patientState });
+      if (v) {
+        const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
+        void notifyClinicians(v.acuity, v.patientState, base);
+      }
+    } else if ((event.type === "checkout.session.expired" || event.type === "checkout.session.async_payment_failed") && Number.isInteger(visitId)) {
+      await db.update(visits).set({ status: "cancelled", paymentStatus: "failed" }).where(and(eq(visits.id, visitId), eq(visits.status, "pending_payment")));
+    }
+    res.json({ received: true });
+  } catch (error3) {
+    logErr("stripe.webhook.error", error3);
+    res.status(500).json({ error: "Webhook handling failed" });
   }
 }
 
@@ -85324,6 +85564,7 @@ function normalizeCommerceApiBaseUrlEnv() {
 normalizeCommerceApiBaseUrlEnv();
 var app = (0, import_express.default)();
 app.set("trust proxy", true);
+app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler29);
 app.use(import_express.default.json());
 app.use(import_express.default.urlencoded({ extended: true }));
 app.get("/api/auth/:action", handler);
@@ -85351,6 +85592,9 @@ app.get("/api/dispatch/visits/:id", handler22);
 app.post("/api/dispatch/visits/:id/accept", handler23);
 app.post("/api/dispatch/visits/:id/release", handler24);
 app.post("/api/dispatch/visits/:id/complete", handler25);
+app.post("/api/dispatch/visits/:id/cancel", handler26);
+app.get("/api/dispatch/pricing", handler27);
+app.get("/api/dispatch/sweep", handler28);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;

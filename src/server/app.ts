@@ -26,6 +26,10 @@ import dispatch__visits__id__get from "./api/dispatch/visits/[id]/GET";
 import dispatch__visits__id__accept__post from "./api/dispatch/visits/[id]/accept/POST";
 import dispatch__visits__id__release__post from "./api/dispatch/visits/[id]/release/POST";
 import dispatch__visits__id__complete__post from "./api/dispatch/visits/[id]/complete/POST";
+import dispatch__visits__id__cancel__post from "./api/dispatch/visits/[id]/cancel/POST";
+import dispatch__pricing__get from "./api/dispatch/pricing/GET";
+import dispatch__sweep__get from "./api/dispatch/sweep/GET";
+import stripe__webhook__post from "./api/stripe/webhook/POST";
 // </api-imports>
 import { seoRoutes } from "../lib/seo-routes";
 import {
@@ -266,6 +270,9 @@ const app = express();
 // the sitemap origin in robots.txt.
 app.set("trust proxy", true);
 
+// Stripe signs the raw bytes — this route must see them before express.json() runs.
+app.post("/api/stripe/webhook", express.raw({ type: "*/*" }), stripe__webhook__post);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -295,6 +302,9 @@ app.get("/api/dispatch/visits/:id", dispatch__visits__id__get);
 app.post("/api/dispatch/visits/:id/accept", dispatch__visits__id__accept__post);
 app.post("/api/dispatch/visits/:id/release", dispatch__visits__id__release__post);
 app.post("/api/dispatch/visits/:id/complete", dispatch__visits__id__complete__post);
+app.post("/api/dispatch/visits/:id/cancel", dispatch__visits__id__cancel__post);
+app.get("/api/dispatch/pricing", dispatch__pricing__get);
+app.get("/api/dispatch/sweep", dispatch__sweep__get);
 // </api-registrations>
 
 // Error middleware must be registered AFTER the routes it protects; Express

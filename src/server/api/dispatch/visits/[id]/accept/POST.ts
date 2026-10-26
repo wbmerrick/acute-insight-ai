@@ -4,6 +4,7 @@ import { db } from '../../../../../db/client.js';
 import { visits, patientProfiles } from '../../../../../db/schema.js';
 import { requireClinician, licensesOf, scopeCovers, logErr } from '../../../../../lib/dispatch.js';
 import { sendSms, acceptedText, toE164, smsAvailable } from '../../../../../lib/sms.js';
+import { capturePayment } from '../../../../../lib/stripe.js';
 
 /** First clinician to accept wins. The UPDATE's WHERE status='queued' is the lock. */
 export default async function handler(req: Request, res: Response) {
@@ -32,6 +33,18 @@ export default async function handler(req: Request, res: Response) {
       .returning({ id: visits.id });
 
     if (!accepted) return res.status(409).json({ error: 'Another clinician already accepted this visit' });
+
+    // Paid visit: capture the hold now that a clinician has committed. A capture
+    // failure is logged, not fatal — the visit is already accepted and care comes first.
+    if (visit.paymentStatus === 'authorized' && visit.stripePaymentIntent) {
+      try {
+        await capturePayment(visit.stripePaymentIntent);
+        await db.update(visits).set({ paymentStatus: 'captured' }).where(eq(visits.id, id));
+      } catch (err) {
+        logErr('dispatch.accept.capture_failed', err);
+      }
+    }
+
     res.json({ ok: true, id: accepted.id });
 
     // Tell the patient who is calling. Fire-and-forget, PHI-free.

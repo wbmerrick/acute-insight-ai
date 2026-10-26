@@ -23,8 +23,10 @@ interface IntakeSession {
   createdAt: string;
   visit: {
     id: number;
-    status: 'queued' | 'accepted' | 'completed' | 'cancelled';
+    status: 'pending_payment' | 'queued' | 'accepted' | 'completed' | 'cancelled';
     state: string;
+    paymentStatus: string | null;
+    amountCents: number | null;
     acceptedAt: string | null;
     completedAt: string | null;
     clinicianName: string | null;
@@ -79,8 +81,9 @@ function StatCard({ label, value, icon, accent = false }: { label: string; value
 
 
 // ─── Dispatch status for one intake (the patient's side of the marketplace) ──
-function VisitStatus({ intake }: { intake: IntakeSession }) {
+function VisitStatus({ intake, onChanged }: { intake: IntakeSession; onChanged?: () => void }) {
   const [open, setOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const disp = intake.aiBrief?.disposition;
   const v = intake.visit;
   if (!disp || disp.level === 'emergency') return null;
@@ -106,15 +109,37 @@ function VisitStatus({ intake }: { intake: IntakeSession }) {
   }
   return (
     <div className="mt-2">
-      {v.status === 'queued' && pill(`Waiting for a clinician in ${v.state}`, 'var(--warning)', true)}
+      {v.status === 'pending_payment' && (
+        <div className="mt-1 max-w-xl"><RequestClinician intakeId={intake.id} disposition={disp} /></div>
+      )}
+      {v.status === 'queued' && (
+        <span className="inline-flex items-center gap-3 flex-wrap">
+          {pill(`Waiting for a clinician in ${v.state}`, 'var(--warning)', true)}
+          {v.paymentStatus === 'authorized' && v.amountCents ? (
+            <span className="text-xs" style={{ color: 'hsl(var(--text-dimmer))' }}>${v.amountCents / 100} held, charged only on accept</span>
+          ) : null}
+          <button
+            type="button"
+            disabled={cancelling}
+            onClick={async () => {
+              setCancelling(true);
+              try { await fetch(`/api/dispatch/visits/${v.id}/cancel`, { method: 'POST' }); onChanged?.(); } finally { setCancelling(false); }
+            }}
+            className="text-xs hover:underline"
+            style={{ color: 'hsl(var(--text-dim))' }}
+          >
+            Cancel request
+          </button>
+        </span>
+      )}
       {v.status === 'accepted' && pill(`${who} accepted — expect a call`, 'var(--primary)')}
       {v.status === 'completed' && pill(`Visit completed with ${who}`, 'var(--primary)')}
-      {v.status === 'cancelled' && pill('Request cancelled', 'var(--text-dim)')}
+      {v.status === 'cancelled' && pill('Request cancelled — nothing charged', 'var(--text-dim)')}
     </div>
   );
 }
 
-function IntakeRow({ intake, onCheckIn }: { intake: IntakeSession; onCheckIn?: (intake: IntakeSession) => void }) {
+function IntakeRow({ intake, onCheckIn, onChanged }: { intake: IntakeSession; onCheckIn?: (intake: IntakeSession) => void; onChanged?: () => void }) {
   const date = new Date(intake.createdAt);
   const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   const isComplete = intake.status === 'complete';
@@ -204,7 +229,7 @@ function IntakeRow({ intake, onCheckIn }: { intake: IntakeSession; onCheckIn?: (
             ))}
           </div>
         )}
-        {isComplete && disp && <VisitStatus intake={intake} />}
+        {isComplete && disp && <VisitStatus intake={intake} onChanged={onChanged} />}
         {isComplete && onCheckIn && (
           <button
             type="button"
@@ -249,6 +274,13 @@ function PortalContent() {
     }
     void load();
   }, []);
+
+  async function reloadIntakes() {
+    try {
+      const r = await fetch('/api/patient/intakes');
+      if (r.ok) setIntakes(await r.json());
+    } catch { /* ignore */ }
+  }
 
   // While a visit is waiting or accepted, keep the timeline live without a reload.
   const hasLiveVisit = intakes.some((i) => i.visit && (i.visit.status === 'queued' || i.visit.status === 'accepted'));
@@ -535,7 +567,7 @@ function PortalContent() {
                   ) : (
                     <div>
                       {intakes.slice(0, 5).map((intake) => (
-                        <IntakeRow key={intake.id} intake={intake} onCheckIn={checkIn} />
+                        <IntakeRow key={intake.id} intake={intake} onCheckIn={checkIn} onChanged={() => void reloadIntakes()} />
                       ))}
                       {intakes.length > 5 && (
                         <button
@@ -587,7 +619,7 @@ function PortalContent() {
                       </p>
                     </div>
                   ) : (
-                    intakes.map((intake) => <IntakeRow key={intake.id} intake={intake} onCheckIn={checkIn} />)
+                    intakes.map((intake) => <IntakeRow key={intake.id} intake={intake} onCheckIn={checkIn} onChanged={() => void reloadIntakes()} />)
                   )}
                 </div>
               </motion.div>
