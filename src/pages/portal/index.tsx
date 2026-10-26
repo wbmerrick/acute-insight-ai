@@ -8,6 +8,7 @@ import { portal } from 'virtual:content';
 import type { ClinicalBrief } from '@/lib/clinical-brief';
 import { acuityMeta } from '@/components/clinical-brief-view';
 import { RequestClinician } from '@/components/request-clinician';
+import { VerifyEmailNudge } from '@/components/verify-email-nudge';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -505,6 +506,7 @@ function PortalContent() {
                   />
                 </div>
 
+                <VerifyEmailNudge />
                 {/* Ace's scheduled check-in (due now) */}
                 {pendingCheckin && (
                   <motion.div

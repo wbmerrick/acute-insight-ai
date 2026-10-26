@@ -19,6 +19,7 @@ import { twoFactor as twoFactorPlugin } from 'better-auth/plugins';
 import { db } from '@/server/db/client';
 import { user, session, account, verification, twoFactor } from '@/server/db/schema';
 import { getSecret } from '#airo/secrets';
+import { sendEmail, verifyEmailTemplate, resetPasswordTemplate } from '@/server/lib/email';
 
 // Lazy singleton — betterAuth() must NOT run at module init time.
 //
@@ -120,7 +121,24 @@ export function getAuth() {
       },
     }),
 
-    emailAndPassword: { enabled: true },
+    emailAndPassword: {
+      enabled: true,
+      // Reset links go out only when a sender is configured; otherwise the request is logged and no-ops.
+      sendResetPassword: async ({ user: u, url }) => {
+        const t = resetPasswordTemplate(u.name ?? null, url);
+        await sendEmail(u.email, t.subject, t.html, t.text);
+      },
+      resetPasswordTokenExpiresIn: 60 * 60,
+    },
+
+    emailVerification: {
+      sendOnSignUp: true,
+      autoSignInAfterVerification: true,
+      sendVerificationEmail: async ({ user: u, url }) => {
+        const t = verifyEmailTemplate(u.name ?? null, url);
+        await sendEmail(u.email, t.subject, t.html, t.text);
+      },
+    },
 
     // MFA (TOTP + backup codes). Enabling requires the password; clinicians and
     // admins are nudged to turn it on, and REQUIRE_MFA_CLINICIANS=true enforces it.

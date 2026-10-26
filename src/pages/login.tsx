@@ -194,6 +194,9 @@ export default function LoginPage() {
               >
                 {loading ? 'Signing in…' : login.submitButton}
               </button>
+              <p className="text-right mt-2">
+                <Link to="/forgot-password" className="text-xs hover:underline" style={{ color: 'hsl(var(--text-dim))' }}>Forgot your password?</Link>
+              </p>
             </form>
 
             <p

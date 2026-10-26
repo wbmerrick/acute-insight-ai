@@ -11,6 +11,8 @@ const PatientPortalPage = lazy(() => import('./pages/portal/index'));
 const ProviderDashboardPage = lazy(() => import('./pages/provider/index'));
 const ClinicianPage = lazy(() => import('./pages/clinician/index'));
 const TwoFactorPage = lazy(() => import('./pages/two-factor'));
+const ForgotPasswordPage = lazy(() => import('./pages/forgot-password'));
+const ResetPasswordPage = lazy(() => import('./pages/reset-password'));
 const AccountSecurityPage = lazy(() => import('./pages/account-security'));
 const IntakePage = lazy(() => import('./pages/intake/index'));
 const AboutPage = lazy(() => import('./pages/about'));
@@ -43,6 +45,14 @@ export const routes: RouteObject[] = [
   {
     path: '/provider',
     element: <ProviderDashboardPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
   },
   {
     path: '/2fa',

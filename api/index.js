@@ -48838,18 +48838,18 @@ var require_binaryParsers = __commonJS({
         }
         return value;
       };
-      var mask2 = 255;
+      var mask3 = 255;
       var firstBits = 8 - offset % 8;
       if (bits < firstBits) {
-        mask2 = 255 << 8 - bits & 255;
+        mask3 = 255 << 8 - bits & 255;
         firstBits = bits;
       }
       if (offset) {
-        mask2 = mask2 >> offset % 8;
+        mask3 = mask3 >> offset % 8;
       }
       var result = 0;
       if (offset % 8 + bits >= 8) {
-        result = callback(0, inv(data[offsetBytes]) & mask2, firstBits);
+        result = callback(0, inv(data[offsetBytes]) & mask3, firstBits);
       }
       var bytes = bits + offset >> 3;
       for (var i = offsetBytes + 1; i < bytes; i++) {
@@ -56891,12 +56891,12 @@ var Poly1305 = class {
       g[i] &= 8191;
     }
     g[9] -= 1 << 13;
-    let mask2 = (c ^ 1) - 1;
+    let mask3 = (c ^ 1) - 1;
     for (let i = 0; i < 10; i++)
-      g[i] &= mask2;
-    mask2 = ~mask2;
+      g[i] &= mask3;
+    mask3 = ~mask3;
     for (let i = 0; i < 10; i++)
-      h[i] = h[i] & mask2 | g[i];
+      h[i] = h[i] & mask3 | g[i];
     h[0] = (h[0] | h[1] << 13) & 65535;
     h[1] = (h[1] >>> 3 | h[2] << 10) & 65535;
     h[2] = (h[2] >>> 6 | h[3] << 7) & 65535;
@@ -57647,7 +57647,7 @@ var BIGINT_FORMAT_RANGES = {
   int64: [/* @__PURE__ */ BigInt("-9223372036854775808"), /* @__PURE__ */ BigInt("9223372036854775807")],
   uint64: [/* @__PURE__ */ BigInt(0), /* @__PURE__ */ BigInt("18446744073709551615")]
 };
-function pick(schema3, mask2) {
+function pick(schema3, mask3) {
   const currDef = schema3._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
@@ -57655,29 +57655,29 @@ function pick(schema3, mask2) {
     throw new Error(".pick() cannot be used on object schemas containing refinements");
   }
   const newShape = {};
-  mirrorShape(newShape, schema3, maskedKeys(schema3, mask2));
+  mirrorShape(newShape, schema3, maskedKeys(schema3, mask3));
   return clone(schema3, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
-function maskedKeys(schema3, mask2) {
+function maskedKeys(schema3, mask3) {
   const raw = sourceShape(schema3);
   const keys = [];
-  for (const key of Reflect.ownKeys(mask2)) {
+  for (const key of Reflect.ownKeys(mask3)) {
     if (!Object.getOwnPropertyDescriptor(raw, key)?.enumerable) {
       throw new Error(`Unrecognized key: "${String(key)}"`);
     }
-    if (mask2[key])
+    if (mask3[key])
       keys.push(key);
   }
   return keys;
 }
-function omit(schema3, mask2) {
+function omit(schema3, mask3) {
   const currDef = schema3._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     throw new Error(".omit() cannot be used on object schemas containing refinements");
   }
-  const omitted = new Set(maskedKeys(schema3, mask2));
+  const omitted = new Set(maskedKeys(schema3, mask3));
   const newShape = {};
   mirrorShape(newShape, schema3, Reflect.ownKeys(sourceShape(schema3)).filter((key) => !omitted.has(key)));
   return clone(schema3, mergeDefs(currDef, { shape: newShape, checks: [] }));
@@ -57729,20 +57729,20 @@ function merge(a, b) {
   });
   return clone(a, def);
 }
-function partial(Class2, schema3, mask2, name = "partial") {
+function partial(Class2, schema3, mask3, name = "partial") {
   const currDef = schema3._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     throw new Error(`.${name}() cannot be used on object schemas containing refinements`);
   }
-  const selected = mask2 ? new Set(maskedKeys(schema3, mask2)) : void 0;
+  const selected = mask3 ? new Set(maskedKeys(schema3, mask3)) : void 0;
   const newShape = {};
   mirrorShape(newShape, schema3, Reflect.ownKeys(sourceShape(schema3)), Class2 && ((value, key) => selected && !selected.has(key) ? value : new Class2({ type: "optional", innerType: value })));
   return clone(schema3, mergeDefs(schema3._zod.def, { shape: newShape, checks: [] }));
 }
-function required(Class2, schema3, mask2) {
-  const selected = mask2 ? new Set(maskedKeys(schema3, mask2)) : void 0;
+function required(Class2, schema3, mask3) {
+  const selected = mask3 ? new Set(maskedKeys(schema3, mask3)) : void 0;
   const newShape = {};
   mirrorShape(newShape, schema3, Reflect.ownKeys(sourceShape(schema3)), (value, key) => (
     // overwrite with non-optional
@@ -63196,11 +63196,11 @@ var ZodObject = /* @__PURE__ */ $constructor("ZodObject", (inst, def) => {
   merge(other) {
     return util_exports.merge(this, other);
   },
-  pick(mask2) {
-    return util_exports.pick(this, mask2);
+  pick(mask3) {
+    return util_exports.pick(this, mask3);
   },
-  omit(mask2) {
-    return util_exports.omit(this, mask2);
+  omit(mask3) {
+    return util_exports.omit(this, mask3);
   },
   partial(...args) {
     return util_exports.partial(ZodOptional, this, args[0]);
@@ -67687,8 +67687,8 @@ function ipv4ToUint32(ip) {
 }
 function inIPv4Range(value, prefix, length) {
   if (length === 0) return true;
-  const mask2 = length === 32 ? 4294967295 : -1 << 32 - length >>> 0;
-  return (value & mask2) === (prefix & mask2);
+  const mask3 = length === 32 ? 4294967295 : -1 << 32 - length >>> 0;
+  return (value & mask3) === (prefix & mask3);
 }
 function classifyIPv4(ip) {
   if (ip === "0.0.0.0") return "unspecified";
@@ -84766,6 +84766,72 @@ function getSecret(secretName) {
   return process.env[secretName] ?? null;
 }
 
+// src/server/lib/email.ts
+import { createHash as createHash2 } from "node:crypto";
+function emailAvailable() {
+  return !!(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
+}
+var mask = (to) => createHash2("sha256").update(to.toLowerCase()).digest("hex").slice(0, 12);
+async function sendEmail(to, subject, html2, text2) {
+  if (!emailAvailable()) {
+    console.log(JSON.stringify({ event: "email.skipped", reason: "resend_not_configured", to: mask(to), subject }));
+    return false;
+  }
+  try {
+    const res = await fetch((process.env.RESEND_API_BASE ?? "https://api.resend.com") + "/emails", {
+      // base override only for local tests
+      method: "POST",
+      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: process.env.EMAIL_FROM, to: [to], subject, html: html2, text: text2 })
+    });
+    if (!res.ok) {
+      console.error(JSON.stringify({ event: "email.failed", status: res.status, to: mask(to), subject }));
+      return false;
+    }
+    console.log(JSON.stringify({ event: "email.sent", to: mask(to), subject }));
+    return true;
+  } catch (err) {
+    console.error(JSON.stringify({ event: "email.error", to: mask(to), error: err instanceof Error ? err.message : String(err) }));
+    return false;
+  }
+}
+function shell(title, body, cta, footnote) {
+  const html2 = `<!doctype html><html><body style="margin:0;background:#0b0f14;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#e6edf3">
+<div style="max-width:520px;margin:0 auto;padding:40px 24px">
+  <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#22e07a;margin-bottom:16px">Acute Insight</div>
+  <h1 style="font-size:22px;margin:0 0 12px">${title}</h1>
+  <p style="font-size:15px;line-height:1.6;color:#aab4c0;margin:0 0 24px">${body}</p>
+  <a href="${cta.url}" style="display:inline-block;background:#22e07a;color:#0b0f14;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:10px">${cta.label}</a>
+  <p style="font-size:12px;line-height:1.6;color:#6b7684;margin:28px 0 0">${footnote}<br>If the button doesn't work, paste this into your browser:<br><span style="word-break:break-all">${cta.url}</span></p>
+</div></body></html>`;
+  const text2 = `${title}
+
+${body}
+
+${cta.label}: ${cta.url}
+
+${footnote}`;
+  return { html: html2, text: text2 };
+}
+function verifyEmailTemplate(name, url) {
+  const t = shell(
+    "Confirm your email",
+    `${name ? `Hi ${name}, t` : "T"}ap below to confirm this address for your Acute Insight account.`,
+    { label: "Confirm email", url },
+    "If you didn't create an account, you can ignore this."
+  );
+  return { subject: "Confirm your email \u2014 Acute Insight", ...t };
+}
+function resetPasswordTemplate(name, url) {
+  const t = shell(
+    "Reset your password",
+    `${name ? `Hi ${name}, s` : "S"}omeone asked to reset the password for this Acute Insight account. The link works for one hour.`,
+    { label: "Choose a new password", url },
+    "If you didn't ask for this, your password is unchanged and you can ignore this email."
+  );
+  return { subject: "Reset your password \u2014 Acute Insight", ...t };
+}
+
 // src/lib/auth/auth.ts
 var _auth = null;
 function getAuth() {
@@ -84835,7 +84901,23 @@ function getAuth() {
         }
       }
     },
-    emailAndPassword: { enabled: true },
+    emailAndPassword: {
+      enabled: true,
+      // Reset links go out only when a sender is configured; otherwise the request is logged and no-ops.
+      sendResetPassword: async ({ user: u, url }) => {
+        const t = resetPasswordTemplate(u.name ?? null, url);
+        await sendEmail(u.email, t.subject, t.html, t.text);
+      },
+      resetPasswordTokenExpiresIn: 60 * 60
+    },
+    emailVerification: {
+      sendOnSignUp: true,
+      autoSignInAfterVerification: true,
+      sendVerificationEmail: async ({ user: u, url }) => {
+        const t = verifyEmailTemplate(u.name ?? null, url);
+        await sendEmail(u.email, t.subject, t.html, t.text);
+      }
+    },
     // MFA (TOTP + backup codes). Enabling requires the password; clinicians and
     // admins are nudged to turn it on, and REQUIRE_MFA_CLINICIANS=true enforces it.
     plugins: [twoFactor({ issuer: "Acute Insight" })]
@@ -85761,7 +85843,7 @@ function toE164(raw) {
 }
 var sendSms = async (to, body) => {
   if (!smsAvailable()) {
-    console.log(JSON.stringify({ event: "sms.skipped", reason: "twilio_not_configured", to: mask(to) }));
+    console.log(JSON.stringify({ event: "sms.skipped", reason: "twilio_not_configured", to: mask2(to) }));
     return false;
   }
   const sid = process.env.TWILIO_ACCOUNT_SID;
@@ -85778,17 +85860,17 @@ var sendSms = async (to, body) => {
     });
     if (!res.ok) {
       const text2 = await res.text().catch(() => "");
-      console.error(JSON.stringify({ event: "sms.failed", status: res.status, to: mask(to), detail: text2.slice(0, 200) }));
+      console.error(JSON.stringify({ event: "sms.failed", status: res.status, to: mask2(to), detail: text2.slice(0, 200) }));
       return false;
     }
-    console.log(JSON.stringify({ event: "sms.sent", to: mask(to) }));
+    console.log(JSON.stringify({ event: "sms.sent", to: mask2(to) }));
     return true;
   } catch (err) {
-    console.error(JSON.stringify({ event: "sms.error", to: mask(to), error: err instanceof Error ? err.message : String(err) }));
+    console.error(JSON.stringify({ event: "sms.error", to: mask2(to), error: err instanceof Error ? err.message : String(err) }));
     return false;
   }
 };
-function mask(to) {
+function mask2(to) {
   return to.length > 4 ? `${"*".repeat(to.length - 4)}${to.slice(-4)}` : "****";
 }
 var ACUITY_WORD = {

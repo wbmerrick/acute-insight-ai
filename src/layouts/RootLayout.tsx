@@ -22,7 +22,7 @@ interface RootLayoutProps {
   children: ReactElement;
 }
 
-const STANDALONE_PREFIXES = ['/intake', '/portal', '/provider', '/clinician', '/admin', '/2fa', '/account'];
+const STANDALONE_PREFIXES = ['/intake', '/portal', '/provider', '/clinician', '/admin', '/2fa', '/account', '/forgot-password', '/reset-password'];
 
 export default function RootLayout({ children }: RootLayoutProps) {
   const { pathname } = useLocation();
