@@ -14,9 +14,10 @@
 
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { twoFactor as twoFactorPlugin } from 'better-auth/plugins';
 
 import { db } from '@/server/db/client';
-import { user, session, account, verification } from '@/server/db/schema';
+import { user, session, account, verification, twoFactor } from '@/server/db/schema';
 import { getSecret } from '#airo/secrets';
 
 // Lazy singleton — betterAuth() must NOT run at module init time.
@@ -46,7 +47,7 @@ export function getAuth() {
     // Schema passed explicitly — avoids BetterAuth's runtime schema inference.
     database: drizzleAdapter(db, {
       provider: 'pg',
-      schema: { user, session, account, verification },
+      schema: { user, session, account, verification, twoFactor },
     }),
 
     secret: authSecret,
@@ -120,6 +121,10 @@ export function getAuth() {
     }),
 
     emailAndPassword: { enabled: true },
+
+    // MFA (TOTP + backup codes). Enabling requires the password; clinicians and
+    // admins are nudged to turn it on, and REQUIRE_MFA_CLINICIANS=true enforces it.
+    plugins: [twoFactorPlugin({ issuer: 'Acute Insight' })],
 
     // socialProviders: {
     //   google: {

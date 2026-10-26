@@ -6,6 +6,7 @@ import { useSession, signOut, ProtectedRoute } from '@/lib/auth/auth-client';
 import type { ClinicalBrief, Acuity } from '@/lib/clinical-brief';
 import { ACUITY_LABEL } from '@/lib/clinical-brief';
 import { ProviderNote, acuityMeta } from '@/components/clinical-brief-view';
+import { MfaBanner } from '@/components/mfa-banner';
 
 // ─── Types (mirror /api/dispatch) ────────────────────────────────────────────
 
@@ -562,6 +563,7 @@ function ClinicianContent() {
   const navigate = useNavigate();
   const [me, setMe] = useState<Me | null>(null);
   const [forbidden, setForbidden] = useState(false);
+  const [mfaBlocked, setMfaBlocked] = useState(false);
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [active, setActive] = useState<ActiveVisit[]>([]);
   const [acceptingId, setAcceptingId] = useState<number | null>(null);
@@ -587,7 +589,8 @@ function ClinicianContent() {
         const m = await api<Me>('/api/dispatch/me');
         if (!cancelled) setMe(m);
       } catch (e) {
-        if (!cancelled && e instanceof Error && /access required/i.test(e.message)) setForbidden(true);
+        if (!cancelled && e instanceof Error && /two-step/i.test(e.message)) setMfaBlocked(true);
+        else if (!cancelled && e instanceof Error && /access required/i.test(e.message)) setForbidden(true);
       }
     })();
     return () => { cancelled = true; };
@@ -655,7 +658,8 @@ function ClinicianContent() {
       </header>
 
       <div className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
-        {!me ? (
+        <MfaBanner blocked={mfaBlocked} />
+        {mfaBlocked ? null : !me ? (
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: 'hsl(var(--primary))' }} />
           </div>

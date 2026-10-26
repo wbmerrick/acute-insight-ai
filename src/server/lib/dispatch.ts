@@ -20,6 +20,11 @@ export const US_STATES = [
 ] as const;
 const STATE_SET = new Set<string>(US_STATES);
 
+/** REQUIRE_MFA_CLINICIANS=true → clinicians/admins must have MFA on to reach patient data. */
+export function mfaRequired(): boolean {
+  return process.env.REQUIRE_MFA_CLINICIANS === 'true';
+}
+
 export function isUsState(s: unknown): s is string {
   return typeof s === 'string' && STATE_SET.has(s.toUpperCase());
 }
@@ -59,6 +64,10 @@ export async function requireClinician(req: Request, res: Response): Promise<Cli
   const [u] = await db.select().from(user).where(eq(user.id, session.user.id)).limit(1);
   if (!u || (u.role !== 'provider' && !u.isAdmin)) {
     res.status(403).json({ error: 'Clinician access required' });
+    return null;
+  }
+  if (mfaRequired() && !u.twoFactorEnabled) {
+    res.status(403).json({ error: 'Two-step verification is required for clinician access', code: 'mfa_required' });
     return null;
   }
   let [profile] = await db

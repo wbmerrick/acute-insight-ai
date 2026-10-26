@@ -19,6 +19,7 @@ export const user = pgTable('user', {
   image: text('image'),
   isAdmin: boolean('is_admin').default(false),
   role: varchar('role', { length: 32 }).default('patient'), // 'patient' | 'provider'
+  twoFactorEnabled: boolean('two_factor_enabled').default(false), // better-auth twoFactor plugin
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at')
     .defaultNow()
@@ -69,6 +70,16 @@ export const verification = pgTable('verification', {
   updatedAt: timestamp('updated_at')
     .defaultNow()
     .$onUpdate(() => new Date()),
+});
+
+export const twoFactor = pgTable('two_factor', {
+  id: varchar('id', { length: 36 }).primaryKey(),
+  secret: text('secret').notNull(),
+  backupCodes: text('backup_codes').notNull(),
+  userId: varchar('user_id', { length: 36 })
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  verified: boolean('verified').default(true),
 });
 
 // ─── Patient intake sessions ─────────────────────────────────────────────────

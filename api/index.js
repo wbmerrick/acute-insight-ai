@@ -599,10 +599,10 @@ var require_supports_color = __commonJS({
         return 3;
       }
       if ("TERM_PROGRAM" in env3) {
-        const version3 = parseInt((env3.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
+        const version4 = parseInt((env3.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
         switch (env3.TERM_PROGRAM) {
           case "iTerm.app":
-            return version3 >= 3 ? 3 : 2;
+            return version4 >= 3 ? 3 : 2;
           case "Apple_Terminal":
             return 2;
         }
@@ -24672,9 +24672,9 @@ var init_get_tables = __esm({
   "node_modules/better-auth/node_modules/@better-auth/core/dist/db/get-tables.mjs"() {
     getAuthTables = (options) => {
       const pluginSchema = (options.plugins ?? []).reduce((acc, plugin) => {
-        const schema2 = plugin.schema;
-        if (!schema2) return acc;
-        for (const [key, value] of Object.entries(schema2)) acc[key] = {
+        const schema3 = plugin.schema;
+        if (!schema3) return acc;
+        for (const [key, value] of Object.entries(schema3)) acc[key] = {
           fields: {
             ...acc[key]?.fields,
             ...value.fields
@@ -26072,10 +26072,10 @@ var init_ProxyTracer = __esm({
     init_NoopTracer();
     NOOP_TRACER = new NoopTracer();
     ProxyTracer = class {
-      constructor(provider, name, version3, options) {
+      constructor(provider, name, version4, options) {
         this._provider = provider;
         this.name = name;
-        this.version = version3;
+        this.version = version4;
         this.options = options;
       }
       startSpan(name, options, context2) {
@@ -26128,9 +26128,9 @@ var init_ProxyTracerProvider = __esm({
       /**
        * Get a {@link ProxyTracer}
        */
-      getTracer(name, version3, options) {
+      getTracer(name, version4, options) {
         var _a7;
-        return (_a7 = this.getDelegateTracer(name, version3, options)) !== null && _a7 !== void 0 ? _a7 : new ProxyTracer(this, name, version3, options);
+        return (_a7 = this.getDelegateTracer(name, version4, options)) !== null && _a7 !== void 0 ? _a7 : new ProxyTracer(this, name, version4, options);
       }
       getDelegate() {
         var _a7;
@@ -26142,9 +26142,9 @@ var init_ProxyTracerProvider = __esm({
       setDelegate(delegate) {
         this._delegate = delegate;
       }
-      getDelegateTracer(name, version3, options) {
+      getDelegateTracer(name, version4, options) {
         var _a7;
-        return (_a7 = this._delegate) === null || _a7 === void 0 ? void 0 : _a7.getTracer(name, version3, options);
+        return (_a7 = this._delegate) === null || _a7 === void 0 ? void 0 : _a7.getTracer(name, version4, options);
       }
     };
   }
@@ -26354,8 +26354,8 @@ var init_metrics = __esm({
       /**
        * Returns a meter from the global meter provider.
        */
-      getMeter(name, version3, options) {
-        return this.getMeterProvider().getMeter(name, version3, options);
+      getMeter(name, version4, options) {
+        return this.getMeterProvider().getMeter(name, version4, options);
       }
       /** Remove the global meter provider */
       disable() {
@@ -26548,8 +26548,8 @@ var init_trace2 = __esm({
       /**
        * Returns a tracer from the global tracer provider.
        */
-      getTracer(name, version3) {
-        return this.getTracerProvider().getTracer(name, version3);
+      getTracer(name, version4) {
+        return this.getTracerProvider().getTracer(name, version4);
       }
       /** Remove the global tracer provider */
       disable() {
@@ -26725,16 +26725,16 @@ var initGetDefaultModelName;
 var init_get_default_model_name = __esm({
   "node_modules/better-auth/node_modules/@better-auth/core/dist/db/adapter/get-default-model-name.mjs"() {
     init_error2();
-    initGetDefaultModelName = ({ usePlural, schema: schema2 }) => {
+    initGetDefaultModelName = ({ usePlural, schema: schema3 }) => {
       const getDefaultModelName = (model) => {
         if (usePlural && model.charAt(model.length - 1) === "s") {
           const pluralessModel = model.slice(0, -1);
-          let m2 = schema2[pluralessModel] ? pluralessModel : void 0;
-          if (!m2) m2 = Object.entries(schema2).find(([_, f]) => f.modelName === pluralessModel)?.[0];
+          let m2 = schema3[pluralessModel] ? pluralessModel : void 0;
+          if (!m2) m2 = Object.entries(schema3).find(([_, f]) => f.modelName === pluralessModel)?.[0];
           if (m2) return m2;
         }
-        let m = schema2[model] ? model : void 0;
-        if (!m) m = Object.entries(schema2).find(([_, f]) => f.modelName === model)?.[0];
+        let m = schema3[model] ? model : void 0;
+        if (!m) m = Object.entries(schema3).find(([_, f]) => f.modelName === model)?.[0];
         if (!m) throw new BetterAuthError(`Model "${model}" not found in schema`);
         return m;
       };
@@ -26749,17 +26749,17 @@ var init_get_default_field_name = __esm({
   "node_modules/better-auth/node_modules/@better-auth/core/dist/db/adapter/get-default-field-name.mjs"() {
     init_error2();
     init_get_default_model_name();
-    initGetDefaultFieldName = ({ schema: schema2, usePlural }) => {
+    initGetDefaultFieldName = ({ schema: schema3, usePlural }) => {
       const getDefaultModelName = initGetDefaultModelName({
-        schema: schema2,
+        schema: schema3,
         usePlural
       });
       const getDefaultFieldName = ({ field, model: unsafeModel }) => {
         if (field === "id" || field === "_id") return "id";
         const model = getDefaultModelName(unsafeModel);
-        let f = schema2[model]?.fields[field];
+        let f = schema3[model]?.fields[field];
         if (!f) {
-          const result = Object.entries(schema2[model].fields).find(([_, f2]) => f2.fieldName === field);
+          const result = Object.entries(schema3[model].fields).find(([_, f2]) => f2.fieldName === field);
           if (result) {
             f = result[1];
             field = result[0];
@@ -26780,10 +26780,10 @@ var init_get_id_field = __esm({
     init_logger();
     init_id();
     init_get_default_model_name();
-    initGetIdField = ({ usePlural, schema: schema2, disableIdGeneration, options, customIdGenerator, supportsUUIDs }) => {
+    initGetIdField = ({ usePlural, schema: schema3, disableIdGeneration, options, customIdGenerator, supportsUUIDs }) => {
       const getDefaultModelName = initGetDefaultModelName({
         usePlural,
-        schema: schema2
+        schema: schema3
       });
       const idField = ({ customModelName, forceAllowId }) => {
         const useNumberId = options.advanced?.database?.generateId === "serial";
@@ -26849,18 +26849,18 @@ var init_get_field_attributes = __esm({
     init_get_default_model_name();
     init_get_default_field_name();
     init_get_id_field();
-    initGetFieldAttributes = ({ usePlural, schema: schema2, options, customIdGenerator, disableIdGeneration }) => {
+    initGetFieldAttributes = ({ usePlural, schema: schema3, options, customIdGenerator, disableIdGeneration }) => {
       const getDefaultModelName = initGetDefaultModelName({
         usePlural,
-        schema: schema2
+        schema: schema3
       });
       const getDefaultFieldName = initGetDefaultFieldName({
         usePlural,
-        schema: schema2
+        schema: schema3
       });
       const idField = initGetIdField({
         usePlural,
-        schema: schema2,
+        schema: schema3,
         options,
         customIdGenerator,
         disableIdGeneration
@@ -26871,7 +26871,7 @@ var init_get_field_attributes = __esm({
           field,
           model: defaultModelName
         });
-        const fields = schema2[defaultModelName].fields;
+        const fields = schema3[defaultModelName].fields;
         fields.id = idField({ customModelName: defaultModelName });
         const fieldAttributes = fields[defaultFieldName];
         if (!fieldAttributes) throw new BetterAuthError(`Field ${field} not found in model ${model}`);
@@ -26888,13 +26888,13 @@ var init_get_field_name = __esm({
   "node_modules/better-auth/node_modules/@better-auth/core/dist/db/adapter/get-field-name.mjs"() {
     init_get_default_model_name();
     init_get_default_field_name();
-    initGetFieldName = ({ schema: schema2, usePlural }) => {
+    initGetFieldName = ({ schema: schema3, usePlural }) => {
       const getDefaultModelName = initGetDefaultModelName({
-        schema: schema2,
+        schema: schema3,
         usePlural
       });
       const getDefaultFieldName = initGetDefaultFieldName({
-        schema: schema2,
+        schema: schema3,
         usePlural
       });
       function getFieldName({ model: modelName, field: fieldName }) {
@@ -26903,7 +26903,7 @@ var init_get_field_name = __esm({
           model,
           field: fieldName
         });
-        return schema2[model]?.fields[field]?.fieldName || field;
+        return schema3[model]?.fields[field]?.fieldName || field;
       }
       return getFieldName;
     };
@@ -26915,14 +26915,14 @@ var initGetModelName;
 var init_get_model_name = __esm({
   "node_modules/better-auth/node_modules/@better-auth/core/dist/db/adapter/get-model-name.mjs"() {
     init_get_default_model_name();
-    initGetModelName = ({ usePlural, schema: schema2 }) => {
+    initGetModelName = ({ usePlural, schema: schema3 }) => {
       const getDefaultModelName = initGetDefaultModelName({
-        schema: schema2,
+        schema: schema3,
         usePlural
       });
       const getModelName = (model) => {
         const defaultModelKey = getDefaultModelName(model);
-        if (schema2 && schema2[defaultModelKey] && schema2[defaultModelKey].modelName !== model) return usePlural ? `${schema2[defaultModelKey].modelName}s` : schema2[defaultModelKey].modelName;
+        if (schema3 && schema3[defaultModelKey] && schema3[defaultModelKey].modelName !== model) return usePlural ? `${schema3[defaultModelKey].modelName}s` : schema3[defaultModelKey].modelName;
         return usePlural ? `${model}s` : model;
       };
       return getModelName;
@@ -27004,7 +27004,7 @@ var init_factory = __esm({
         disableTransformJoin: cfg.disableTransformJoin ?? false
       };
       if (options.advanced?.database?.generateId === "serial" && config3.supportsNumericIds === false) throw new BetterAuthError(`[${config3.adapterName}] Your database or database adapter does not support numeric ids. Please disable "useNumberId" in your config.`);
-      const schema2 = getAuthTables(options);
+      const schema3 = getAuthTables(options);
       const debugLog = (...args) => {
         if (config3.debugLogs === true || typeof config3.debugLogs === "object") {
           const logger3 = createLogger({ level: "info" });
@@ -27039,22 +27039,22 @@ var init_factory = __esm({
       const logger2 = createLogger(options.logger);
       const getDefaultModelName = initGetDefaultModelName({
         usePlural: config3.usePlural,
-        schema: schema2
+        schema: schema3
       });
       const getDefaultFieldName = initGetDefaultFieldName({
         usePlural: config3.usePlural,
-        schema: schema2
+        schema: schema3
       });
       const getModelName = initGetModelName({
         usePlural: config3.usePlural,
-        schema: schema2
+        schema: schema3
       });
       const getFieldName = initGetFieldName({
-        schema: schema2,
+        schema: schema3,
         usePlural: config3.usePlural
       });
       const idField = initGetIdField({
-        schema: schema2,
+        schema: schema3,
         options,
         usePlural: config3.usePlural,
         disableIdGeneration: config3.disableIdGeneration,
@@ -27062,7 +27062,7 @@ var init_factory = __esm({
         supportsUUIDs: config3.supportsUUIDs
       });
       const getFieldAttributes = initGetFieldAttributes({
-        schema: schema2,
+        schema: schema3,
         options,
         usePlural: config3.usePlural,
         disableIdGeneration: config3.disableIdGeneration,
@@ -27070,7 +27070,7 @@ var init_factory = __esm({
       });
       const transformInput = async (data, defaultModelName, action, forceAllowId) => {
         const transformedData = {};
-        const fields = schema2[defaultModelName].fields;
+        const fields = schema3[defaultModelName].fields;
         const newMappedKeys = config3.mapKeysTransformInput ?? {};
         const useNumberId = options.advanced?.database?.generateId === "serial";
         fields.id = idField({
@@ -27104,7 +27104,7 @@ var init_factory = __esm({
             field: newFieldName,
             fieldAttributes,
             model: getModelName(defaultModelName),
-            schema: schema2,
+            schema: schema3,
             options
           });
           if (newValue !== void 0) transformedData[newFieldName] = newValue;
@@ -27116,7 +27116,7 @@ var init_factory = __esm({
           if (!data2) return null;
           const newMappedKeys = config3.mapKeysTransformOutput ?? {};
           const transformedData2 = {};
-          const tableSchema = schema2[getDefaultModelName(unsafe_model2)].fields;
+          const tableSchema = schema3[getDefaultModelName(unsafe_model2)].fields;
           const idKey = Object.entries(newMappedKeys).find(([_, v]) => v === "id")?.[0];
           tableSchema[idKey ?? "id"] = { type: options.advanced?.database?.generateId === "serial" ? "number" : "string" };
           for (const key in tableSchema) {
@@ -27139,7 +27139,7 @@ var init_factory = __esm({
                 fieldAttributes: field,
                 select: select2,
                 model: getModelName(unsafe_model2),
-                schema: schema2,
+                schema: schema3,
                 options
               });
               transformedData2[newFieldName] = newValue;
@@ -27230,7 +27230,7 @@ var init_factory = __esm({
             fieldAttributes: fieldAttr,
             field: fieldName,
             model: getModelName(model),
-            schema: schema2,
+            schema: schema3,
             options,
             action
           });
@@ -27251,10 +27251,10 @@ var init_factory = __esm({
           if (!join2) continue;
           const defaultModelName = getDefaultModelName(model);
           const defaultBaseModelName = getDefaultModelName(baseModel);
-          let foreignKeys = Object.entries(schema2[defaultModelName].fields).filter(([field, fieldAttributes]) => fieldAttributes.references && getDefaultModelName(fieldAttributes.references.model) === defaultBaseModelName);
+          let foreignKeys = Object.entries(schema3[defaultModelName].fields).filter(([field, fieldAttributes]) => fieldAttributes.references && getDefaultModelName(fieldAttributes.references.model) === defaultBaseModelName);
           let isForwardJoin = true;
           if (!foreignKeys.length) {
-            foreignKeys = Object.entries(schema2[defaultBaseModelName].fields).filter(([field, fieldAttributes]) => fieldAttributes.references && getDefaultModelName(fieldAttributes.references.model) === defaultModelName);
+            foreignKeys = Object.entries(schema3[defaultBaseModelName].fields).filter(([field, fieldAttributes]) => fieldAttributes.references && getDefaultModelName(fieldAttributes.references.model) === defaultModelName);
             isForwardJoin = false;
           }
           if (!foreignKeys.length) throw new BetterAuthError(`No foreign key found for model ${model} and base model ${baseModel} while performing join operation.`);
@@ -27355,7 +27355,7 @@ var init_factory = __esm({
       };
       const adapterInstance = customAdapter({
         options,
-        schema: schema2,
+        schema: schema3,
         debugLog,
         getFieldName,
         getModelName,
@@ -28198,10 +28198,10 @@ var init_create_schema_node = __esm({
       is(node2) {
         return node2.kind === "CreateSchemaNode";
       },
-      create(schema2, params) {
+      create(schema3, params) {
         return freeze({
           kind: "CreateSchemaNode",
-          schema: IdentifierNode.create(schema2),
+          schema: IdentifierNode.create(schema3),
           ...params
         });
       },
@@ -28288,10 +28288,10 @@ var init_schemable_identifier_node = __esm({
           identifier: IdentifierNode.create(identifier)
         });
       },
-      createWithSchema(schema2, identifier) {
+      createWithSchema(schema3, identifier) {
         return freeze({
           kind: "SchemableIdentifierNode",
-          schema: IdentifierNode.create(schema2),
+          schema: IdentifierNode.create(schema3),
           identifier: IdentifierNode.create(identifier)
         });
       }
@@ -28336,10 +28336,10 @@ var init_drop_schema_node = __esm({
       is(node2) {
         return node2.kind === "DropSchemaNode";
       },
-      create(schema2, params) {
+      create(schema3, params) {
         return freeze({
           kind: "DropSchemaNode",
-          schema: IdentifierNode.create(schema2),
+          schema: IdentifierNode.create(schema3),
           ...params
         });
       },
@@ -28415,10 +28415,10 @@ var init_table_node = __esm({
           table: SchemableIdentifierNode.create(table2)
         });
       },
-      createWithSchema(schema2, table2) {
+      createWithSchema(schema3, table2) {
         return freeze({
           kind: "TableNode",
-          table: SchemableIdentifierNode.createWithSchema(schema2, table2)
+          table: SchemableIdentifierNode.createWithSchema(schema3, table2)
         });
       }
     });
@@ -29199,8 +29199,8 @@ function parseOrderedColumnName(column) {
   }
 }
 function parseStringReferenceWithTableAndSchema(parts) {
-  const [schema2, table2, column] = parts;
-  return ReferenceNode.create(ColumnNode.create(column), TableNode.createWithSchema(schema2, table2));
+  const [schema3, table2, column] = parts;
+  return ReferenceNode.create(ColumnNode.create(column), TableNode.createWithSchema(schema3, table2));
 }
 function parseStringReferenceWithTable(parts) {
   const [table2, column] = parts;
@@ -34368,9 +34368,9 @@ var init_with_schema_transformer = __esm({
       #schema;
       #schemableIds = /* @__PURE__ */ new Set();
       #ctes = /* @__PURE__ */ new Set();
-      constructor(schema2) {
+      constructor(schema3) {
         super();
-        this.#schema = schema2;
+        this.#schema = schema3;
       }
       transformNodeImpl(node2, queryId) {
         if (!isRootOperationNode(node2)) {
@@ -34522,8 +34522,8 @@ var init_with_schema_plugin = __esm({
     init_with_schema_transformer();
     WithSchemaPlugin = class {
       #transformer;
-      constructor(schema2) {
-        this.#transformer = new WithSchemaTransformer(schema2);
+      constructor(schema3) {
+        this.#transformer = new WithSchemaTransformer(schema3);
       }
       transformQuery(args) {
         return this.#transformer.transformNode(args.node, args.queryId);
@@ -36145,10 +36145,10 @@ var init_query_creator = __esm({
        * select "p"."name" from "mammals"."pet" as "p"
        * ```
        */
-      withSchema(schema2) {
+      withSchema(schema3) {
         return new _QueryCreator({
           ...this.#props,
-          executor: this.#props.executor.withPluginAtFront(new WithSchemaPlugin(schema2))
+          executor: this.#props.executor.withPluginAtFront(new WithSchemaPlugin(schema3))
         });
       }
     };
@@ -38021,8 +38021,8 @@ function parseAliasedTable(from) {
 function parseTable(from) {
   const SCHEMA_SEPARATOR = ".";
   if (from.includes(SCHEMA_SEPARATOR)) {
-    const [schema2, table2] = from.split(SCHEMA_SEPARATOR).map(trim2);
-    return TableNode.createWithSchema(schema2, table2);
+    const [schema3, table2] = from.split(SCHEMA_SEPARATOR).map(trim2);
+    return TableNode.createWithSchema(schema3, table2);
   } else {
     return TableNode.create(from);
   }
@@ -41560,11 +41560,11 @@ var init_alter_type_builder = __esm({
       /**
        * Changes the type's schema.
        */
-      setSchema(schema2) {
+      setSchema(schema3) {
         return new QueryFinalizer({
           ...this.#props,
           node: AlterTypeNode.cloneWith(this.#props.node, {
-            setSchema: IdentifierNode.create(schema2)
+            setSchema: IdentifierNode.create(schema3)
           })
         });
       }
@@ -41736,11 +41736,11 @@ var init_schema_module = __esm({
        *   .execute()
        * ```
        */
-      createSchema(schema2) {
+      createSchema(schema3) {
         return new CreateSchemaBuilder({
           queryId: createQueryId(),
           executor: this.#executor,
-          node: CreateSchemaNode.create(schema2)
+          node: CreateSchemaNode.create(schema3)
         });
       }
       /**
@@ -41754,11 +41754,11 @@ var init_schema_module = __esm({
        *   .execute()
        * ```
        */
-      dropSchema(schema2) {
+      dropSchema(schema3) {
         return new DropSchemaBuilder({
           queryId: createQueryId(),
           executor: this.#executor,
-          node: DropSchemaNode.create(schema2)
+          node: DropSchemaNode.create(schema3)
         });
       }
       /**
@@ -41924,8 +41924,8 @@ var init_schema_module = __esm({
       /**
        * See {@link QueryCreator.withSchema}
        */
-      withSchema(schema2) {
-        return new _SchemaModule(this.#executor.withPluginAtFront(new WithSchemaPlugin(schema2)));
+      withSchema(schema3) {
+        return new _SchemaModule(this.#executor.withPluginAtFront(new WithSchemaPlugin(schema3)));
       }
     };
   }
@@ -42826,10 +42826,10 @@ var init_kysely = __esm({
       /**
        * @override
        */
-      withSchema(schema2) {
+      withSchema(schema3) {
         return new _Kysely({
           ...this.#props,
-          executor: this.#props.executor.withPluginAtFront(new WithSchemaPlugin(schema2))
+          executor: this.#props.executor.withPluginAtFront(new WithSchemaPlugin(schema3))
         });
       }
       /**
@@ -43040,10 +43040,10 @@ var init_kysely = __esm({
       /**
        * Similar to {@link Kysely.withSchema} but returns the transaction.
        */
-      withSchema(schema2) {
+      withSchema(schema3) {
         return new _Transaction({
           ...this.#props,
-          executor: this.#props.executor.withPluginAtFront(new WithSchemaPlugin(schema2))
+          executor: this.#props.executor.withPluginAtFront(new WithSchemaPlugin(schema3))
         });
       }
       /**
@@ -43407,10 +43407,10 @@ var init_kysely = __esm({
           executor: this.#props.executor.withoutPlugins()
         });
       }
-      withSchema(schema2) {
+      withSchema(schema3) {
         return new _ControlledTransaction({
           ...this.#props,
-          executor: this.#props.executor.withPluginAtFront(new WithSchemaPlugin(schema2))
+          executor: this.#props.executor.withPluginAtFront(new WithSchemaPlugin(schema3))
         });
       }
       withTables() {
@@ -46196,12 +46196,12 @@ var init_postgres_introspector = __esm({
         const tables = [];
         const schemas = /* @__PURE__ */ new Map();
         for (const column of columns) {
-          let schema2 = schemas.get(column.schema);
-          if (!schema2) {
-            schema2 = /* @__PURE__ */ new Map();
-            schemas.set(column.schema, schema2);
+          let schema3 = schemas.get(column.schema);
+          if (!schema3) {
+            schema3 = /* @__PURE__ */ new Map();
+            schemas.set(column.schema, schema3);
           }
-          let table2 = schema2.get(column.table);
+          let table2 = schema3.get(column.table);
           if (!table2) {
             table2 = freeze({
               columns: [],
@@ -46210,7 +46210,7 @@ var init_postgres_introspector = __esm({
               name: column.table,
               schema: column.schema
             });
-            schema2.set(column.table, table2);
+            schema3.set(column.table, table2);
             tables.push(table2);
           }
           table2.columns.push(freeze({
@@ -47782,7 +47782,7 @@ var init_dist3 = __esm({
       let lazyOptions = null;
       let mysqlNoIdWarned = false;
       const createCustomAdapter = (db3, inTransaction = false) => {
-        return ({ getFieldName, schema: schema2, getDefaultFieldName, getDefaultModelName, getFieldAttributes, getModelName, options }) => {
+        return ({ getFieldName, schema: schema3, getDefaultFieldName, getDefaultModelName, getFieldAttributes, getModelName, options }) => {
           if (config3?.type === "mysql" && options.advanced?.database?.generateId === false && !mysqlNoIdWarned) {
             mysqlNoIdWarned = true;
             logger.warn(`[Kysely Adapter] MySQL does not support INSERT...RETURNING. With generateId set to false, the adapter uses best-effort fallback strategies (unique columns, full-field match) to retrieve inserted rows. For reliable behavior, use Better Auth's default ID generation, a custom generateId function, or generateId: "serial" for auto-increment.`);
@@ -47791,7 +47791,7 @@ var init_dist3 = __esm({
             const allSelects = [];
             const allSelectsStr = [];
             if (join2) for (const [joinModel, _] of Object.entries(join2)) {
-              const fields = schema2[getDefaultModelName(joinModel)]?.fields;
+              const fields = schema3[getDefaultModelName(joinModel)]?.fields;
               const [_joinModelSchema, joinModelName] = joinModel.includes(".") ? joinModel.split(".") : [void 0, joinModel];
               if (!fields) continue;
               fields.id = { type: "string" };
@@ -47832,7 +47832,7 @@ var init_dist3 = __esm({
                     field: "id"
                   }), "=", lastId).limit(1).executeTakeFirst();
                 }
-                const modelSchema = schema2[getDefaultModelName(model)]?.fields;
+                const modelSchema = schema3[getDefaultModelName(model)]?.fields;
                 if (modelSchema) for (const [fieldKey, fieldAttr] of Object.entries(modelSchema)) {
                   if (!fieldAttr.unique) continue;
                   const dbFieldName = getFieldName({
@@ -56058,8 +56058,8 @@ function getAllSecrets(secret) {
     value: secret
   }];
   const result = [];
-  for (const [version3, value] of secret.keys) result.push({
-    version: version3,
+  for (const [version4, value] of secret.keys) result.push({
+    version: version4,
     value
   });
   if (secret.legacySecret && !result.some((s) => s.value === secret.legacySecret)) result.push({
@@ -56124,6 +56124,18 @@ async function symmetricDecodeJWT(token, secret, salt) {
     }
     return null;
   }
+}
+
+// node_modules/better-auth/dist/crypto/buffer.mjs
+function constantTimeEqual(a, b) {
+  if (typeof a === "string") a = new TextEncoder().encode(a);
+  if (typeof b === "string") b = new TextEncoder().encode(b);
+  const aBuffer = new Uint8Array(a);
+  const bBuffer = new Uint8Array(b);
+  let c = aBuffer.length ^ bBuffer.length;
+  const length = Math.max(aBuffer.length, bBuffer.length);
+  for (let i = 0; i < length; i++) c |= (i < aBuffer.length ? aBuffer[i] : 0) ^ (i < bBuffer.length ? bBuffer[i] : 0);
+  return c === 0;
 }
 
 // node_modules/@better-auth/utils/dist/password.node.mjs
@@ -57135,15 +57147,15 @@ function parseEnvelope(data) {
   const firstSep = 4;
   const secondSep = data.indexOf("$", firstSep);
   if (secondSep === -1) return null;
-  const version3 = parseInt(data.slice(firstSep, secondSep), 10);
-  if (!Number.isInteger(version3) || version3 < 0) return null;
+  const version4 = parseInt(data.slice(firstSep, secondSep), 10);
+  if (!Number.isInteger(version4) || version4 < 0) return null;
   return {
-    version: version3,
+    version: version4,
     ciphertext: data.slice(secondSep + 1)
   };
 }
-function formatEnvelope(version3, ciphertext) {
-  return `${ENVELOPE_PREFIX}${version3}$${ciphertext}`;
+function formatEnvelope(version4, ciphertext) {
+  return `${ENVELOPE_PREFIX}${version4}$${ciphertext}`;
 }
 async function rawEncrypt(secret, data) {
   const keyAsBytes = await createHash("SHA-256").digest(secret);
@@ -57265,7 +57277,7 @@ function assertNotEqual(val) {
   return val;
 }
 function toZod() {
-  return (schema2) => schema2;
+  return (schema3) => schema3;
 }
 function assertIs(_arg) {
 }
@@ -57358,8 +57370,8 @@ function rawShape(def) {
   const desc2 = Object.getOwnPropertyDescriptor(def, "shape");
   return desc2?.get ? desc2.get.raw : desc2?.value;
 }
-function sourceShape(schema2) {
-  return rawShape(schema2._zod.def) ?? schema2._zod.def.shape;
+function sourceShape(schema3) {
+  return rawShape(schema3._zod.def) ?? schema3._zod.def.shape;
 }
 function deferProp(target, key, getter) {
   Object.defineProperty(target, key, {
@@ -57412,8 +57424,8 @@ function mergeDefs(...defs) {
   }
   return Object.defineProperties({}, mergedDescriptors);
 }
-function cloneDef(schema2) {
-  return mergeDefs(schema2._zod.def);
+function cloneDef(schema3) {
+  return mergeDefs(schema3._zod.def);
 }
 function getElementAtPath(obj, path2) {
   if (!path2)
@@ -57635,19 +57647,19 @@ var BIGINT_FORMAT_RANGES = {
   int64: [/* @__PURE__ */ BigInt("-9223372036854775808"), /* @__PURE__ */ BigInt("9223372036854775807")],
   uint64: [/* @__PURE__ */ BigInt(0), /* @__PURE__ */ BigInt("18446744073709551615")]
 };
-function pick(schema2, mask2) {
-  const currDef = schema2._zod.def;
+function pick(schema3, mask2) {
+  const currDef = schema3._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     throw new Error(".pick() cannot be used on object schemas containing refinements");
   }
   const newShape = {};
-  mirrorShape(newShape, schema2, maskedKeys(schema2, mask2));
-  return clone(schema2, mergeDefs(currDef, { shape: newShape, checks: [] }));
+  mirrorShape(newShape, schema3, maskedKeys(schema3, mask2));
+  return clone(schema3, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
-function maskedKeys(schema2, mask2) {
-  const raw = sourceShape(schema2);
+function maskedKeys(schema3, mask2) {
+  const raw = sourceShape(schema3);
   const keys = [];
   for (const key of Reflect.ownKeys(mask2)) {
     if (!Object.getOwnPropertyDescriptor(raw, key)?.enumerable) {
@@ -57658,45 +57670,45 @@ function maskedKeys(schema2, mask2) {
   }
   return keys;
 }
-function omit(schema2, mask2) {
-  const currDef = schema2._zod.def;
+function omit(schema3, mask2) {
+  const currDef = schema3._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     throw new Error(".omit() cannot be used on object schemas containing refinements");
   }
-  const omitted = new Set(maskedKeys(schema2, mask2));
+  const omitted = new Set(maskedKeys(schema3, mask2));
   const newShape = {};
-  mirrorShape(newShape, schema2, Reflect.ownKeys(sourceShape(schema2)).filter((key) => !omitted.has(key)));
-  return clone(schema2, mergeDefs(currDef, { shape: newShape, checks: [] }));
+  mirrorShape(newShape, schema3, Reflect.ownKeys(sourceShape(schema3)).filter((key) => !omitted.has(key)));
+  return clone(schema3, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
-function extend(schema2, shape) {
+function extend(schema3, shape) {
   if (!isPlainObject(shape)) {
     throw new Error("Invalid input to extend: expected a plain object");
   }
-  const checks = schema2._zod.def.checks;
+  const checks = schema3._zod.def.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
-    const existingShape = sourceShape(schema2);
+    const existingShape = sourceShape(schema3);
     for (const key of Reflect.ownKeys(shape)) {
       if (Object.getOwnPropertyDescriptor(existingShape, key) !== void 0) {
         throw new Error("Cannot overwrite keys on object schemas containing refinements. Use `.safeExtend()` instead.");
       }
     }
   }
-  return clone(schema2, mergeDefs(schema2._zod.def, { shape: extended(schema2, shape) }));
+  return clone(schema3, mergeDefs(schema3._zod.def, { shape: extended(schema3, shape) }));
 }
-function extended(schema2, shape) {
+function extended(schema3, shape) {
   const newShape = {};
-  mirrorShape(newShape, schema2, Reflect.ownKeys(sourceShape(schema2)));
+  mirrorShape(newShape, schema3, Reflect.ownKeys(sourceShape(schema3)));
   mirrorProps(newShape, shape);
   return newShape;
 }
-function safeExtend(schema2, shape) {
+function safeExtend(schema3, shape) {
   if (!isPlainObject(shape)) {
     throw new Error("Invalid input to safeExtend: expected a plain object");
   }
-  return clone(schema2, mergeDefs(schema2._zod.def, { shape: extended(schema2, shape) }));
+  return clone(schema3, mergeDefs(schema3._zod.def, { shape: extended(schema3, shape) }));
 }
 function merge(a, b) {
   if (!b?._zod?.def) {
@@ -57717,26 +57729,26 @@ function merge(a, b) {
   });
   return clone(a, def);
 }
-function partial(Class2, schema2, mask2, name = "partial") {
-  const currDef = schema2._zod.def;
+function partial(Class2, schema3, mask2, name = "partial") {
+  const currDef = schema3._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     throw new Error(`.${name}() cannot be used on object schemas containing refinements`);
   }
-  const selected = mask2 ? new Set(maskedKeys(schema2, mask2)) : void 0;
+  const selected = mask2 ? new Set(maskedKeys(schema3, mask2)) : void 0;
   const newShape = {};
-  mirrorShape(newShape, schema2, Reflect.ownKeys(sourceShape(schema2)), Class2 && ((value, key) => selected && !selected.has(key) ? value : new Class2({ type: "optional", innerType: value })));
-  return clone(schema2, mergeDefs(schema2._zod.def, { shape: newShape, checks: [] }));
+  mirrorShape(newShape, schema3, Reflect.ownKeys(sourceShape(schema3)), Class2 && ((value, key) => selected && !selected.has(key) ? value : new Class2({ type: "optional", innerType: value })));
+  return clone(schema3, mergeDefs(schema3._zod.def, { shape: newShape, checks: [] }));
 }
-function required(Class2, schema2, mask2) {
-  const selected = mask2 ? new Set(maskedKeys(schema2, mask2)) : void 0;
+function required(Class2, schema3, mask2) {
+  const selected = mask2 ? new Set(maskedKeys(schema3, mask2)) : void 0;
   const newShape = {};
-  mirrorShape(newShape, schema2, Reflect.ownKeys(sourceShape(schema2)), (value, key) => (
+  mirrorShape(newShape, schema3, Reflect.ownKeys(sourceShape(schema3)), (value, key) => (
     // overwrite with non-optional
     selected && !selected.has(key) ? value : new Class2({ type: "nonoptional", innerType: value })
   ));
-  return clone(schema2, mergeDefs(schema2._zod.def, { shape: newShape }));
+  return clone(schema3, mergeDefs(schema3._zod.def, { shape: newShape }));
 }
 function aborted(x, startIndex = 0) {
   if (x.aborted === true)
@@ -58272,9 +58284,9 @@ function finalizeParams(callee, params) {
   return { callee: params?.callee ?? callee, Err: params?.Err };
 }
 var _parse = (_Err) => {
-  const fn = (schema2, value, _ctx, _params) => {
+  const fn = (schema3, value, _ctx, _params) => {
     const ctx = _ctx ? { ..._ctx, async: false } : { async: false };
-    const result = schema2._zod.run({ value, issues: [] }, ctx);
+    const result = schema3._zod.run({ value, issues: [] }, ctx);
     if (result instanceof Promise) {
       throw new $ZodAsyncError();
     }
@@ -58288,9 +58300,9 @@ var _parse = (_Err) => {
   return fn;
 };
 var _parseAsync = (_Err) => {
-  const fn = async (schema2, value, _ctx, params) => {
+  const fn = async (schema3, value, _ctx, params) => {
     const ctx = _ctx ? { ..._ctx, async: true } : { async: true };
-    let result = schema2._zod.run({ value, issues: [] }, ctx);
+    let result = schema3._zod.run({ value, issues: [] }, ctx);
     if (result instanceof Promise)
       result = await result;
     if (result.issues.length) {
@@ -58302,9 +58314,9 @@ var _parseAsync = (_Err) => {
   };
   return fn;
 };
-var _safeParse = (_Err) => (schema2, value, _ctx) => {
+var _safeParse = (_Err) => (schema3, value, _ctx) => {
   const ctx = _ctx ? { ..._ctx, async: false } : { async: false };
-  const result = schema2._zod.run({ value, issues: [] }, ctx);
+  const result = schema3._zod.run({ value, issues: [] }, ctx);
   if (result instanceof Promise) {
     throw new $ZodAsyncError();
   }
@@ -58329,90 +58341,90 @@ function failure(Err, issues, ctx) {
     }
   };
 }
-var _safeParseAsync = (_Err) => async (schema2, value, _ctx) => {
+var _safeParseAsync = (_Err) => async (schema3, value, _ctx) => {
   const ctx = _ctx ? { ..._ctx, async: true } : { async: true };
-  let result = schema2._zod.run({ value, issues: [] }, ctx);
+  let result = schema3._zod.run({ value, issues: [] }, ctx);
   if (result instanceof Promise)
     result = await result;
   return result.issues.length ? failure(_Err, result.issues, ctx) : { success: true, data: result.value };
 };
 var COMPILE_INVALID = /* @__PURE__ */ Symbol.for("zod.compile.invalid");
 var COMPILE_FALLBACK = /* @__PURE__ */ Symbol.for("zod.compile.fallback");
-var validate = ((schema2, value, _ctx) => {
-  const validator = schema2._zod.bag.validator;
+var validate = ((schema3, value, _ctx) => {
+  const validator = schema3._zod.bag.validator;
   if (validator !== void 0) {
     if (validator(value) !== COMPILE_INVALID)
       return true;
     if (validator.definite === true && _ctx === void 0)
       return false;
   }
-  return validateFallback(schema2, value, _ctx);
+  return validateFallback(schema3, value, _ctx);
 });
-function validateFallback(schema2, value, _ctx) {
+function validateFallback(schema3, value, _ctx) {
   const ctx = _ctx ? { ..._ctx, async: false, abortEarly: true } : { async: false, abortEarly: true };
-  const fallbackRun = schema2._zod.bag.fallbackRun;
+  const fallbackRun = schema3._zod.bag.fallbackRun;
   let result;
   if (fallbackRun) {
     ctx[COMPILE_FALLBACK] = true;
     result = fallbackRun({ value, issues: [] }, ctx);
   } else {
-    result = schema2._zod.run({ value, issues: [] }, ctx);
+    result = schema3._zod.run({ value, issues: [] }, ctx);
   }
   if (result instanceof Promise) {
     throw new $ZodAsyncError();
   }
   return result.issues.length === 0;
 }
-var validateAsync = async (schema2, value, _ctx) => {
+var validateAsync = async (schema3, value, _ctx) => {
   const ctx = _ctx ? { ..._ctx, async: true, abortEarly: true } : { async: true, abortEarly: true };
-  let result = schema2._zod.run({ value, issues: [] }, ctx);
+  let result = schema3._zod.run({ value, issues: [] }, ctx);
   if (result instanceof Promise)
     result = await result;
   return result.issues.length === 0;
 };
 var _encode = (_Err) => {
   const parse3 = _parse(_Err);
-  const fn = (schema2, value, _ctx, _params) => {
+  const fn = (schema3, value, _ctx, _params) => {
     const ctx = _ctx ? { ..._ctx, direction: "backward" } : { direction: "backward" };
-    return parse3(schema2, value, ctx, finalizeParams(fn, _params));
+    return parse3(schema3, value, ctx, finalizeParams(fn, _params));
   };
   return fn;
 };
 var _decode = (_Err) => {
   const parse3 = _parse(_Err);
-  const fn = (schema2, value, _ctx, _params) => {
-    return parse3(schema2, value, _ctx, finalizeParams(fn, _params));
+  const fn = (schema3, value, _ctx, _params) => {
+    return parse3(schema3, value, _ctx, finalizeParams(fn, _params));
   };
   return fn;
 };
 var _encodeAsync = (_Err) => {
   const parseAsync2 = _parseAsync(_Err);
-  const fn = async (schema2, value, _ctx, _params) => {
+  const fn = async (schema3, value, _ctx, _params) => {
     const ctx = _ctx ? { ..._ctx, direction: "backward" } : { direction: "backward" };
-    return await parseAsync2(schema2, value, ctx, finalizeParams(fn, _params));
+    return await parseAsync2(schema3, value, ctx, finalizeParams(fn, _params));
   };
   return fn;
 };
 var _decodeAsync = (_Err) => {
   const parseAsync2 = _parseAsync(_Err);
-  const fn = async (schema2, value, _ctx, _params) => {
-    return await parseAsync2(schema2, value, _ctx, finalizeParams(fn, _params));
+  const fn = async (schema3, value, _ctx, _params) => {
+    return await parseAsync2(schema3, value, _ctx, finalizeParams(fn, _params));
   };
   return fn;
 };
-var _safeEncode = (_Err) => (schema2, value, _ctx) => {
+var _safeEncode = (_Err) => (schema3, value, _ctx) => {
   const ctx = _ctx ? { ..._ctx, direction: "backward" } : { direction: "backward" };
-  return _safeParse(_Err)(schema2, value, ctx);
+  return _safeParse(_Err)(schema3, value, ctx);
 };
-var _safeDecode = (_Err) => (schema2, value, _ctx) => {
-  return _safeParse(_Err)(schema2, value, _ctx);
+var _safeDecode = (_Err) => (schema3, value, _ctx) => {
+  return _safeParse(_Err)(schema3, value, _ctx);
 };
-var _safeEncodeAsync = (_Err) => async (schema2, value, _ctx) => {
+var _safeEncodeAsync = (_Err) => async (schema3, value, _ctx) => {
   const ctx = _ctx ? { ..._ctx, direction: "backward" } : { direction: "backward" };
-  return _safeParseAsync(_Err)(schema2, value, ctx);
+  return _safeParseAsync(_Err)(schema3, value, ctx);
 };
-var _safeDecodeAsync = (_Err) => async (schema2, value, _ctx) => {
-  return _safeParseAsync(_Err)(schema2, value, _ctx);
+var _safeDecodeAsync = (_Err) => async (schema3, value, _ctx) => {
+  return _safeParseAsync(_Err)(schema3, value, _ctx);
 };
 
 // node_modules/better-auth/node_modules/zod/v4/core/regexes.js
@@ -58427,10 +58439,10 @@ function nanoidOfLength(length) {
 }
 var duration = /^P(?:(\d+W)|(?!.*W)(?=\d|T\d)(\d+Y)?(\d+M)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+([.,]\d+)?S)?)?)$/;
 var guid = /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/;
-var uuid = (version3) => {
-  if (!version3)
+var uuid = (version4) => {
+  if (!version4)
     return /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/;
-  return new RegExp(`^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-${version3}[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$`);
+  return new RegExp(`^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-${version4}[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$`);
 };
 var email = /^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/;
 var _emoji = `^(?=[\\s\\S]*[\\p{Extended_Pictographic}\\p{Regional_Indicator}\\u20E3])[\\p{Extended_Pictographic}\\p{Emoji_Component}]+$`;
@@ -59726,10 +59738,10 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
       const id = ids[key];
       const k = typeof key === "symbol" ? `syms[${syms.indexOf(key)}]` : esc(key);
       const isPresent = `${k} in input`;
-      const schema2 = shape[key];
-      const optin = schema2?._zod?.optin;
+      const schema3 = shape[key];
+      const optin = schema3?._zod?.optin;
       const isOptionalIn = optin !== void 0;
-      const isOptionalOut = schema2?._zod?.optout === "optional";
+      const isOptionalOut = schema3?._zod?.optout === "optional";
       doc.write(`const ${id} = ${parseStr(k)};`);
       if (isOptionalIn && isOptionalOut) {
         const assign = optin === "optional" ? `${id}_present` : `${id}.value !== undefined || ${id}_present`;
@@ -60838,11 +60850,11 @@ var $ZodRegistry = class {
     this._map = /* @__PURE__ */ new WeakMap();
     this._idmap = /* @__PURE__ */ new Map();
   }
-  add(schema2, ..._meta) {
+  add(schema3, ..._meta) {
     const meta2 = _meta[0];
-    this._map.set(schema2, meta2);
+    this._map.set(schema3, meta2);
     if (meta2 && typeof meta2 === "object" && "id" in meta2) {
-      this._idmap.set(meta2.id, schema2);
+      this._idmap.set(meta2.id, schema3);
     }
     return this;
   }
@@ -60851,26 +60863,26 @@ var $ZodRegistry = class {
     this._idmap = /* @__PURE__ */ new Map();
     return this;
   }
-  remove(schema2) {
-    const meta2 = this._map.get(schema2);
+  remove(schema3) {
+    const meta2 = this._map.get(schema3);
     if (meta2 && typeof meta2 === "object" && "id" in meta2) {
       this._idmap.delete(meta2.id);
     }
-    this._map.delete(schema2);
+    this._map.delete(schema3);
     return this;
   }
-  get(schema2) {
-    const p = schema2._zod.parent;
+  get(schema3) {
+    const p = schema3._zod.parent;
     if (p) {
       const pm = { ...this.get(p) ?? {} };
       delete pm.id;
-      const f = { ...pm, ...this._map.get(schema2) };
+      const f = { ...pm, ...this._map.get(schema3) };
       return Object.keys(f).length ? f : void 0;
     }
-    return this._map.get(schema2);
+    return this._map.get(schema3);
   }
-  has(schema2) {
-    return this._map.has(schema2);
+  has(schema3) {
+    return this._map.has(schema3);
   }
 };
 function registry() {
@@ -61385,13 +61397,13 @@ function _array(Class2, element, params) {
 }
 // @__NO_SIDE_EFFECTS__
 function _refine(Class2, fn, _params) {
-  const schema2 = new Class2({
+  const schema3 = new Class2({
     type: "custom",
     check: "custom",
     fn,
     ...normalizeParams(_params)
   });
-  return schema2;
+  return schema3;
 }
 // @__NO_SIDE_EFFECTS__
 function _superRefine(fn, params) {
@@ -61461,8 +61473,8 @@ function initializeContext(params) {
     external: params?.external ?? void 0
   };
 }
-function handleUnrepresentable(schema2, ctx, json2, params, message2) {
-  const result = typeof ctx.unrepresentable === "function" ? ctx.unrepresentable({ zodSchema: schema2, path: params.path, message: message2 }) : ctx.unrepresentable;
+function handleUnrepresentable(schema3, ctx, json2, params, message2) {
+  const result = typeof ctx.unrepresentable === "function" ? ctx.unrepresentable({ zodSchema: schema3, path: params.path, message: message2 }) : ctx.unrepresentable;
   if (result === "any")
     return false;
   if (result === void 0 || result === "throw")
@@ -61470,42 +61482,42 @@ function handleUnrepresentable(schema2, ctx, json2, params, message2) {
   Object.assign(json2, result);
   return true;
 }
-function processSchema(schema2, ctx, _params = { path: [], schemaPath: [] }) {
+function processSchema(schema3, ctx, _params = { path: [], schemaPath: [] }) {
   var _a7;
-  const def = schema2._zod.def;
-  const seen = ctx.seen.get(schema2);
+  const def = schema3._zod.def;
+  const seen = ctx.seen.get(schema3);
   if (seen) {
     seen.count++;
-    const isCycle = _params.schemaPath.includes(schema2);
+    const isCycle = _params.schemaPath.includes(schema3);
     if (isCycle) {
       seen.cycle = _params.path;
     }
     return seen.schema;
   }
   const result = { schema: {}, count: 1, cycle: void 0, path: _params.path };
-  ctx.seen.set(schema2, result);
+  ctx.seen.set(schema3, result);
   ctx.sharedDefsExtractedFor = void 0;
   ctx.sharedEmitDoneFor = void 0;
-  const overrideSchema = schema2._zod.toJSONSchema?.();
+  const overrideSchema = schema3._zod.toJSONSchema?.();
   if (overrideSchema) {
     result.schema = overrideSchema;
   } else {
     const params = {
       ..._params,
-      schemaPath: [..._params.schemaPath, schema2],
+      schemaPath: [..._params.schemaPath, schema3],
       path: _params.path
     };
-    if (schema2._zod.processJSONSchema) {
-      schema2._zod.processJSONSchema(ctx, result.schema, params);
+    if (schema3._zod.processJSONSchema) {
+      schema3._zod.processJSONSchema(ctx, result.schema, params);
     } else {
       const _json = result.schema;
       const processor = ctx.processors[def.type];
       if (!processor) {
         throw new Error(`[toJSONSchema]: Non-representable type encountered: ${def.type}`);
       }
-      processor(schema2, ctx, _json, params);
+      processor(schema3, ctx, _json, params);
     }
-    const parent = schema2._zod.parent;
+    const parent = schema3._zod.parent;
     if (parent) {
       if (!result.ref)
         result.ref = parent;
@@ -61513,24 +61525,24 @@ function processSchema(schema2, ctx, _params = { path: [], schemaPath: [] }) {
       ctx.seen.get(parent).isParent = true;
     }
   }
-  const meta2 = ctx.metadataRegistry.get(schema2);
+  const meta2 = ctx.metadataRegistry.get(schema3);
   if (meta2)
     assignProps(result.schema, meta2);
-  if (ctx.io === "input" && isTransforming(schema2)) {
+  if (ctx.io === "input" && isTransforming(schema3)) {
     delete result.schema.examples;
     delete result.schema.default;
   }
   if (ctx.io === "input" && "_prefault" in result.schema)
     (_a7 = result.schema).default ?? (_a7.default = result.schema._prefault);
   delete result.schema._prefault;
-  const _result = ctx.seen.get(schema2);
+  const _result = ctx.seen.get(schema3);
   return _result.schema;
 }
 function encodeJSONPointerSegment(segment) {
   return segment.replace(/~/g, "~0").replace(/\//g, "~1");
 }
-function extractDefs(ctx, schema2) {
-  const root = ctx.seen.get(schema2);
+function extractDefs(ctx, schema3) {
+  const root = ctx.seen.get(schema3);
   if (!root)
     throw new Error("Unprocessed schema. This is a bug in Zod.");
   if (ctx.external && ctx.sharedDefsExtractedFor === ctx.external)
@@ -61575,11 +61587,11 @@ function extractDefs(ctx, schema2) {
     seen.def = { ...seen.schema };
     if (defId)
       seen.defId = defId;
-    const schema3 = seen.schema;
-    for (const key in schema3) {
-      delete schema3[key];
+    const schema4 = seen.schema;
+    for (const key in schema4) {
+      delete schema4[key];
     }
-    schema3.$ref = ref;
+    schema4.$ref = ref;
   };
   if (ctx.cycles === "throw") {
     for (const entry of ctx.seen.entries()) {
@@ -61593,13 +61605,13 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   }
   for (const entry of ctx.seen.entries()) {
     const seen = entry[1];
-    if (schema2 === entry[0]) {
+    if (schema3 === entry[0]) {
       extractToDef(entry);
       continue;
     }
     if (ctx.external) {
       const ext = ctx.external.registry.get(entry[0])?.id;
-      if (schema2 !== entry[0] && ext) {
+      if (schema3 !== entry[0] && ext) {
         extractToDef(entry);
         continue;
       }
@@ -61622,9 +61634,9 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   if (ctx.external)
     ctx.sharedDefsExtractedFor = ctx.external;
 }
-function compactTypeUnion(schema2) {
-  const options = schema2.anyOf;
-  if (!Array.isArray(options) || options.length === 0 || schema2.type !== void 0)
+function compactTypeUnion(schema3) {
+  const options = schema3.anyOf;
+  if (!Array.isArray(options) || options.length === 0 || schema3.type !== void 0)
     return;
   const types3 = [];
   for (const option of options) {
@@ -61642,8 +61654,8 @@ function compactTypeUnion(schema2) {
         types3.push(member);
     }
   }
-  delete schema2.anyOf;
-  schema2.type = types3.length === 1 ? types3[0] : types3;
+  delete schema3.anyOf;
+  schema3.type = types3.length === 1 ? types3[0] : types3;
 }
 var FOLDABLE_KEYS = /* @__PURE__ */ new Set(["type", "properties", "required", "additionalProperties"]);
 var UNION_KEYS = ["oneOf", "anyOf"];
@@ -61730,16 +61742,16 @@ function foldIntersection(json2) {
   delete json2.allOf;
   assignProps(json2, folded);
 }
-function finalize(ctx, schema2) {
-  const root = ctx.seen.get(schema2);
+function finalize(ctx, schema3) {
+  const root = ctx.seen.get(schema3);
   if (!root)
     throw new Error("Unprocessed schema. This is a bug in Zod.");
   const flattenRef = (zodSchema) => {
     const seen = ctx.seen.get(zodSchema);
     if (seen.ref === null)
       return;
-    const schema3 = seen.def ?? seen.schema;
-    const _cached = { ...schema3 };
+    const schema4 = seen.def ?? seen.schema;
+    const _cached = { ...schema4 };
     const ref = seen.ref;
     seen.ref = null;
     if (ref) {
@@ -61747,28 +61759,28 @@ function finalize(ctx, schema2) {
       const refSeen = ctx.seen.get(ref);
       const refSchema = refSeen.schema;
       if (refSchema.$ref && (ctx.target === "draft-07" || ctx.target === "draft-04" || ctx.target === "openapi-3.0")) {
-        schema3.allOf = schema3.allOf ?? [];
-        schema3.allOf.push(refSchema);
+        schema4.allOf = schema4.allOf ?? [];
+        schema4.allOf.push(refSchema);
       } else {
-        assignProps(schema3, refSchema);
+        assignProps(schema4, refSchema);
       }
-      assignProps(schema3, _cached);
+      assignProps(schema4, _cached);
       const isParentRef = zodSchema._zod.parent === ref;
       if (isParentRef) {
-        for (const key in schema3) {
+        for (const key in schema4) {
           if (key === "$ref" || key === "allOf")
             continue;
           if (!(key in _cached)) {
-            delete schema3[key];
+            delete schema4[key];
           }
         }
       }
       if (refSchema.$ref && refSeen.def) {
-        for (const key in schema3) {
+        for (const key in schema4) {
           if (key === "$ref" || key === "allOf")
             continue;
-          if (key in refSeen.def && JSON.stringify(schema3[key]) === JSON.stringify(refSeen.def[key])) {
-            delete schema3[key];
+          if (key in refSeen.def && JSON.stringify(schema4[key]) === JSON.stringify(refSeen.def[key])) {
+            delete schema4[key];
           }
         }
       }
@@ -61778,13 +61790,13 @@ function finalize(ctx, schema2) {
       flattenRef(parent);
       const parentSeen = ctx.seen.get(parent);
       if (parentSeen?.schema.$ref) {
-        schema3.$ref = parentSeen.schema.$ref;
+        schema4.$ref = parentSeen.schema.$ref;
         if (parentSeen.def) {
-          for (const key in schema3) {
+          for (const key in schema4) {
             if (key === "$ref" || key === "allOf")
               continue;
-            if (key in parentSeen.def && JSON.stringify(schema3[key]) === JSON.stringify(parentSeen.def[key])) {
-              delete schema3[key];
+            if (key in parentSeen.def && JSON.stringify(schema4[key]) === JSON.stringify(parentSeen.def[key])) {
+              delete schema4[key];
             }
           }
         }
@@ -61792,7 +61804,7 @@ function finalize(ctx, schema2) {
     }
     ctx.override({
       zodSchema,
-      jsonSchema: schema3,
+      jsonSchema: schema4,
       path: seen.path ?? []
     });
   };
@@ -61838,13 +61850,13 @@ function finalize(ctx, schema2) {
   } else {
   }
   if (ctx.external?.uri) {
-    const id = ctx.external.registry.get(schema2)?.id;
+    const id = ctx.external.registry.get(schema3)?.id;
     if (!id)
       throw new Error("Schema is missing an `id` property");
     result.$id = ctx.external.uri(id);
   }
   assignProps(result, root.defId ? root.schema : root.def ?? root.schema);
-  const rootMetaId = ctx.metadataRegistry.get(schema2)?.id;
+  const rootMetaId = ctx.metadataRegistry.get(schema3)?.id;
   if (rootMetaId !== void 0 && result.id === rootMetaId)
     delete result.id;
   const defs = ctx.external?.defs ?? {};
@@ -61874,10 +61886,10 @@ function finalize(ctx, schema2) {
     const finalized = JSON.parse(JSON.stringify(result));
     Object.defineProperty(finalized, "~standard", {
       value: {
-        ...schema2["~standard"],
+        ...schema3["~standard"],
         jsonSchema: {
-          input: createStandardJSONSchemaMethod(schema2, "input", ctx.processors),
-          output: createStandardJSONSchemaMethod(schema2, "output", ctx.processors)
+          input: createStandardJSONSchemaMethod(schema3, "input", ctx.processors),
+          output: createStandardJSONSchemaMethod(schema3, "output", ctx.processors)
         }
       },
       enumerable: false,
@@ -61941,18 +61953,18 @@ function isTransforming(_schema, _ctx) {
   }
   return false;
 }
-var createToJSONSchemaMethod = (schema2, processors = {}) => (params) => {
+var createToJSONSchemaMethod = (schema3, processors = {}) => (params) => {
   const ctx = initializeContext({ ...params, processors });
-  processSchema(schema2, ctx);
-  extractDefs(ctx, schema2);
-  return finalize(ctx, schema2);
+  processSchema(schema3, ctx);
+  extractDefs(ctx, schema3);
+  return finalize(ctx, schema3);
 };
-var createStandardJSONSchemaMethod = (schema2, io, processors = {}) => (params) => {
+var createStandardJSONSchemaMethod = (schema3, io, processors = {}) => (params) => {
   const { libraryOptions, target } = params ?? {};
   const ctx = initializeContext({ ...libraryOptions ?? {}, target, io, processors });
-  processSchema(schema2, ctx);
-  extractDefs(ctx, schema2);
-  return finalize(ctx, schema2);
+  processSchema(schema3, ctx);
+  extractDefs(ctx, schema3);
+  return finalize(ctx, schema3);
 };
 
 // node_modules/better-auth/node_modules/zod/v4/core/json-schema-processors.js
@@ -62016,13 +62028,13 @@ var contributors = {
   },
   mime_type: (agg, def) => intersectMime(agg, def.mime)
 };
-function aggregateChecks(schema2) {
+function aggregateChecks(schema3) {
   const agg = {};
-  const def = schema2._zod.def;
-  const list = schema2._zod.traits.has("$ZodCheck") ? [schema2, ...def.checks ?? []] : def.checks ?? [];
+  const def = schema3._zod.def;
+  const list = schema3._zod.traits.has("$ZodCheck") ? [schema3, ...def.checks ?? []] : def.checks ?? [];
   for (const ch of list)
     contributors[ch._zod.def.check]?.(agg, ch._zod.def);
-  const bag = schema2._zod.bag;
+  const bag = schema3._zod.bag;
   if (bag.minimum !== void 0)
     narrowMin(agg, "minimum", bag.minimum);
   if (bag.exclusiveMinimum !== void 0)
@@ -62057,10 +62069,10 @@ var exactPatterns = /* @__PURE__ */ new Map([
   [base64urlCharset, base64url]
 ]);
 var exactPattern = (p) => exactPatterns.get(p) ?? p;
-var stringProcessor = (schema2, ctx, _json, _params) => {
+var stringProcessor = (schema3, ctx, _json, _params) => {
   const json2 = _json;
   json2.type = "string";
-  const { minimum, maximum, format, patterns, contentEncoding, laxFormat } = aggregateChecks(schema2);
+  const { minimum, maximum, format, patterns, contentEncoding, laxFormat } = aggregateChecks(schema3);
   if (typeof minimum === "number")
     json2.minLength = minimum;
   if (typeof maximum === "number")
@@ -62089,9 +62101,9 @@ var stringProcessor = (schema2, ctx, _json, _params) => {
     }
   }
 };
-var numberProcessor = (schema2, ctx, _json, params) => {
+var numberProcessor = (schema3, ctx, _json, params) => {
   const json2 = _json;
-  const { minimum, maximum, multipleOf, exclusiveMaximum, exclusiveMinimum, isInt } = aggregateChecks(schema2);
+  const { minimum, maximum, multipleOf, exclusiveMaximum, exclusiveMinimum, isInt } = aggregateChecks(schema3);
   json2.type = isInt ? "integer" : "number";
   const exMin = typeof exclusiveMinimum === "number" && exclusiveMinimum >= (minimum ?? Number.NEGATIVE_INFINITY);
   const exMax = typeof exclusiveMaximum === "number" && exclusiveMaximum <= (maximum ?? Number.POSITIVE_INFINITY);
@@ -62122,7 +62134,7 @@ var numberProcessor = (schema2, ctx, _json, params) => {
       if (Number.isFinite(divisor) && divisor !== 0)
         divisors.add(Math.abs(divisor));
       else
-        handleUnrepresentable(schema2, ctx, json2, params, `A multipleOf divisor of ${divisor} cannot be represented in JSON Schema`);
+        handleUnrepresentable(schema3, ctx, json2, params, `A multipleOf divisor of ${divisor} cannot be represented in JSON Schema`);
     }
     const [first, ...rest] = divisors;
     if (first !== void 0)
@@ -62134,8 +62146,8 @@ var numberProcessor = (schema2, ctx, _json, params) => {
 var booleanProcessor = (_schema, _ctx, json2, _params) => {
   json2.type = "boolean";
 };
-var bigintProcessor = (schema2, ctx, json2, params) => {
-  handleUnrepresentable(schema2, ctx, json2, params, "BigInt cannot be represented in JSON Schema");
+var bigintProcessor = (schema3, ctx, json2, params) => {
+  handleUnrepresentable(schema3, ctx, json2, params, "BigInt cannot be represented in JSON Schema");
 };
 var neverProcessor = (_schema, _ctx, json2, _params) => {
   json2.not = {};
@@ -62144,11 +62156,11 @@ var anyProcessor = (_schema, _ctx, _json, _params) => {
 };
 var unknownProcessor = (_schema, _ctx, _json, _params) => {
 };
-var dateProcessor = (schema2, ctx, json2, params) => {
-  handleUnrepresentable(schema2, ctx, json2, params, "Date cannot be represented in JSON Schema");
+var dateProcessor = (schema3, ctx, json2, params) => {
+  handleUnrepresentable(schema3, ctx, json2, params, "Date cannot be represented in JSON Schema");
 };
-var enumProcessor = (schema2, _ctx, json2, _params) => {
-  const def = schema2._zod.def;
+var enumProcessor = (schema3, _ctx, json2, _params) => {
+  const def = schema3._zod.def;
   const values = getEnumValues(def.entries);
   if (values.length === 0) {
     json2.not = {};
@@ -62160,16 +62172,16 @@ var enumProcessor = (schema2, _ctx, json2, _params) => {
     json2.type = "string";
   json2.enum = values;
 };
-var customProcessor = (schema2, ctx, json2, params) => {
-  handleUnrepresentable(schema2, ctx, json2, params, "Custom types cannot be represented in JSON Schema");
+var customProcessor = (schema3, ctx, json2, params) => {
+  handleUnrepresentable(schema3, ctx, json2, params, "Custom types cannot be represented in JSON Schema");
 };
-var transformProcessor = (schema2, ctx, json2, params) => {
-  handleUnrepresentable(schema2, ctx, json2, params, "Transforms cannot be represented in JSON Schema");
+var transformProcessor = (schema3, ctx, json2, params) => {
+  handleUnrepresentable(schema3, ctx, json2, params, "Transforms cannot be represented in JSON Schema");
 };
-var arrayProcessor = (schema2, ctx, _json, params) => {
+var arrayProcessor = (schema3, ctx, _json, params) => {
   const json2 = _json;
-  const def = schema2._zod.def;
-  const { minimum, maximum } = aggregateChecks(schema2);
+  const def = schema3._zod.def;
+  const { minimum, maximum } = aggregateChecks(schema3);
   if (typeof minimum === "number")
     json2.minItems = minimum;
   if (typeof maximum === "number")
@@ -62180,22 +62192,22 @@ var arrayProcessor = (schema2, ctx, _json, params) => {
     path: [...params.path, "items"]
   });
 };
-function inputOptin(schema2) {
-  const def = schema2._zod.def;
+function inputOptin(schema3) {
+  const def = schema3._zod.def;
   if (def.type === "pipe" && def.in._zod.traits.has("$ZodTransform")) {
     return inputOptin(def.out);
   }
   if (def.type === "catch") {
     return inputOptin(def.innerType);
   }
-  return schema2._zod.optin;
+  return schema3._zod.optin;
 }
-var objectProcessor = (schema2, ctx, _json, params) => {
+var objectProcessor = (schema3, ctx, _json, params) => {
   const json2 = _json;
-  const def = schema2._zod.def;
+  const def = schema3._zod.def;
   const shape = def.shape;
   const symbolKeys = Object.getOwnPropertySymbols(shape);
-  if (symbolKeys.length && handleUnrepresentable(schema2, ctx, json2, params, "Symbol keys cannot be represented in JSON Schema")) {
+  if (symbolKeys.length && handleUnrepresentable(schema3, ctx, json2, params, "Symbol keys cannot be represented in JSON Schema")) {
     return;
   }
   json2.type = "object";
@@ -62228,8 +62240,8 @@ var objectProcessor = (schema2, ctx, _json, params) => {
     });
   }
 };
-var unionProcessor = (schema2, ctx, json2, params) => {
-  const def = schema2._zod.def;
+var unionProcessor = (schema3, ctx, json2, params) => {
+  const def = schema3._zod.def;
   const isExclusive = def.inclusive === false;
   const options = def.options.map((x, i) => processSchema(x, ctx, {
     ...params,
@@ -62241,8 +62253,8 @@ var unionProcessor = (schema2, ctx, json2, params) => {
     json2.anyOf = options;
   }
 };
-var intersectionProcessor = (schema2, ctx, json2, params) => {
-  const def = schema2._zod.def;
+var intersectionProcessor = (schema3, ctx, json2, params) => {
+  const def = schema3._zod.def;
   const a = processSchema(def.left, ctx, {
     ...params,
     path: [...params.path, "allOf", 0]
@@ -62322,9 +62334,9 @@ function rewriteKeyNames(ctx) {
     }
   }
 }
-var recordProcessor = (schema2, ctx, _json, params) => {
+var recordProcessor = (schema3, ctx, _json, params) => {
   const json2 = _json;
-  const def = schema2._zod.def;
+  const def = schema3._zod.def;
   json2.type = "object";
   const keyType = def.keyType;
   const patterns = aggregateChecks(keyType).patterns;
@@ -62349,7 +62361,7 @@ var recordProcessor = (schema2, ctx, _json, params) => {
         pendingRecords.set(ctx, pending);
         ctx.deferred.push(() => rewriteKeyNames(ctx));
       }
-      pending.push(schema2);
+      pending.push(schema3);
     }
     json2.additionalProperties = processSchema(def.valueType, ctx, {
       ...params,
@@ -62365,10 +62377,10 @@ var recordProcessor = (schema2, ctx, _json, params) => {
     }
   }
 };
-var nullableProcessor = (schema2, ctx, json2, params) => {
-  const def = schema2._zod.def;
+var nullableProcessor = (schema3, ctx, json2, params) => {
+  const def = schema3._zod.def;
   const inner = processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema2);
+  const seen = ctx.seen.get(schema3);
   if (ctx.target === "openapi-3.0") {
     seen.ref = def.innerType;
     json2.nullable = true;
@@ -62376,14 +62388,14 @@ var nullableProcessor = (schema2, ctx, json2, params) => {
     json2.anyOf = [inner, { type: "null" }];
   }
 };
-var nonoptionalProcessor = (schema2, ctx, _json, params) => {
-  const def = schema2._zod.def;
+var nonoptionalProcessor = (schema3, ctx, _json, params) => {
+  const def = schema3._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema2);
+  const seen = ctx.seen.get(schema3);
   seen.ref = def.innerType;
 };
 var UNREPRESENTABLE_DEFAULT = /* @__PURE__ */ Symbol();
-function serializeDefaultValue(value, schema2, ctx, json2, params) {
+function serializeDefaultValue(value, schema3, ctx, json2, params) {
   let unrepresentable = false;
   const serialized = JSON.stringify(value, (_, val) => {
     if (typeof val !== "bigint")
@@ -62393,62 +62405,62 @@ function serializeDefaultValue(value, schema2, ctx, json2, params) {
   });
   if (!unrepresentable)
     return JSON.parse(serialized);
-  handleUnrepresentable(schema2, ctx, json2, params, "BigInt defaults cannot be represented in JSON Schema");
+  handleUnrepresentable(schema3, ctx, json2, params, "BigInt defaults cannot be represented in JSON Schema");
   return UNREPRESENTABLE_DEFAULT;
 }
-var defaultProcessor = (schema2, ctx, json2, params) => {
-  const def = schema2._zod.def;
+var defaultProcessor = (schema3, ctx, json2, params) => {
+  const def = schema3._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema2);
+  const seen = ctx.seen.get(schema3);
   seen.ref = def.innerType;
-  const value = serializeDefaultValue(def.defaultValue, schema2, ctx, json2, params);
+  const value = serializeDefaultValue(def.defaultValue, schema3, ctx, json2, params);
   if (value !== UNREPRESENTABLE_DEFAULT)
     json2.default = value;
 };
-var prefaultProcessor = (schema2, ctx, json2, params) => {
-  const def = schema2._zod.def;
+var prefaultProcessor = (schema3, ctx, json2, params) => {
+  const def = schema3._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema2);
+  const seen = ctx.seen.get(schema3);
   seen.ref = def.innerType;
   if (ctx.io !== "input")
     return;
-  const value = serializeDefaultValue(def.defaultValue, schema2, ctx, json2, params);
+  const value = serializeDefaultValue(def.defaultValue, schema3, ctx, json2, params);
   if (value !== UNREPRESENTABLE_DEFAULT)
     json2._prefault = value;
 };
-var catchProcessor = (schema2, ctx, json2, params) => {
-  const def = schema2._zod.def;
+var catchProcessor = (schema3, ctx, json2, params) => {
+  const def = schema3._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema2);
+  const seen = ctx.seen.get(schema3);
   seen.ref = def.innerType;
   let catchValue;
   try {
     catchValue = def.catchValue(void 0);
   } catch {
-    handleUnrepresentable(schema2, ctx, json2, params, "Dynamic catch values are not supported in JSON Schema");
+    handleUnrepresentable(schema3, ctx, json2, params, "Dynamic catch values are not supported in JSON Schema");
     return;
   }
   json2.default = catchValue;
 };
-var pipeProcessor = (schema2, ctx, _json, params) => {
-  const def = schema2._zod.def;
+var pipeProcessor = (schema3, ctx, _json, params) => {
+  const def = schema3._zod.def;
   const inIsTransform = def.in._zod.traits.has("$ZodTransform");
   const innerType = ctx.io === "input" ? inIsTransform ? def.out : def.in : def.out;
   processSchema(innerType, ctx, params);
-  const seen = ctx.seen.get(schema2);
+  const seen = ctx.seen.get(schema3);
   seen.ref = innerType;
 };
-var readonlyProcessor = (schema2, ctx, json2, params) => {
-  const def = schema2._zod.def;
+var readonlyProcessor = (schema3, ctx, json2, params) => {
+  const def = schema3._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema2);
+  const seen = ctx.seen.get(schema3);
   seen.ref = def.innerType;
   json2.readOnly = true;
 };
-var optionalProcessor = (schema2, ctx, _json, params) => {
-  const def = schema2._zod.def;
+var optionalProcessor = (schema3, ctx, _json, params) => {
+  const def = schema3._zod.def;
   processSchema(def.innerType, ctx, params);
-  const seen = ctx.seen.get(schema2);
+  const seen = ctx.seen.get(schema3);
   seen.ref = def.innerType;
 };
 
@@ -63531,25 +63543,25 @@ function getFields(options, modelName, mode) {
   if (tableCache.has(cacheKey)) return tableCache.get(cacheKey);
   const coreSchema = mode === "output" ? getAuthTables(options)[modelName]?.fields ?? {} : {};
   const additionalFields = modelName === "user" || modelName === "session" || modelName === "account" ? options[modelName]?.additionalFields : void 0;
-  let schema2 = {
+  let schema3 = {
     ...coreSchema,
     ...additionalFields ?? {}
   };
-  for (const plugin of options.plugins || []) if (plugin.schema && plugin.schema[modelName]) schema2 = {
-    ...schema2,
+  for (const plugin of options.plugins || []) if (plugin.schema && plugin.schema[modelName]) schema3 = {
+    ...schema3,
     ...plugin.schema[modelName].fields
   };
-  tableCache.set(cacheKey, schema2);
-  return schema2;
+  tableCache.set(cacheKey, schema3);
+  return schema3;
 }
 function parseUserOutput(options, user2) {
   return filterOutputFields(user2, getFields(options, "user", "output"));
 }
 function buildSyntheticUserOutput(options, data) {
-  const schema2 = getFields(options, "user", "output");
+  const schema3 = getFields(options, "user", "output");
   const result = {};
-  for (const key in schema2) {
-    const fieldAttr = schema2[key];
+  for (const key in schema3) {
+    const fieldAttr = schema3[key];
     if (fieldAttr.returned === false) continue;
     if (key in data && data[key] !== void 0) result[key] = data[key];
     else if (fieldAttr.defaultValue !== void 0) result[key] = typeof fieldAttr.defaultValue === "function" ? fieldAttr.defaultValue() : fieldAttr.defaultValue;
@@ -63565,9 +63577,9 @@ function parseAccountOutput(options, account2) {
   const { accessToken: _accessToken, refreshToken: _refreshToken, idToken: _idToken, accessTokenExpiresAt: _accessTokenExpiresAt, refreshTokenExpiresAt: _refreshTokenExpiresAt, password: _password, ...rest } = filterOutputFields(account2, getFields(options, "account", "output"));
   return rest;
 }
-function parseInputData(data, schema2) {
-  const action = schema2.action || "create";
-  const fields = schema2.fields;
+function parseInputData(data, schema3) {
+  const action = schema3.action || "create";
+  const fields = schema3.fields;
   const parsedData = /* @__PURE__ */ Object.create(null);
   for (const key in fields) {
     if (key in data) {
@@ -63633,6 +63645,19 @@ function getSessionDefaultFields(options) {
   const defaults2 = {};
   for (const key in fields) if (fields[key].defaultValue !== void 0) defaults2[key] = typeof fields[key].defaultValue === "function" ? fields[key].defaultValue() : fields[key].defaultValue;
   return defaults2;
+}
+function mergeSchema(schema3, newSchema) {
+  if (!newSchema) return schema3;
+  for (const table2 in newSchema) {
+    const newModelName = newSchema[table2]?.modelName;
+    if (newModelName) schema3[table2].modelName = newModelName;
+    for (const field in schema3[table2].fields) {
+      const newField = newSchema[table2]?.fields?.[field];
+      if (!newField) continue;
+      schema3[table2].fields[field].fieldName = newField;
+    }
+  }
+  return schema3;
 }
 
 // node_modules/better-auth/dist/utils/date.mjs
@@ -64100,19 +64125,19 @@ async function setCookieCache(ctx, session2, dontRememberMe) {
   const filteredSession = filterOutputFields(session2.session, ctx.context.options.session?.additionalFields);
   const filteredUser = parseUserOutput(ctx.context.options, session2.user);
   const versionConfig = ctx.context.options.session?.cookieCache?.version;
-  let version3 = "1";
+  let version4 = "1";
   if (versionConfig) {
-    if (typeof versionConfig === "string") version3 = versionConfig;
+    if (typeof versionConfig === "string") version4 = versionConfig;
     else if (typeof versionConfig === "function") {
       const result = versionConfig(session2.session, session2.user);
-      version3 = isPromise(result) ? await result : result;
+      version4 = isPromise(result) ? await result : result;
     }
   }
   const sessionData = {
     session: filteredSession,
     user: filteredUser,
     updatedAt: Date.now(),
-    version: version3
+    version: version4
   };
   const options = {
     ...ctx.context.authCookies.sessionData.attributes,
@@ -65533,8 +65558,8 @@ var createRouter$1 = (endpoints, config3) => {
       ...config3?.openapi
     };
     endpoints["openapi"] = createEndpoint(openapi.path, { method: "GET" }, async (c) => {
-      const schema2 = await generator(endpoints);
-      return new Response(getHTML(schema2, openapi.scalar), { headers: { "Content-Type": "text/html" } });
+      const schema3 = await generator(endpoints);
+      return new Response(getHTML(schema3, openapi.scalar), { headers: { "Content-Type": "text/html" } });
     });
   }
   const router2 = createRouter();
@@ -68722,8 +68747,8 @@ var ValidationError2 = class _ValidationError extends Error {
     Object.setPrototypeOf(this, _ValidationError.prototype);
   }
 };
-async function parseStandardSchema(schema2, input) {
-  const result = await schema2["~standard"].validate(input);
+async function parseStandardSchema(schema3, input) {
+  const result = await schema3["~standard"].validate(input);
   if (result.issues) {
     throw new ValidationError2(result.issues);
   }
@@ -72947,6 +72972,11 @@ async function checkPassword(userId, c) {
   })) throw APIError2.from("BAD_REQUEST", BASE_ERROR_CODES.INVALID_PASSWORD);
   return true;
 }
+async function shouldRequirePassword(ctx, userId, allowPasswordless) {
+  if (!allowPasswordless) return true;
+  const credentialAccount = (await ctx.context.internalAdapter.findAccounts(userId))?.find((account2) => account2.providerId === "credential" && account2.password);
+  return Boolean(credentialAccount);
+}
 
 // node_modules/better-auth/dist/api/routes/password.mjs
 init_error2();
@@ -74676,7 +74706,7 @@ async function getAdapter(options) {
 // node_modules/better-auth/dist/db/get-schema.mjs
 function getSchema(config3) {
   const tables = getAuthTables(config3);
-  const schema2 = {};
+  const schema3 = {};
   for (const key in tables) {
     const table2 = tables[key];
     const fields = table2.fields;
@@ -74692,19 +74722,19 @@ function getSchema(config3) {
         };
       }
     });
-    if (schema2[table2.modelName]) {
-      schema2[table2.modelName].fields = {
-        ...schema2[table2.modelName].fields,
+    if (schema3[table2.modelName]) {
+      schema3[table2.modelName].fields = {
+        ...schema3[table2.modelName].fields,
         ...actualFields
       };
       continue;
     }
-    schema2[table2.modelName] = {
+    schema3[table2.modelName] = {
       fields: actualFields,
       order: table2.order || Infinity
     };
   }
-  return schema2;
+  return schema3;
 }
 
 // node_modules/better-auth/dist/db/get-migration.mjs
@@ -75055,12 +75085,12 @@ function parseSecretsEnv(envValue) {
     entry = entry.trim();
     const colonIdx = entry.indexOf(":");
     if (colonIdx === -1) throw new BetterAuthError(`Invalid BETTER_AUTH_SECRETS entry: "${entry}". Expected format: "<version>:<secret>"`);
-    const version3 = parseInt(entry.slice(0, colonIdx), 10);
-    if (!Number.isInteger(version3) || version3 < 0) throw new BetterAuthError(`Invalid version in BETTER_AUTH_SECRETS: "${entry.slice(0, colonIdx)}". Version must be a non-negative integer.`);
+    const version4 = parseInt(entry.slice(0, colonIdx), 10);
+    if (!Number.isInteger(version4) || version4 < 0) throw new BetterAuthError(`Invalid version in BETTER_AUTH_SECRETS: "${entry.slice(0, colonIdx)}". Version must be a non-negative integer.`);
     const value = entry.slice(colonIdx + 1).trim();
-    if (!value) throw new BetterAuthError(`Empty secret value for version ${version3} in BETTER_AUTH_SECRETS.`);
+    if (!value) throw new BetterAuthError(`Empty secret value for version ${version4} in BETTER_AUTH_SECRETS.`);
     return {
-      version: version3,
+      version: version4,
       value
     };
   });
@@ -75069,11 +75099,11 @@ function validateSecretsArray(secrets, logger2) {
   if (secrets.length === 0) throw new BetterAuthError("`secrets` array must contain at least one entry.");
   const seen = /* @__PURE__ */ new Set();
   for (const s of secrets) {
-    const version3 = parseInt(String(s.version), 10);
-    if (!Number.isInteger(version3) || version3 < 0 || String(version3) !== String(s.version).trim()) throw new BetterAuthError(`Invalid version ${s.version} in \`secrets\`. Version must be a non-negative integer.`);
-    if (!s.value) throw new BetterAuthError(`Empty secret value for version ${version3} in \`secrets\`.`);
-    if (seen.has(version3)) throw new BetterAuthError(`Duplicate version ${version3} in \`secrets\`. Each version must be unique.`);
-    seen.add(version3);
+    const version4 = parseInt(String(s.version), 10);
+    if (!Number.isInteger(version4) || version4 < 0 || String(version4) !== String(s.version).trim()) throw new BetterAuthError(`Invalid version ${s.version} in \`secrets\`. Version must be a non-negative integer.`);
+    if (!s.value) throw new BetterAuthError(`Empty secret value for version ${version4} in \`secrets\`.`);
+    if (seen.has(version4)) throw new BetterAuthError(`Duplicate version ${version4} in \`secrets\`. Each version must be unique.`);
+    seen.add(version4);
   }
   const current = secrets[0];
   if (current.value.length < 32) logger2.warn(`[better-auth] Warning: the current secret (version ${current.version}) should be at least 32 characters long for adequate security.`);
@@ -75486,10 +75516,10 @@ async function detectDatabaseNode() {
     mongodb: "mongodb",
     "drizzle-orm": "drizzle"
   })) {
-    const version3 = await getPackageVersion(pkg);
-    if (version3) return {
+    const version4 = await getPackageVersion(pkg);
+    if (version4) return {
       name,
-      version: version3
+      version: version4
     };
   }
 }
@@ -75507,10 +75537,10 @@ async function detectFrameworkNode() {
     elysia: "elysia",
     expo: "expo"
   })) {
-    const version3 = await getPackageVersion(pkg);
-    if (version3) return {
+    const version4 = await getPackageVersion(pkg);
+    if (version4) return {
       name,
-      version: version3
+      version: version4
     };
   }
 }
@@ -76556,9 +76586,9 @@ var Table = class {
   [IsDrizzleTable] = true;
   /** @internal */
   [ExtraConfigBuilder] = void 0;
-  constructor(name, schema2, baseName) {
+  constructor(name, schema3, baseName) {
     this[TableName] = this[OriginalName] = name;
-    this[Schema] = schema2;
+    this[Schema] = schema3;
     this[BaseName] = baseName;
   }
 };
@@ -76938,11 +76968,11 @@ var View = class {
   [ViewBaseConfig];
   /** @internal */
   [IsDrizzleView] = true;
-  constructor({ name: name2, schema: schema2, selectedFields, query }) {
+  constructor({ name: name2, schema: schema3, selectedFields, query }) {
     this[ViewBaseConfig] = {
       name: name2,
       originalName: name2,
-      schema: schema2,
+      schema: schema3,
       selectedFields,
       query,
       isExisting: !query,
@@ -78667,8 +78697,8 @@ var PgTable = class extends Table {
   /** @internal */
   [Table.Symbol.ExtraConfigColumns] = {};
 };
-function pgTableWithSchema(name, columns, extraConfig, schema2, baseName = name) {
-  const rawTable = new PgTable(name, schema2, baseName);
+function pgTableWithSchema(name, columns, extraConfig, schema3, baseName = name) {
+  const rawTable = new PgTable(name, schema3, baseName);
   const parsedColumns = typeof columns === "function" ? columns(getPgColumnBuilders()) : columns;
   const builtColumns = Object.fromEntries(
     Object.entries(parsedColumns).map(([name2, colBuilderBase]) => {
@@ -78943,14 +78973,14 @@ function getOrderByOperators() {
     desc
   };
 }
-function extractTablesRelationalConfig(schema2, configHelpers) {
-  if (Object.keys(schema2).length === 1 && "default" in schema2 && !is(schema2["default"], Table)) {
-    schema2 = schema2["default"];
+function extractTablesRelationalConfig(schema3, configHelpers) {
+  if (Object.keys(schema3).length === 1 && "default" in schema3 && !is(schema3["default"], Table)) {
+    schema3 = schema3["default"];
   }
   const tableNamesMap = {};
   const relationsBuffer = {};
   const tablesConfig = {};
-  for (const [key, value] of Object.entries(schema2)) {
+  for (const [key, value] of Object.entries(schema3)) {
     if (is(value, Table)) {
       const dbName = getTableUniqueName(value);
       const bufferedRelations = relationsBuffer[dbName];
@@ -79021,7 +79051,7 @@ function createMany(sourceTable) {
     return new Many(sourceTable, referencedTable, config3);
   };
 }
-function normalizeRelation(schema2, tableNamesMap, relation) {
+function normalizeRelation(schema3, tableNamesMap, relation) {
   if (is(relation, One) && relation.config) {
     return {
       fields: relation.config.fields,
@@ -79034,7 +79064,7 @@ function normalizeRelation(schema2, tableNamesMap, relation) {
       `Table "${relation.referencedTable[Table.Symbol.Name]}" not found in schema`
     );
   }
-  const referencedTableConfig = schema2[referencedTableTsName];
+  const referencedTableConfig = schema3[referencedTableTsName];
   if (!referencedTableConfig) {
     throw new Error(`Table "${referencedTableTsName}" not found in schema`);
   }
@@ -79150,9 +79180,9 @@ var drizzleAdapter = (db2, config3) => {
       logger.warn(`[Drizzle Adapter] MySQL does not support INSERT...RETURNING. With generateId set to false, the adapter uses best-effort fallback strategies (unique columns, full-field match) to retrieve inserted rows. For reliable behavior, use Better Auth's default ID generation, a custom generateId function, or generateId: "serial" for auto-increment.`);
     }
     function getSchema2(model) {
-      const schema2 = config3.schema || db3._.fullSchema;
-      if (!schema2) throw new BetterAuthError("Drizzle adapter failed to initialize. Schema not found. Please provide a schema object in the adapter options object.");
-      const schemaModel = schema2[model];
+      const schema3 = config3.schema || db3._.fullSchema;
+      if (!schema3) throw new BetterAuthError("Drizzle adapter failed to initialize. Schema not found. Please provide a schema object in the adapter options object.");
+      const schemaModel = schema3[model];
       if (!schemaModel) throw new BetterAuthError(`[# Drizzle Adapter]: The model "${model}" was not found in the schema object. Please pass the schema directly to the adapter options.`);
       return schemaModel;
     }
@@ -79346,8 +79376,8 @@ var drizzleAdapter = (db2, config3) => {
       if (orGroup.length) return [orClause];
       return [];
     }
-    function checkMissingFields(schema2, model, values) {
-      if (!schema2) throw new BetterAuthError("Drizzle adapter failed to initialize. Drizzle Schema not found. Please provide a schema object in the adapter options object.");
+    function checkMissingFields(schema3, model, values) {
+      if (!schema3) throw new BetterAuthError("Drizzle adapter failed to initialize. Drizzle Schema not found. Please provide a schema object in the adapter options object.");
       for (const key in values) {
         let fieldName;
         try {
@@ -79358,7 +79388,7 @@ var drizzleAdapter = (db2, config3) => {
         } catch {
           fieldName = key;
         }
-        if (!schema2[fieldName]) throw new BetterAuthError(`The field "${key}" does not exist in the "${model}" Drizzle schema. Please update your drizzle schema or re-generate using "npx auth@latest generate".`);
+        if (!schema3[fieldName]) throw new BetterAuthError(`The field "${key}" does not exist in the "${model}" Drizzle schema. Please update your drizzle schema or re-generate using "npx auth@latest generate".`);
       }
     }
     function getQueryModel(model) {
@@ -79606,6 +79636,1157 @@ var drizzleAdapter = (db2, config3) => {
   };
 };
 
+// node_modules/better-auth/dist/plugins/two-factor/error-code.mjs
+init_error_codes();
+var TWO_FACTOR_ERROR_CODES = defineErrorCodes({
+  OTP_NOT_ENABLED: "OTP not enabled",
+  OTP_HAS_EXPIRED: "OTP has expired",
+  TOTP_NOT_ENABLED: "TOTP not enabled",
+  TWO_FACTOR_NOT_ENABLED: "Two factor isn't enabled",
+  BACKUP_CODES_NOT_ENABLED: "Backup codes aren't enabled",
+  INVALID_BACKUP_CODE: "Invalid backup code",
+  INVALID_CODE: "Invalid code",
+  TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE: "Too many attempts. Please request a new code.",
+  INVALID_TWO_FACTOR_COOKIE: "Invalid two factor cookie"
+});
+
+// node_modules/better-auth/dist/package.mjs
+var version3 = "1.6.15";
+
+// node_modules/better-auth/dist/version.mjs
+var PACKAGE_VERSION = version3;
+
+// node_modules/better-auth/dist/plugins/two-factor/constant.mjs
+var TWO_FACTOR_COOKIE_NAME = "two_factor";
+var TRUST_DEVICE_COOKIE_NAME = "trust_device";
+var TRUST_DEVICE_COOKIE_MAX_AGE = 720 * 60 * 60;
+
+// node_modules/better-auth/dist/plugins/two-factor/verify-two-factor.mjs
+init_error2();
+async function verifyTwoFactor(ctx) {
+  const invalid2 = (errorKey) => {
+    throw APIError2.from("UNAUTHORIZED", TWO_FACTOR_ERROR_CODES[errorKey]);
+  };
+  const session2 = await getSessionFromCtx(ctx);
+  if (!session2) {
+    const twoFactorCookie = ctx.context.createAuthCookie(TWO_FACTOR_COOKIE_NAME);
+    const signedTwoFactorCookie = await ctx.getSignedCookie(twoFactorCookie.name, ctx.context.secret);
+    if (!signedTwoFactorCookie) throw APIError2.from("UNAUTHORIZED", TWO_FACTOR_ERROR_CODES.INVALID_TWO_FACTOR_COOKIE);
+    const verificationToken = await ctx.context.internalAdapter.findVerificationValue(signedTwoFactorCookie);
+    if (!verificationToken) throw APIError2.from("UNAUTHORIZED", TWO_FACTOR_ERROR_CODES.INVALID_TWO_FACTOR_COOKIE);
+    const user2 = await ctx.context.internalAdapter.findUserById(verificationToken.value);
+    if (!user2) throw APIError2.from("UNAUTHORIZED", TWO_FACTOR_ERROR_CODES.INVALID_TWO_FACTOR_COOKIE);
+    const dontRememberMe = await ctx.getSignedCookie(ctx.context.authCookies.dontRememberToken.name, ctx.context.secret);
+    return {
+      valid: async (ctx2) => {
+        const session3 = await ctx2.context.internalAdapter.createSession(verificationToken.value, !!dontRememberMe);
+        if (!session3) throw APIError2.from("INTERNAL_SERVER_ERROR", {
+          message: "failed to create session",
+          code: "FAILED_TO_CREATE_SESSION"
+        });
+        await ctx2.context.internalAdapter.deleteVerificationByIdentifier(signedTwoFactorCookie);
+        await setSessionCookie(ctx2, {
+          session: session3,
+          user: user2
+        });
+        expireCookie(ctx2, twoFactorCookie);
+        if (ctx2.body.trustDevice) {
+          const maxAge = ctx2.context.getPlugin("two-factor").options?.trustDeviceMaxAge ?? 2592e3;
+          const trustDeviceCookie = ctx2.context.createAuthCookie(TRUST_DEVICE_COOKIE_NAME, { maxAge });
+          const trustIdentifier = `trust-device-${generateRandomString(32)}`;
+          const token = await createHMAC("SHA-256", "base64urlnopad").sign(ctx2.context.secret, `${user2.id}!${trustIdentifier}`);
+          await ctx2.context.internalAdapter.createVerificationValue({
+            value: user2.id,
+            identifier: trustIdentifier,
+            expiresAt: new Date(Date.now() + maxAge * 1e3)
+          });
+          await ctx2.setSignedCookie(trustDeviceCookie.name, `${token}!${trustIdentifier}`, ctx2.context.secret, trustDeviceCookie.attributes);
+          expireCookie(ctx2, ctx2.context.authCookies.dontRememberToken);
+        }
+        return ctx2.json({
+          token: session3.token,
+          user: parseUserOutput(ctx2.context.options, user2)
+        });
+      },
+      invalid: invalid2,
+      session: {
+        session: null,
+        user: user2
+      },
+      key: signedTwoFactorCookie
+    };
+  }
+  return {
+    valid: async (ctx2) => {
+      return ctx2.json({
+        token: session2.session.token,
+        user: parseUserOutput(ctx2.context.options, session2.user)
+      });
+    },
+    invalid: invalid2,
+    session: session2,
+    key: `${session2.user.id}!${session2.session.id}`
+  };
+}
+
+// node_modules/better-auth/dist/plugins/two-factor/backup-codes/index.mjs
+init_error2();
+init_json();
+function generateBackupCodesFn(options) {
+  return Array.from({ length: options?.amount ?? 10 }).fill(null).map(() => generateRandomString(options?.length ?? 10, "a-z", "0-9", "A-Z")).map((code) => `${code.slice(0, 5)}-${code.slice(5)}`);
+}
+async function encodeBackupCodes(codes, secret, options) {
+  const json2 = JSON.stringify(codes);
+  if (options?.storeBackupCodes === "encrypted") return symmetricEncrypt({
+    data: json2,
+    key: secret
+  });
+  if (typeof options?.storeBackupCodes === "object" && "encrypt" in options?.storeBackupCodes) return options.storeBackupCodes.encrypt(json2);
+  return json2;
+}
+async function generateBackupCodes(secret, options) {
+  const backupCodes = options?.customBackupCodesGenerate ? options.customBackupCodesGenerate() : generateBackupCodesFn(options);
+  return {
+    backupCodes,
+    encryptedBackupCodes: await encodeBackupCodes(backupCodes, secret, options)
+  };
+}
+async function verifyBackupCode(data, key, options) {
+  const codes = await getBackupCodes(data.backupCodes, key, options);
+  if (!codes) return {
+    status: false,
+    updated: null
+  };
+  return {
+    status: codes.includes(data.code),
+    updated: codes.filter((code) => code !== data.code)
+  };
+}
+async function getBackupCodes(backupCodes, key, options) {
+  if (options?.storeBackupCodes === "encrypted") return safeJSONParse(await symmetricDecrypt({
+    key,
+    data: backupCodes
+  }));
+  if (typeof options?.storeBackupCodes === "object" && "decrypt" in options?.storeBackupCodes) return safeJSONParse(await options?.storeBackupCodes.decrypt(backupCodes));
+  return safeJSONParse(backupCodes);
+}
+var verifyBackupCodeBodySchema = object({
+  code: string2().meta({ description: `A backup code to verify. Eg: "123456"` }),
+  disableSession: boolean2().meta({ description: "If true, the session cookie will not be set." }).optional(),
+  trustDevice: boolean2().meta({ description: "If true, the device will be trusted for 30 days. It'll be refreshed on every sign in request within this time. Eg: true" }).optional()
+});
+var viewBackupCodesBodySchema = object({ userId: coerce_exports.string().meta({ description: `The user ID to view all backup codes. Eg: "user-id"` }) });
+var backupCode2fa = (opts) => {
+  const twoFactorTable = "twoFactor";
+  const passwordSchema = string2().meta({ description: "The users password." });
+  const generateBackupCodesBodySchema = opts.allowPasswordless ? object({ password: passwordSchema.optional() }) : object({ password: passwordSchema });
+  return {
+    id: "backup_code",
+    version: PACKAGE_VERSION,
+    endpoints: {
+      verifyBackupCode: createAuthEndpoint("/two-factor/verify-backup-code", {
+        method: "POST",
+        body: verifyBackupCodeBodySchema,
+        metadata: { openapi: {
+          description: "Verify a backup code for two-factor authentication",
+          responses: { "200": {
+            description: "Backup code verified successfully",
+            content: { "application/json": { schema: {
+              type: "object",
+              properties: {
+                user: {
+                  type: "object",
+                  properties: {
+                    id: {
+                      type: "string",
+                      description: "Unique identifier of the user"
+                    },
+                    email: {
+                      type: "string",
+                      format: "email",
+                      nullable: true,
+                      description: "User's email address"
+                    },
+                    emailVerified: {
+                      type: "boolean",
+                      nullable: true,
+                      description: "Whether the email is verified"
+                    },
+                    name: {
+                      type: "string",
+                      nullable: true,
+                      description: "User's name"
+                    },
+                    image: {
+                      type: "string",
+                      format: "uri",
+                      nullable: true,
+                      description: "User's profile image URL"
+                    },
+                    twoFactorEnabled: {
+                      type: "boolean",
+                      description: "Whether two-factor authentication is enabled for the user"
+                    },
+                    createdAt: {
+                      type: "string",
+                      format: "date-time",
+                      description: "Timestamp when the user was created"
+                    },
+                    updatedAt: {
+                      type: "string",
+                      format: "date-time",
+                      description: "Timestamp when the user was last updated"
+                    }
+                  },
+                  required: [
+                    "id",
+                    "twoFactorEnabled",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  description: "The authenticated user object with two-factor details"
+                },
+                session: {
+                  type: "object",
+                  properties: {
+                    token: {
+                      type: "string",
+                      description: "Session token"
+                    },
+                    userId: {
+                      type: "string",
+                      description: "ID of the user associated with the session"
+                    },
+                    createdAt: {
+                      type: "string",
+                      format: "date-time",
+                      description: "Timestamp when the session was created"
+                    },
+                    expiresAt: {
+                      type: "string",
+                      format: "date-time",
+                      description: "Timestamp when the session expires"
+                    }
+                  },
+                  required: [
+                    "token",
+                    "userId",
+                    "createdAt",
+                    "expiresAt"
+                  ],
+                  description: "The current session object, included unless disableSession is true"
+                }
+              },
+              required: ["user", "session"]
+            } } }
+          } }
+        } }
+      }, async (ctx) => {
+        const { session: session2, valid } = await verifyTwoFactor(ctx);
+        const user2 = session2.user;
+        const twoFactor3 = await ctx.context.adapter.findOne({
+          model: twoFactorTable,
+          where: [{
+            field: "userId",
+            value: user2.id
+          }]
+        });
+        if (!twoFactor3) throw APIError2.from("BAD_REQUEST", TWO_FACTOR_ERROR_CODES.BACKUP_CODES_NOT_ENABLED);
+        const validate2 = await verifyBackupCode({
+          backupCodes: twoFactor3.backupCodes,
+          code: ctx.body.code
+        }, ctx.context.secretConfig, opts);
+        if (!validate2.status || !validate2.updated) throw APIError2.from("UNAUTHORIZED", TWO_FACTOR_ERROR_CODES.INVALID_BACKUP_CODE);
+        const updatedBackupCodes = await encodeBackupCodes(validate2.updated, ctx.context.secretConfig, opts);
+        if (!await ctx.context.adapter.update({
+          model: twoFactorTable,
+          update: { backupCodes: updatedBackupCodes },
+          where: [{
+            field: "id",
+            value: twoFactor3.id
+          }, {
+            field: "backupCodes",
+            value: twoFactor3.backupCodes
+          }]
+        })) throw APIError2.fromStatus("CONFLICT", { message: "Failed to verify backup code. Please try again." });
+        if (!ctx.body.disableSession) return valid(ctx);
+        return ctx.json({
+          token: session2.session?.token,
+          user: parseUserOutput(ctx.context.options, session2.user)
+        });
+      }),
+      generateBackupCodes: createAuthEndpoint("/two-factor/generate-backup-codes", {
+        method: "POST",
+        body: generateBackupCodesBodySchema,
+        use: [sessionMiddleware],
+        metadata: { openapi: {
+          description: "Generate new backup codes for two-factor authentication",
+          responses: { "200": {
+            description: "Backup codes generated successfully",
+            content: { "application/json": { schema: {
+              type: "object",
+              properties: {
+                status: {
+                  type: "boolean",
+                  description: "Indicates if the backup codes were generated successfully",
+                  enum: [true]
+                },
+                backupCodes: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "Array of generated backup codes in plain text"
+                }
+              },
+              required: ["status", "backupCodes"]
+            } } }
+          } }
+        } }
+      }, async (ctx) => {
+        const user2 = ctx.context.session.user;
+        if (!user2.twoFactorEnabled) throw APIError2.from("BAD_REQUEST", TWO_FACTOR_ERROR_CODES.TWO_FACTOR_NOT_ENABLED);
+        if (await shouldRequirePassword(ctx, user2.id, opts.allowPasswordless)) {
+          if (!ctx.body.password) throw APIError2.from("BAD_REQUEST", BASE_ERROR_CODES.INVALID_PASSWORD);
+          await ctx.context.password.checkPassword(user2.id, ctx);
+        }
+        const twoFactor3 = await ctx.context.adapter.findOne({
+          model: twoFactorTable,
+          where: [{
+            field: "userId",
+            value: user2.id
+          }]
+        });
+        if (!twoFactor3) throw APIError2.from("BAD_REQUEST", TWO_FACTOR_ERROR_CODES.TWO_FACTOR_NOT_ENABLED);
+        const backupCodes = await generateBackupCodes(ctx.context.secretConfig, opts);
+        await ctx.context.adapter.update({
+          model: twoFactorTable,
+          update: { backupCodes: backupCodes.encryptedBackupCodes },
+          where: [{
+            field: "id",
+            value: twoFactor3.id
+          }]
+        });
+        return ctx.json({
+          status: true,
+          backupCodes: backupCodes.backupCodes
+        });
+      }),
+      viewBackupCodes: createAuthEndpoint({
+        method: "POST",
+        body: viewBackupCodesBodySchema
+      }, async (ctx) => {
+        const twoFactor3 = await ctx.context.adapter.findOne({
+          model: twoFactorTable,
+          where: [{
+            field: "userId",
+            value: ctx.body.userId
+          }]
+        });
+        if (!twoFactor3) throw APIError2.from("BAD_REQUEST", TWO_FACTOR_ERROR_CODES.BACKUP_CODES_NOT_ENABLED);
+        const decryptedBackupCodes = await getBackupCodes(twoFactor3.backupCodes, ctx.context.secretConfig, opts);
+        if (!decryptedBackupCodes) throw APIError2.from("BAD_REQUEST", TWO_FACTOR_ERROR_CODES.INVALID_BACKUP_CODE);
+        return ctx.json({
+          status: true,
+          backupCodes: decryptedBackupCodes
+        });
+      })
+    }
+  };
+};
+
+// node_modules/better-auth/dist/plugins/two-factor/utils.mjs
+var defaultKeyHasher2 = async (token) => {
+  const hash = await createHash("SHA-256").digest(new TextEncoder().encode(token));
+  return base64Url.encode(new Uint8Array(hash), { padding: false });
+};
+
+// node_modules/better-auth/dist/plugins/two-factor/otp/index.mjs
+init_error2();
+var verifyOTPBodySchema = object({
+  code: string2().meta({ description: 'The otp code to verify. Eg: "012345"' }),
+  trustDevice: boolean2().optional().meta({ description: "If true, the device will be trusted for 30 days. It'll be refreshed on every sign in request within this time. Eg: true" })
+});
+var send2FaOTPBodySchema = object({ trustDevice: boolean2().optional().meta({ description: "If true, the device will be trusted for 30 days. It'll be refreshed on every sign in request within this time. Eg: true" }) }).optional();
+var otp2fa = (options) => {
+  const opts = {
+    storeOTP: "plain",
+    digits: 6,
+    ...options,
+    period: (options?.period || 3) * 60 * 1e3
+  };
+  async function storeOTP(ctx, otp) {
+    if (opts.storeOTP === "hashed") return await defaultKeyHasher2(otp);
+    if (typeof opts.storeOTP === "object" && "hash" in opts.storeOTP) return await opts.storeOTP.hash(otp);
+    if (typeof opts.storeOTP === "object" && "encrypt" in opts.storeOTP) return await opts.storeOTP.encrypt(otp);
+    if (opts.storeOTP === "encrypted") return await symmetricEncrypt({
+      key: ctx.context.secretConfig,
+      data: otp
+    });
+    return otp;
+  }
+  async function decryptOrHashForComparison(ctx, storedOtp, userInput) {
+    if (opts.storeOTP === "hashed") return [storedOtp, await defaultKeyHasher2(userInput)];
+    if (opts.storeOTP === "encrypted") return [await symmetricDecrypt({
+      key: ctx.context.secretConfig,
+      data: storedOtp
+    }), userInput];
+    if (typeof opts.storeOTP === "object" && "encrypt" in opts.storeOTP) return [await opts.storeOTP.decrypt(storedOtp), userInput];
+    if (typeof opts.storeOTP === "object" && "hash" in opts.storeOTP) return [storedOtp, await opts.storeOTP.hash(userInput)];
+    return [storedOtp, userInput];
+  }
+  return {
+    id: "otp",
+    version: PACKAGE_VERSION,
+    endpoints: {
+      sendTwoFactorOTP: createAuthEndpoint("/two-factor/send-otp", {
+        method: "POST",
+        body: send2FaOTPBodySchema,
+        metadata: { openapi: {
+          summary: "Send two factor OTP",
+          description: "Send two factor OTP to the user",
+          responses: { 200: {
+            description: "Successful response",
+            content: { "application/json": { schema: {
+              type: "object",
+              properties: { status: { type: "boolean" } }
+            } } }
+          } }
+        } }
+      }, async (ctx) => {
+        if (!options || !options.sendOTP) {
+          ctx.context.logger.error("send otp isn't configured. Please configure the send otp function on otp options.");
+          throw APIError2.from("BAD_REQUEST", {
+            message: "otp isn't configured",
+            code: "OTP_NOT_CONFIGURED"
+          });
+        }
+        const { session: session2, key } = await verifyTwoFactor(ctx);
+        const code = generateRandomString(opts.digits, "0-9");
+        const hashedCode = await storeOTP(ctx, code);
+        await ctx.context.internalAdapter.createVerificationValue({
+          value: `${hashedCode}:0`,
+          identifier: `2fa-otp-${key}`,
+          expiresAt: new Date(Date.now() + opts.period)
+        });
+        const sendOTPResult = options.sendOTP({
+          user: session2.user,
+          otp: code
+        }, ctx);
+        if (sendOTPResult instanceof Promise) await ctx.context.runInBackgroundOrAwait(sendOTPResult.catch((e) => {
+          ctx.context.logger.error("Failed to send two-factor OTP", e);
+        }));
+        return ctx.json({ status: true });
+      }),
+      verifyTwoFactorOTP: createAuthEndpoint("/two-factor/verify-otp", {
+        method: "POST",
+        body: verifyOTPBodySchema,
+        metadata: { openapi: {
+          summary: "Verify two factor OTP",
+          description: "Verify two factor OTP",
+          responses: { "200": {
+            description: "Two-factor OTP verified successfully",
+            content: { "application/json": { schema: {
+              type: "object",
+              properties: {
+                token: {
+                  type: "string",
+                  description: "Session token for the authenticated session"
+                },
+                user: {
+                  type: "object",
+                  properties: {
+                    id: {
+                      type: "string",
+                      description: "Unique identifier of the user"
+                    },
+                    email: {
+                      type: "string",
+                      format: "email",
+                      nullable: true,
+                      description: "User's email address"
+                    },
+                    emailVerified: {
+                      type: "boolean",
+                      nullable: true,
+                      description: "Whether the email is verified"
+                    },
+                    name: {
+                      type: "string",
+                      nullable: true,
+                      description: "User's name"
+                    },
+                    image: {
+                      type: "string",
+                      format: "uri",
+                      nullable: true,
+                      description: "User's profile image URL"
+                    },
+                    createdAt: {
+                      type: "string",
+                      format: "date-time",
+                      description: "Timestamp when the user was created"
+                    },
+                    updatedAt: {
+                      type: "string",
+                      format: "date-time",
+                      description: "Timestamp when the user was last updated"
+                    }
+                  },
+                  required: [
+                    "id",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  description: "The authenticated user object"
+                }
+              },
+              required: ["token", "user"]
+            } } }
+          } }
+        } }
+      }, async (ctx) => {
+        const { session: session2, key, valid, invalid: invalid2 } = await verifyTwoFactor(ctx);
+        const toCheckOtp = await ctx.context.internalAdapter.findVerificationValue(`2fa-otp-${key}`);
+        const [otp, counter] = toCheckOtp?.value?.split(":") ?? [];
+        if (!toCheckOtp || toCheckOtp.expiresAt < /* @__PURE__ */ new Date()) {
+          if (toCheckOtp) await ctx.context.internalAdapter.deleteVerificationByIdentifier(`2fa-otp-${key}`);
+          throw APIError2.from("BAD_REQUEST", TWO_FACTOR_ERROR_CODES.OTP_HAS_EXPIRED);
+        }
+        const allowedAttempts = options?.allowedAttempts || 5;
+        if (parseInt(counter) >= allowedAttempts) {
+          await ctx.context.internalAdapter.deleteVerificationByIdentifier(`2fa-otp-${key}`);
+          throw APIError2.from("BAD_REQUEST", TWO_FACTOR_ERROR_CODES.TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE);
+        }
+        const [storedValue, inputValue] = await decryptOrHashForComparison(ctx, otp, ctx.body.code);
+        if (constantTimeEqual(new TextEncoder().encode(storedValue), new TextEncoder().encode(inputValue))) {
+          if (!session2.user.twoFactorEnabled) {
+            if (!session2.session) throw APIError2.from("BAD_REQUEST", BASE_ERROR_CODES.FAILED_TO_CREATE_SESSION);
+            const updatedUser = await ctx.context.internalAdapter.updateUser(session2.user.id, { twoFactorEnabled: true });
+            const newSession = await ctx.context.internalAdapter.createSession(session2.user.id, false, session2.session);
+            await setSessionCookie(ctx, {
+              session: newSession,
+              user: updatedUser
+            });
+            await ctx.context.internalAdapter.deleteSession(session2.session.token);
+            return ctx.json({
+              token: newSession.token,
+              user: parseUserOutput(ctx.context.options, updatedUser)
+            });
+          }
+          return valid(ctx);
+        } else {
+          await ctx.context.internalAdapter.updateVerificationByIdentifier(`2fa-otp-${key}`, { value: `${otp}:${(parseInt(counter, 10) || 0) + 1}` });
+          return invalid2("INVALID_CODE");
+        }
+      })
+    }
+  };
+};
+
+// node_modules/better-auth/dist/plugins/two-factor/schema.mjs
+var schema2 = {
+  user: { fields: { twoFactorEnabled: {
+    type: "boolean",
+    required: false,
+    defaultValue: false,
+    input: false
+  } } },
+  twoFactor: { fields: {
+    secret: {
+      type: "string",
+      required: true,
+      returned: false,
+      index: true
+    },
+    backupCodes: {
+      type: "string",
+      required: true,
+      returned: false
+    },
+    userId: {
+      type: "string",
+      required: true,
+      returned: false,
+      references: {
+        model: "user",
+        field: "id"
+      },
+      index: true
+    },
+    verified: {
+      type: "boolean",
+      required: false,
+      defaultValue: true,
+      input: false
+    }
+  } }
+};
+
+// node_modules/better-auth/dist/plugins/two-factor/totp/index.mjs
+init_error2();
+
+// node_modules/@better-auth/utils/dist/base32.mjs
+function getAlphabet2(hex2) {
+  return hex2 ? "0123456789ABCDEFGHIJKLMNOPQRSTUV" : "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+}
+function createDecodeMap(alphabet) {
+  const decodeMap = /* @__PURE__ */ new Map();
+  for (let i = 0; i < alphabet.length; i++) {
+    decodeMap.set(alphabet[i], i);
+  }
+  return decodeMap;
+}
+function base32Encode(data, alphabet, padding) {
+  let result = "";
+  let buffer = 0;
+  let shift = 0;
+  for (const byte of data) {
+    buffer = buffer << 8 | byte;
+    shift += 8;
+    while (shift >= 5) {
+      shift -= 5;
+      result += alphabet[buffer >> shift & 31];
+    }
+  }
+  if (shift > 0) {
+    result += alphabet[buffer << 5 - shift & 31];
+  }
+  if (padding) {
+    const padCount = (8 - result.length % 8) % 8;
+    result += "=".repeat(padCount);
+  }
+  return result;
+}
+function base32Decode(data, alphabet) {
+  const decodeMap = createDecodeMap(alphabet);
+  const result = [];
+  let buffer = 0;
+  let bitsCollected = 0;
+  for (const char2 of data) {
+    if (char2 === "=")
+      break;
+    const value = decodeMap.get(char2);
+    if (value === void 0) {
+      throw new Error(`Invalid Base32 character: ${char2}`);
+    }
+    buffer = buffer << 5 | value;
+    bitsCollected += 5;
+    while (bitsCollected >= 8) {
+      bitsCollected -= 8;
+      result.push(buffer >> bitsCollected & 255);
+    }
+  }
+  return Uint8Array.from(result);
+}
+var base32 = {
+  /**
+   * Encodes data into a Base32 string.
+   * @param data - The data to encode (ArrayBuffer, TypedArray, or string).
+   * @param options - Encoding options.
+   * @returns The Base32 encoded string.
+   */
+  encode(data, options = {}) {
+    const alphabet = getAlphabet2(false);
+    const buffer = typeof data === "string" ? new TextEncoder().encode(data) : new Uint8Array(data);
+    return base32Encode(buffer, alphabet, options.padding ?? true);
+  },
+  /**
+   * Decodes a Base32 string into a Uint8Array.
+   * @param data - The Base32 encoded string or ArrayBuffer/TypedArray.
+   * @returns The decoded Uint8Array.
+   */
+  decode(data) {
+    if (typeof data !== "string") {
+      data = new TextDecoder().decode(data);
+    }
+    const alphabet = getAlphabet2(false);
+    return base32Decode(data, alphabet);
+  }
+};
+
+// node_modules/@better-auth/utils/dist/otp.mjs
+var defaultPeriod = 30;
+var defaultDigits = 6;
+async function generateHOTP(secret, {
+  counter,
+  digits,
+  hash = "SHA-1"
+}) {
+  const _digits = digits ?? defaultDigits;
+  if (_digits < 1 || _digits > 8) {
+    throw new TypeError("Digits must be between 1 and 8");
+  }
+  const buffer = new ArrayBuffer(8);
+  new DataView(buffer).setBigUint64(0, BigInt(counter), false);
+  const bytes = new Uint8Array(buffer);
+  const hmacResult = new Uint8Array(await createHMAC(hash).sign(secret, bytes));
+  const offset = hmacResult[hmacResult.length - 1] & 15;
+  const truncated = (hmacResult[offset] & 127) << 24 | (hmacResult[offset + 1] & 255) << 16 | (hmacResult[offset + 2] & 255) << 8 | hmacResult[offset + 3] & 255;
+  const otp = truncated % 10 ** _digits;
+  return otp.toString().padStart(_digits, "0");
+}
+async function generateTOTP(secret, options) {
+  const digits = options?.digits ?? defaultDigits;
+  const period = options?.period ?? defaultPeriod;
+  const milliseconds = period * 1e3;
+  const counter = Math.floor(Date.now() / milliseconds);
+  return await generateHOTP(secret, { counter, digits, hash: options?.hash });
+}
+async function verifyTOTP(otp, {
+  window: window2 = 1,
+  digits = defaultDigits,
+  secret,
+  period = defaultPeriod
+}) {
+  const milliseconds = period * 1e3;
+  const counter = Math.floor(Date.now() / milliseconds);
+  for (let i = -window2; i <= window2; i++) {
+    const generatedOTP = await generateHOTP(secret, {
+      counter: counter + i,
+      digits
+    });
+    if (otp === generatedOTP) {
+      return true;
+    }
+  }
+  return false;
+}
+function generateQRCode({
+  issuer,
+  account: account2,
+  secret,
+  digits = defaultDigits,
+  period = defaultPeriod
+}) {
+  const encodedIssuer = encodeURIComponent(issuer);
+  const encodedAccountName = encodeURIComponent(account2);
+  const baseURI = `otpauth://totp/${encodedIssuer}:${encodedAccountName}`;
+  const params = new URLSearchParams({
+    secret: base32.encode(secret, {
+      padding: false
+    }),
+    issuer
+  });
+  if (digits !== void 0) {
+    params.set("digits", digits.toString());
+  }
+  if (period !== void 0) {
+    params.set("period", period.toString());
+  }
+  return `${baseURI}?${params.toString()}`;
+}
+var createOTP = (secret, opts) => {
+  const digits = opts?.digits ?? defaultDigits;
+  const period = opts?.period ?? defaultPeriod;
+  return {
+    hotp: (counter) => generateHOTP(secret, { counter, digits }),
+    totp: () => generateTOTP(secret, { digits, period }),
+    verify: (otp, options) => verifyTOTP(otp, { secret, digits, period, ...options }),
+    url: (issuer, account2) => generateQRCode({ issuer, account: account2, secret, digits, period })
+  };
+};
+
+// node_modules/better-auth/dist/plugins/two-factor/totp/index.mjs
+var generateTOTPBodySchema = object({ secret: string2().meta({ description: "The secret to generate the TOTP code" }) });
+var verifyTOTPBodySchema = object({
+  code: string2().meta({ description: 'The otp code to verify. Eg: "012345"' }),
+  trustDevice: boolean2().meta({ description: "If true, the device will be trusted for 30 days. It'll be refreshed on every sign in request within this time. Eg: true" }).optional()
+});
+var totp2fa = (options) => {
+  const opts = {
+    ...options,
+    digits: options?.digits || 6,
+    period: options?.period || 30
+  };
+  const passwordSchema = string2().meta({ description: "User password" });
+  const getTOTPURIBodySchema = options?.allowPasswordless ? object({ password: passwordSchema.optional() }) : object({ password: passwordSchema });
+  const twoFactorTable = "twoFactor";
+  return {
+    id: "totp",
+    version: PACKAGE_VERSION,
+    endpoints: {
+      generateTOTP: createAuthEndpoint({
+        method: "POST",
+        body: generateTOTPBodySchema,
+        metadata: { openapi: {
+          summary: "Generate TOTP code",
+          description: "Use this endpoint to generate a TOTP code",
+          responses: { 200: {
+            description: "Successful response",
+            content: { "application/json": { schema: {
+              type: "object",
+              properties: { code: { type: "string" } }
+            } } }
+          } }
+        } }
+      }, async (ctx) => {
+        if (options?.disable) {
+          ctx.context.logger.error("totp isn't configured. please pass totp option on two factor plugin to enable totp");
+          throw APIError2.from("BAD_REQUEST", {
+            message: "totp isn't configured",
+            code: "TOTP_NOT_CONFIGURED"
+          });
+        }
+        return { code: await createOTP(ctx.body.secret, {
+          period: opts.period,
+          digits: opts.digits
+        }).totp() };
+      }),
+      getTOTPURI: createAuthEndpoint("/two-factor/get-totp-uri", {
+        method: "POST",
+        use: [sessionMiddleware],
+        body: getTOTPURIBodySchema,
+        metadata: { openapi: {
+          summary: "Get TOTP URI",
+          description: "Use this endpoint to get the TOTP URI",
+          responses: { 200: {
+            description: "Successful response",
+            content: { "application/json": { schema: {
+              type: "object",
+              properties: { totpURI: { type: "string" } }
+            } } }
+          } }
+        } }
+      }, async (ctx) => {
+        if (options?.disable) {
+          ctx.context.logger.error("totp isn't configured. please pass totp option on two factor plugin to enable totp");
+          throw APIError2.from("BAD_REQUEST", {
+            message: "totp isn't configured",
+            code: "TOTP_NOT_CONFIGURED"
+          });
+        }
+        const user2 = ctx.context.session.user;
+        const twoFactor3 = await ctx.context.adapter.findOne({
+          model: twoFactorTable,
+          where: [{
+            field: "userId",
+            value: user2.id
+          }]
+        });
+        if (!twoFactor3) throw APIError2.from("BAD_REQUEST", TWO_FACTOR_ERROR_CODES.TOTP_NOT_ENABLED);
+        const secret = await symmetricDecrypt({
+          key: ctx.context.secretConfig,
+          data: twoFactor3.secret
+        });
+        if (await shouldRequirePassword(ctx, user2.id, options?.allowPasswordless)) {
+          if (!ctx.body.password) throw APIError2.from("BAD_REQUEST", BASE_ERROR_CODES.INVALID_PASSWORD);
+          await ctx.context.password.checkPassword(user2.id, ctx);
+        }
+        return { totpURI: createOTP(secret, {
+          digits: opts.digits,
+          period: opts.period
+        }).url(options?.issuer || ctx.context.appName, user2.email) };
+      }),
+      verifyTOTP: createAuthEndpoint("/two-factor/verify-totp", {
+        method: "POST",
+        body: verifyTOTPBodySchema,
+        metadata: { openapi: {
+          summary: "Verify two factor TOTP",
+          description: "Verify two factor TOTP",
+          responses: { 200: {
+            description: "Successful response",
+            content: { "application/json": { schema: {
+              type: "object",
+              properties: { status: { type: "boolean" } }
+            } } }
+          } }
+        } }
+      }, async (ctx) => {
+        if (options?.disable) {
+          ctx.context.logger.error("totp isn't configured. please pass totp option on two factor plugin to enable totp");
+          throw APIError2.from("BAD_REQUEST", {
+            message: "totp isn't configured",
+            code: "TOTP_NOT_CONFIGURED"
+          });
+        }
+        const { session: session2, valid, invalid: invalid2 } = await verifyTwoFactor(ctx);
+        const user2 = session2.user;
+        const isSignIn = !session2.session;
+        const twoFactor3 = await ctx.context.adapter.findOne({
+          model: twoFactorTable,
+          where: [{
+            field: "userId",
+            value: user2.id
+          }]
+        });
+        if (!twoFactor3) throw APIError2.from("BAD_REQUEST", TWO_FACTOR_ERROR_CODES.TOTP_NOT_ENABLED);
+        if (isSignIn && twoFactor3.verified === false) throw APIError2.from("BAD_REQUEST", TWO_FACTOR_ERROR_CODES.TOTP_NOT_ENABLED);
+        if (!await createOTP(await symmetricDecrypt({
+          key: ctx.context.secretConfig,
+          data: twoFactor3.secret
+        }), {
+          period: opts.period,
+          digits: opts.digits
+        }).verify(ctx.body.code)) return invalid2("INVALID_CODE");
+        if (twoFactor3.verified !== true) {
+          if (!user2.twoFactorEnabled) {
+            const activeSession = session2.session;
+            const updatedUser = await ctx.context.internalAdapter.updateUser(user2.id, { twoFactorEnabled: true });
+            await setSessionCookie(ctx, {
+              session: await ctx.context.internalAdapter.createSession(user2.id, false, activeSession),
+              user: updatedUser
+            });
+            await ctx.context.internalAdapter.deleteSession(activeSession.token);
+          }
+          await ctx.context.adapter.update({
+            model: twoFactorTable,
+            update: { verified: true },
+            where: [{
+              field: "id",
+              value: twoFactor3.id
+            }]
+          });
+        }
+        return valid(ctx);
+      })
+    }
+  };
+};
+
+// node_modules/better-auth/dist/plugins/two-factor/index.mjs
+init_error2();
+var twoFactor = (options) => {
+  const opts = { twoFactorTable: "twoFactor" };
+  const trustDeviceMaxAge = options?.trustDeviceMaxAge ?? 2592e3;
+  const allowPasswordless = options?.allowPasswordless;
+  const backupCodeOptions = {
+    storeBackupCodes: "encrypted",
+    ...options?.backupCodeOptions
+  };
+  const totp = totp2fa({
+    ...options?.totpOptions,
+    allowPasswordless: options?.totpOptions?.allowPasswordless ?? allowPasswordless
+  });
+  const backupCode = backupCode2fa({
+    ...backupCodeOptions,
+    allowPasswordless: options?.backupCodeOptions?.allowPasswordless ?? allowPasswordless
+  });
+  const otp = otp2fa(options?.otpOptions);
+  const passwordSchema = string2().meta({ description: "User password" });
+  const enableTwoFactorBodySchema = allowPasswordless ? object({
+    password: passwordSchema.optional(),
+    issuer: string2().meta({ description: "Custom issuer for the TOTP URI" }).optional()
+  }) : object({
+    password: passwordSchema,
+    issuer: string2().meta({ description: "Custom issuer for the TOTP URI" }).optional()
+  });
+  const disableTwoFactorBodySchema = allowPasswordless ? object({ password: passwordSchema.optional() }) : object({ password: passwordSchema });
+  return {
+    id: "two-factor",
+    version: PACKAGE_VERSION,
+    endpoints: {
+      ...totp.endpoints,
+      ...otp.endpoints,
+      ...backupCode.endpoints,
+      enableTwoFactor: createAuthEndpoint("/two-factor/enable", {
+        method: "POST",
+        body: enableTwoFactorBodySchema,
+        use: [sessionMiddleware],
+        metadata: { openapi: {
+          summary: "Enable two factor authentication",
+          description: "Use this endpoint to enable two factor authentication. This will generate a TOTP URI and backup codes. Once the user verifies the TOTP URI, the two factor authentication will be enabled.",
+          responses: { 200: {
+            description: "Successful response",
+            content: { "application/json": { schema: {
+              type: "object",
+              properties: {
+                totpURI: {
+                  type: "string",
+                  description: "TOTP URI"
+                },
+                backupCodes: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "Backup codes"
+                }
+              }
+            } } }
+          } }
+        } }
+      }, async (ctx) => {
+        const user2 = ctx.context.session.user;
+        const { password, issuer } = ctx.body;
+        if (await shouldRequirePassword(ctx, user2.id, allowPasswordless)) {
+          if (!password) throw APIError2.from("BAD_REQUEST", BASE_ERROR_CODES.INVALID_PASSWORD);
+          if (!await validatePassword(ctx, {
+            password,
+            userId: user2.id
+          })) throw APIError2.from("BAD_REQUEST", BASE_ERROR_CODES.INVALID_PASSWORD);
+        }
+        const secret = generateRandomString(32);
+        const encryptedSecret = await symmetricEncrypt({
+          key: ctx.context.secretConfig,
+          data: secret
+        });
+        const backupCodes = await generateBackupCodes(ctx.context.secretConfig, backupCodeOptions);
+        if (options?.skipVerificationOnEnable) {
+          const updatedUser = await ctx.context.internalAdapter.updateUser(user2.id, { twoFactorEnabled: true });
+          await setSessionCookie(ctx, {
+            session: await ctx.context.internalAdapter.createSession(updatedUser.id, false, ctx.context.session.session),
+            user: updatedUser
+          });
+          await ctx.context.internalAdapter.deleteSession(ctx.context.session.session.token);
+        }
+        const existingTwoFactor = await ctx.context.adapter.findOne({
+          model: opts.twoFactorTable,
+          where: [{
+            field: "userId",
+            value: user2.id
+          }]
+        });
+        await ctx.context.adapter.deleteMany({
+          model: opts.twoFactorTable,
+          where: [{
+            field: "userId",
+            value: user2.id
+          }]
+        });
+        await ctx.context.adapter.create({
+          model: opts.twoFactorTable,
+          data: {
+            secret: encryptedSecret,
+            backupCodes: backupCodes.encryptedBackupCodes,
+            userId: user2.id,
+            verified: existingTwoFactor != null && existingTwoFactor.verified !== false || !!options?.skipVerificationOnEnable
+          }
+        });
+        const totpURI = createOTP(secret, {
+          digits: options?.totpOptions?.digits || 6,
+          period: options?.totpOptions?.period
+        }).url(issuer || options?.issuer || ctx.context.appName, user2.email);
+        return ctx.json({
+          totpURI,
+          backupCodes: backupCodes.backupCodes
+        });
+      }),
+      disableTwoFactor: createAuthEndpoint("/two-factor/disable", {
+        method: "POST",
+        body: disableTwoFactorBodySchema,
+        use: [sensitiveSessionMiddleware],
+        metadata: { openapi: {
+          summary: "Disable two factor authentication",
+          description: "Use this endpoint to disable two factor authentication.",
+          responses: { 200: {
+            description: "Successful response",
+            content: { "application/json": { schema: {
+              type: "object",
+              properties: { status: { type: "boolean" } }
+            } } }
+          } }
+        } }
+      }, async (ctx) => {
+        const user2 = ctx.context.session.user;
+        const { password } = ctx.body;
+        if (await shouldRequirePassword(ctx, user2.id, allowPasswordless)) {
+          if (!password) throw APIError2.from("BAD_REQUEST", BASE_ERROR_CODES.INVALID_PASSWORD);
+          if (!await validatePassword(ctx, {
+            password,
+            userId: user2.id
+          })) throw APIError2.from("BAD_REQUEST", BASE_ERROR_CODES.INVALID_PASSWORD);
+        }
+        const updatedUser = await ctx.context.internalAdapter.updateUser(user2.id, { twoFactorEnabled: false });
+        await ctx.context.adapter.delete({
+          model: opts.twoFactorTable,
+          where: [{
+            field: "userId",
+            value: updatedUser.id
+          }]
+        });
+        await setSessionCookie(ctx, {
+          session: await ctx.context.internalAdapter.createSession(updatedUser.id, false, ctx.context.session.session),
+          user: updatedUser
+        });
+        await ctx.context.internalAdapter.deleteSession(ctx.context.session.session.token);
+        const disableTrustCookie = ctx.context.createAuthCookie(TRUST_DEVICE_COOKIE_NAME, { maxAge: trustDeviceMaxAge });
+        const disableTrustValue = await ctx.getSignedCookie(disableTrustCookie.name, ctx.context.secret);
+        if (disableTrustValue) {
+          const [, trustId] = disableTrustValue.split("!");
+          if (trustId) await ctx.context.internalAdapter.deleteVerificationByIdentifier(trustId);
+          expireCookie(ctx, disableTrustCookie);
+        }
+        return ctx.json({ status: true });
+      })
+    },
+    options,
+    hooks: { after: [{
+      matcher(context2) {
+        return context2.path === "/sign-in/email" || context2.path === "/sign-in/username" || context2.path === "/sign-in/phone-number";
+      },
+      handler: createAuthMiddleware(async (ctx) => {
+        const data = ctx.context.newSession;
+        if (!data) return;
+        if (!data?.user.twoFactorEnabled) return;
+        const trustDeviceCookieAttrs = ctx.context.createAuthCookie(TRUST_DEVICE_COOKIE_NAME, { maxAge: trustDeviceMaxAge });
+        const trustDeviceCookie = await ctx.getSignedCookie(trustDeviceCookieAttrs.name, ctx.context.secret);
+        if (trustDeviceCookie) {
+          const [token, trustIdentifier] = trustDeviceCookie.split("!");
+          if (token && trustIdentifier) {
+            if (token === await createHMAC("SHA-256", "base64urlnopad").sign(ctx.context.secret, `${data.user.id}!${trustIdentifier}`)) {
+              const verificationRecord = await ctx.context.internalAdapter.findVerificationValue(trustIdentifier);
+              if (verificationRecord && verificationRecord.value === data.user.id && verificationRecord.expiresAt > /* @__PURE__ */ new Date()) {
+                await ctx.context.internalAdapter.deleteVerificationByIdentifier(trustIdentifier);
+                const newTrustIdentifier = `trust-device-${generateRandomString(32)}`;
+                const newToken = await createHMAC("SHA-256", "base64urlnopad").sign(ctx.context.secret, `${data.user.id}!${newTrustIdentifier}`);
+                await ctx.context.internalAdapter.createVerificationValue({
+                  value: data.user.id,
+                  identifier: newTrustIdentifier,
+                  expiresAt: new Date(Date.now() + trustDeviceMaxAge * 1e3)
+                });
+                const newTrustDeviceCookie = ctx.context.createAuthCookie(TRUST_DEVICE_COOKIE_NAME, { maxAge: trustDeviceMaxAge });
+                await ctx.setSignedCookie(newTrustDeviceCookie.name, `${newToken}!${newTrustIdentifier}`, ctx.context.secret, trustDeviceCookieAttrs.attributes);
+                return;
+              }
+            }
+          }
+          expireCookie(ctx, trustDeviceCookieAttrs);
+        }
+        deleteSessionCookie(ctx, true);
+        await ctx.context.internalAdapter.deleteSession(data.session.token);
+        ctx.context.setNewSession(null);
+        const maxAge = options?.twoFactorCookieMaxAge ?? 600;
+        const twoFactorCookie = ctx.context.createAuthCookie(TWO_FACTOR_COOKIE_NAME, { maxAge });
+        const identifier = `2fa-${generateRandomString(20)}`;
+        await ctx.context.internalAdapter.createVerificationValue({
+          value: data.user.id,
+          identifier,
+          expiresAt: new Date(Date.now() + maxAge * 1e3)
+        });
+        await ctx.setSignedCookie(twoFactorCookie.name, identifier, ctx.context.secret, twoFactorCookie.attributes);
+        const twoFactorMethods = [];
+        if (!options?.totpOptions?.disable) {
+          const userTotpSecret = await ctx.context.adapter.findOne({
+            model: opts.twoFactorTable,
+            where: [{
+              field: "userId",
+              value: data.user.id
+            }]
+          });
+          if (userTotpSecret && userTotpSecret.verified !== false) twoFactorMethods.push("totp");
+        }
+        if (options?.otpOptions?.sendOTP) twoFactorMethods.push("otp");
+        return ctx.json({
+          twoFactorRedirect: true,
+          twoFactorMethods
+        });
+      })
+    }] },
+    schema: mergeSchema(schema2, {
+      ...options?.schema,
+      twoFactor: {
+        ...options?.schema?.twoFactor,
+        ...options?.twoFactorTable ? { modelName: options.twoFactorTable } : {}
+      }
+    }),
+    rateLimit: [{
+      pathMatcher(path2) {
+        return path2.startsWith("/two-factor/");
+      },
+      window: 10,
+      max: 3
+    }],
+    $ERROR_CODES: TWO_FACTOR_ERROR_CODES
+  };
+};
+
 // node_modules/pg/esm/index.mjs
 var import_lib = __toESM(require_lib4(), 1);
 var Client = import_lib.default.Client;
@@ -79715,18 +80896,18 @@ var CasingCache = class {
   }
   getColumnCasing(column) {
     if (!column.keyAsName) return column.name;
-    const schema2 = column.table[Table.Symbol.Schema] ?? "public";
+    const schema3 = column.table[Table.Symbol.Schema] ?? "public";
     const tableName = column.table[Table.Symbol.OriginalName];
-    const key = `${schema2}.${tableName}.${column.name}`;
+    const key = `${schema3}.${tableName}.${column.name}`;
     if (!this.cache[key]) {
       this.cacheTable(column.table);
     }
     return this.cache[key];
   }
   cacheTable(table2) {
-    const schema2 = table2[Table.Symbol.Schema] ?? "public";
+    const schema3 = table2[Table.Symbol.Schema] ?? "public";
     const tableName = table2[Table.Symbol.OriginalName];
-    const tableKey = `${schema2}.${tableName}`;
+    const tableKey = `${schema3}.${tableName}`;
     if (!this.cachedTables[tableKey]) {
       for (const column of Object.values(table2[Table.Symbol.Columns])) {
         const columnKey = `${tableKey}.${column.name}`;
@@ -80631,7 +81812,7 @@ var PgDialect = class {
   // }
   buildRelationalQueryWithoutPK({
     fullSchema,
-    schema: schema2,
+    schema: schema3,
     tableNamesMap,
     table: table2,
     tableConfig,
@@ -80727,7 +81908,7 @@ var PgDialect = class {
         queryConfig: selectedRelationConfigValue,
         relation
       } of selectedRelations) {
-        const normalizedRelation = normalizeRelation(schema2, tableNamesMap, relation);
+        const normalizedRelation = normalizeRelation(schema3, tableNamesMap, relation);
         const relationTableName = getTableUniqueName(relation.referencedTable);
         const relationTableTsName = tableNamesMap[relationTableName];
         const relationTableAlias = `${tableAlias}_${selectedRelationTsKey}`;
@@ -80741,10 +81922,10 @@ var PgDialect = class {
         );
         const builtRelation = this.buildRelationalQueryWithoutPK({
           fullSchema,
-          schema: schema2,
+          schema: schema3,
           tableNamesMap,
           table: fullSchema[relationTableTsName],
-          tableConfig: schema2[relationTableTsName],
+          tableConfig: schema3[relationTableTsName],
           queryConfig: is(relation, One) ? selectedRelationConfigValue === true ? { limit: 1 } : { ...selectedRelationConfigValue, limit: 1 } : selectedRelationConfigValue,
           tableAlias: relationTableAlias,
           joinOn: joinOn2,
@@ -82385,9 +83566,9 @@ var PgCountBuilder = class _PgCountBuilder extends SQL {
 
 // node_modules/drizzle-orm/pg-core/query-builders/query.js
 var RelationalQueryBuilder = class {
-  constructor(fullSchema, schema2, tableNamesMap, table2, tableConfig, dialect, session2) {
+  constructor(fullSchema, schema3, tableNamesMap, table2, tableConfig, dialect, session2) {
     this.fullSchema = fullSchema;
-    this.schema = schema2;
+    this.schema = schema3;
     this.tableNamesMap = tableNamesMap;
     this.table = table2;
     this.tableConfig = tableConfig;
@@ -82423,10 +83604,10 @@ var RelationalQueryBuilder = class {
   }
 };
 var PgRelationalQuery = class extends QueryPromise {
-  constructor(fullSchema, schema2, tableNamesMap, table2, tableConfig, dialect, session2, config3, mode) {
+  constructor(fullSchema, schema3, tableNamesMap, table2, tableConfig, dialect, session2, config3, mode) {
     super();
     this.fullSchema = fullSchema;
-    this.schema = schema2;
+    this.schema = schema3;
     this.tableNamesMap = tableNamesMap;
     this.table = table2;
     this.tableConfig = tableConfig;
@@ -82527,13 +83708,13 @@ var PgRaw = class extends QueryPromise {
 
 // node_modules/drizzle-orm/pg-core/db.js
 var PgDatabase = class {
-  constructor(dialect, session2, schema2) {
+  constructor(dialect, session2, schema3) {
     this.dialect = dialect;
     this.session = session2;
-    this._ = schema2 ? {
-      schema: schema2.schema,
-      fullSchema: schema2.fullSchema,
-      tableNamesMap: schema2.tableNamesMap,
+    this._ = schema3 ? {
+      schema: schema3.schema,
+      fullSchema: schema3.fullSchema,
+      tableNamesMap: schema3.tableNamesMap,
       session: session2
     } : {
       schema: void 0,
@@ -82545,10 +83726,10 @@ var PgDatabase = class {
     if (this._.schema) {
       for (const [tableName, columns] of Object.entries(this._.schema)) {
         this.query[tableName] = new RelationalQueryBuilder(
-          schema2.fullSchema,
+          schema3.fullSchema,
           this._.schema,
           this._.tableNamesMap,
-          schema2.fullSchema[tableName],
+          schema3.fullSchema[tableName],
           columns,
           dialect,
           session2
@@ -82963,9 +84144,9 @@ var PgSession = class {
   }
 };
 var PgTransaction = class extends PgDatabase {
-  constructor(dialect, session2, schema2, nestedIndex = 0) {
-    super(dialect, session2, schema2);
-    this.schema = schema2;
+  constructor(dialect, session2, schema3, nestedIndex = 0) {
+    super(dialect, session2, schema3);
+    this.schema = schema3;
     this.nestedIndex = nestedIndex;
   }
   static [entityKind] = "PgTransaction";
@@ -83136,10 +84317,10 @@ var NodePgPreparedQuery = class extends PgPreparedQuery {
   }
 };
 var NodePgSession = class _NodePgSession extends PgSession {
-  constructor(client, dialect, schema2, options = {}) {
+  constructor(client, dialect, schema3, options = {}) {
     super(dialect);
     this.client = client;
-    this.schema = schema2;
+    this.schema = schema3;
     this.options = options;
     this.logger = options.logger ?? new NoopLogger();
     this.cache = options.cache ?? new NoopCache();
@@ -83215,8 +84396,8 @@ var NodePgDriver = class {
     this.options = options;
   }
   static [entityKind] = "NodePgDriver";
-  createSession(schema2) {
-    return new NodePgSession(this.client, this.dialect, schema2, {
+  createSession(schema3) {
+    return new NodePgSession(this.client, this.dialect, schema3, {
       logger: this.options.logger,
       cache: this.options.cache
     });
@@ -83233,21 +84414,21 @@ function construct(client, config3 = {}) {
   } else if (config3.logger !== false) {
     logger2 = config3.logger;
   }
-  let schema2;
+  let schema3;
   if (config3.schema) {
     const tablesConfig = extractTablesRelationalConfig(
       config3.schema,
       createTableRelationsHelpers
     );
-    schema2 = {
+    schema3 = {
       fullSchema: config3.schema,
       schema: tablesConfig.tables,
       tableNamesMap: tablesConfig.tableNamesMap
     };
   }
   const driver = new NodePgDriver(client, dialect, { logger: logger2, cache: config3.cache });
-  const session2 = driver.createSession(schema2);
-  const db2 = new NodePgDatabase(dialect, session2, schema2);
+  const session2 = driver.createSession(schema3);
+  const db2 = new NodePgDatabase(dialect, session2, schema3);
   db2.$client = client;
   db2.$cache = config3.cache;
   if (db2.$cache) {
@@ -83351,6 +84532,7 @@ __export(schema_exports, {
   intakeSessions: () => intakeSessions,
   patientProfiles: () => patientProfiles,
   session: () => session,
+  twoFactor: () => twoFactor2,
   user: () => user,
   verification: () => verification,
   visits: () => visits
@@ -83364,6 +84546,8 @@ var user = pgTable("user", {
   isAdmin: boolean4("is_admin").default(false),
   role: varchar("role", { length: 32 }).default("patient"),
   // 'patient' | 'provider'
+  twoFactorEnabled: boolean4("two_factor_enabled").default(false),
+  // better-auth twoFactor plugin
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
 });
@@ -83399,6 +84583,13 @@ var verification = pgTable("verification", {
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
+});
+var twoFactor2 = pgTable("two_factor", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  secret: text("secret").notNull(),
+  backupCodes: text("backup_codes").notNull(),
+  userId: varchar("user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
+  verified: boolean4("verified").default(true)
 });
 var intakeSessions = pgTable("intake_sessions", {
   id: serial("id").primaryKey(),
@@ -83590,7 +84781,7 @@ function getAuth() {
     // Schema passed explicitly — avoids BetterAuth's runtime schema inference.
     database: drizzleAdapter(db, {
       provider: "pg",
-      schema: { user, session, account, verification }
+      schema: { user, session, account, verification, twoFactor: twoFactor2 }
     }),
     secret: authSecret,
     // Protect admin status field from user input
@@ -83644,7 +84835,10 @@ function getAuth() {
         }
       }
     },
-    emailAndPassword: { enabled: true }
+    emailAndPassword: { enabled: true },
+    // MFA (TOTP + backup codes). Enabling requires the password; clinicians and
+    // admins are nudged to turn it on, and REQUIRE_MFA_CLINICIANS=true enforces it.
+    plugins: [twoFactor({ issuer: "Acute Insight" })]
     // socialProviders: {
     //   google: {
     //     clientId: getSecret('GOOGLE_CLIENT_ID') as string,
@@ -83913,6 +85107,170 @@ function audit(req, input) {
   db.insert(auditEvents).values(row).catch((err) => console.error(JSON.stringify({ event: "audit.write_failed", action: row.action, error: err instanceof Error ? err.message : String(err) })));
 }
 
+// src/lib/clinical-brief.ts
+var ACUITY_LABEL = {
+  emergency: "Emergency",
+  urgent: "Urgent",
+  telehealth: "Telehealth",
+  routine: "Routine",
+  selfcare: "Self-care"
+};
+var ACUITY_LEVELS = ["emergency", "urgent", "telehealth", "routine", "selfcare"];
+var LIKELIHOODS = ["higher", "possible", "consider"];
+function str(v, max = 600) {
+  return typeof v === "string" ? v.trim().slice(0, max) : "";
+}
+function strArray(v, maxItems, maxLen = 300) {
+  if (!Array.isArray(v)) return [];
+  return v.map((x) => str(x, maxLen)).filter((x) => x.length > 0).slice(0, maxItems);
+}
+function coerceClinicalBrief(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const o = raw;
+  const summary = str(o.summary, 2e3);
+  if (!summary) return null;
+  const d = o.disposition && typeof o.disposition === "object" ? o.disposition : {};
+  const level = ACUITY_LEVELS.includes(d.level) ? d.level : "routine";
+  const disposition = {
+    level,
+    label: str(d.label, 160) || ACUITY_LABEL[level],
+    timeframe: str(d.timeframe, 80),
+    rationale: str(d.rationale, 600),
+    safetyNet: str(d.safetyNet, 600)
+  };
+  const n = o.note && typeof o.note === "object" ? o.note : {};
+  const note = {
+    plan: strArray(n.plan, 10),
+    assessment: str(n.assessment, 800),
+    objective: strArray(n.objective, 12),
+    hpi: str(n.hpi, 1200)
+  };
+  const differential = Array.isArray(o.differential) ? o.differential.map((x) => {
+    const it = x && typeof x === "object" ? x : {};
+    const condition = str(it.condition, 160);
+    if (!condition) return null;
+    const likelihood = LIKELIHOODS.includes(it.likelihood) ? it.likelihood : "consider";
+    return { condition, likelihood, rationale: str(it.rationale, 400) };
+  }).filter((x) => x !== null).slice(0, 8) : [];
+  const workup = Array.isArray(o.workup) ? o.workup.map((x) => {
+    const it = x && typeof x === "object" ? x : {};
+    const item = str(it.item, 200);
+    if (!item) return null;
+    return { item, rationale: str(it.rationale, 400) };
+  }).filter((x) => x !== null).slice(0, 10) : [];
+  return { summary, flags: strArray(o.flags, 8, 160), disposition, note, differential, workup };
+}
+
+// src/server/lib/dispatch.ts
+var US_STATES = [
+  "AL",
+  "AK",
+  "AZ",
+  "AR",
+  "CA",
+  "CO",
+  "CT",
+  "DE",
+  "DC",
+  "FL",
+  "GA",
+  "HI",
+  "ID",
+  "IL",
+  "IN",
+  "IA",
+  "KS",
+  "KY",
+  "LA",
+  "ME",
+  "MD",
+  "MA",
+  "MI",
+  "MN",
+  "MS",
+  "MO",
+  "MT",
+  "NE",
+  "NV",
+  "NH",
+  "NJ",
+  "NM",
+  "NY",
+  "NC",
+  "ND",
+  "OH",
+  "OK",
+  "OR",
+  "PA",
+  "RI",
+  "SC",
+  "SD",
+  "TN",
+  "TX",
+  "UT",
+  "VT",
+  "VA",
+  "WA",
+  "WV",
+  "WI",
+  "WY"
+];
+var STATE_SET = new Set(US_STATES);
+function mfaRequired() {
+  return process.env.REQUIRE_MFA_CLINICIANS === "true";
+}
+function isUsState(s) {
+  return typeof s === "string" && STATE_SET.has(s.toUpperCase());
+}
+var DISPATCHABLE = ["urgent", "telehealth", "routine", "selfcare"];
+var SCOPE_OPTIONS = ["urgent", "telehealth", "routine"];
+function scopeCovers(maxAcuity, acuity) {
+  const max = ACUITY_LEVELS.indexOf(maxAcuity ?? "urgent");
+  const a = ACUITY_LEVELS.indexOf(acuity);
+  if (max < 0 || a < 0) return false;
+  return a >= max;
+}
+async function requireClinician(req, res) {
+  const session2 = await getAuth().api.getSession({
+    headers: new Headers(req.headers)
+  });
+  if (!session2?.user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return null;
+  }
+  const [u] = await db.select().from(user).where(eq(user.id, session2.user.id)).limit(1);
+  if (!u || u.role !== "provider" && !u.isAdmin) {
+    res.status(403).json({ error: "Clinician access required" });
+    return null;
+  }
+  if (mfaRequired() && !u.twoFactorEnabled) {
+    res.status(403).json({ error: "Two-step verification is required for clinician access", code: "mfa_required" });
+    return null;
+  }
+  let [profile] = await db.select().from(clinicianProfiles).where(eq(clinicianProfiles.userId, u.id)).limit(1);
+  if (!profile) {
+    [profile] = await db.insert(clinicianProfiles).values({ userId: u.id, displayName: u.name ?? null, stateLicenses: [], online: false }).returning();
+  }
+  return { userId: u.id, isAdmin: !!u.isAdmin, profile };
+}
+function licensesOf(profile) {
+  const raw = profile.stateLicenses;
+  return Array.isArray(raw) ? raw.filter(isUsState).map((s) => s.toUpperCase()) : [];
+}
+async function requirePatient(req, res) {
+  const session2 = await getAuth().api.getSession({
+    headers: new Headers(req.headers)
+  });
+  if (!session2?.user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return null;
+  }
+  return session2.user.id;
+}
+function logErr(event, error3) {
+  console.error(JSON.stringify({ event, error: error3 instanceof Error ? error3.message : String(error3) }));
+}
+
 // src/server/api/provider/intakes/GET.ts
 async function handler9(req, res) {
   try {
@@ -83921,6 +85279,9 @@ async function handler9(req, res) {
     const dbUser = await db.select().from(user).where(eq(user.id, session2.user.id)).limit(1);
     if (!dbUser[0] || dbUser[0].role !== "provider" && !dbUser[0].isAdmin) {
       return res.status(403).json({ error: "Forbidden" });
+    }
+    if (mfaRequired() && !dbUser[0].twoFactorEnabled) {
+      return res.status(403).json({ error: "Two-step verification is required for clinician access", code: "mfa_required" });
     }
     const intakes = await db.select({
       id: intakeSessions.id,
@@ -83975,60 +85336,6 @@ async function handler10(req, res) {
     console.error(JSON.stringify({ event: "api.error", route: "intake/start/POST.ts", error: error3 instanceof Error ? error3.message : String(error3) }));
     res.status(500).json({ error: "Failed to start intake" });
   }
-}
-
-// src/lib/clinical-brief.ts
-var ACUITY_LABEL = {
-  emergency: "Emergency",
-  urgent: "Urgent",
-  telehealth: "Telehealth",
-  routine: "Routine",
-  selfcare: "Self-care"
-};
-var ACUITY_LEVELS = ["emergency", "urgent", "telehealth", "routine", "selfcare"];
-var LIKELIHOODS = ["higher", "possible", "consider"];
-function str(v, max = 600) {
-  return typeof v === "string" ? v.trim().slice(0, max) : "";
-}
-function strArray(v, maxItems, maxLen = 300) {
-  if (!Array.isArray(v)) return [];
-  return v.map((x) => str(x, maxLen)).filter((x) => x.length > 0).slice(0, maxItems);
-}
-function coerceClinicalBrief(raw) {
-  if (!raw || typeof raw !== "object") return null;
-  const o = raw;
-  const summary = str(o.summary, 2e3);
-  if (!summary) return null;
-  const d = o.disposition && typeof o.disposition === "object" ? o.disposition : {};
-  const level = ACUITY_LEVELS.includes(d.level) ? d.level : "routine";
-  const disposition = {
-    level,
-    label: str(d.label, 160) || ACUITY_LABEL[level],
-    timeframe: str(d.timeframe, 80),
-    rationale: str(d.rationale, 600),
-    safetyNet: str(d.safetyNet, 600)
-  };
-  const n = o.note && typeof o.note === "object" ? o.note : {};
-  const note = {
-    plan: strArray(n.plan, 10),
-    assessment: str(n.assessment, 800),
-    objective: strArray(n.objective, 12),
-    hpi: str(n.hpi, 1200)
-  };
-  const differential = Array.isArray(o.differential) ? o.differential.map((x) => {
-    const it = x && typeof x === "object" ? x : {};
-    const condition = str(it.condition, 160);
-    if (!condition) return null;
-    const likelihood = LIKELIHOODS.includes(it.likelihood) ? it.likelihood : "consider";
-    return { condition, likelihood, rationale: str(it.rationale, 400) };
-  }).filter((x) => x !== null).slice(0, 8) : [];
-  const workup = Array.isArray(o.workup) ? o.workup.map((x) => {
-    const it = x && typeof x === "object" ? x : {};
-    const item = str(it.item, 200);
-    if (!item) return null;
-    return { item, rationale: str(it.rationale, 400) };
-  }).filter((x) => x !== null).slice(0, 10) : [];
-  return { summary, flags: strArray(o.flags, 8, 160), disposition, note, differential, workup };
 }
 
 // src/server/lib/ai.ts
@@ -85058,109 +86365,6 @@ function rateLimit(opts) {
   };
 }
 var byIp = (req) => `ip:${clientIp(req)}`;
-
-// src/server/lib/dispatch.ts
-var US_STATES = [
-  "AL",
-  "AK",
-  "AZ",
-  "AR",
-  "CA",
-  "CO",
-  "CT",
-  "DE",
-  "DC",
-  "FL",
-  "GA",
-  "HI",
-  "ID",
-  "IL",
-  "IN",
-  "IA",
-  "KS",
-  "KY",
-  "LA",
-  "ME",
-  "MD",
-  "MA",
-  "MI",
-  "MN",
-  "MS",
-  "MO",
-  "MT",
-  "NE",
-  "NV",
-  "NH",
-  "NJ",
-  "NM",
-  "NY",
-  "NC",
-  "ND",
-  "OH",
-  "OK",
-  "OR",
-  "PA",
-  "RI",
-  "SC",
-  "SD",
-  "TN",
-  "TX",
-  "UT",
-  "VT",
-  "VA",
-  "WA",
-  "WV",
-  "WI",
-  "WY"
-];
-var STATE_SET = new Set(US_STATES);
-function isUsState(s) {
-  return typeof s === "string" && STATE_SET.has(s.toUpperCase());
-}
-var DISPATCHABLE = ["urgent", "telehealth", "routine", "selfcare"];
-var SCOPE_OPTIONS = ["urgent", "telehealth", "routine"];
-function scopeCovers(maxAcuity, acuity) {
-  const max = ACUITY_LEVELS.indexOf(maxAcuity ?? "urgent");
-  const a = ACUITY_LEVELS.indexOf(acuity);
-  if (max < 0 || a < 0) return false;
-  return a >= max;
-}
-async function requireClinician(req, res) {
-  const session2 = await getAuth().api.getSession({
-    headers: new Headers(req.headers)
-  });
-  if (!session2?.user) {
-    res.status(401).json({ error: "Unauthorized" });
-    return null;
-  }
-  const [u] = await db.select().from(user).where(eq(user.id, session2.user.id)).limit(1);
-  if (!u || u.role !== "provider" && !u.isAdmin) {
-    res.status(403).json({ error: "Clinician access required" });
-    return null;
-  }
-  let [profile] = await db.select().from(clinicianProfiles).where(eq(clinicianProfiles.userId, u.id)).limit(1);
-  if (!profile) {
-    [profile] = await db.insert(clinicianProfiles).values({ userId: u.id, displayName: u.name ?? null, stateLicenses: [], online: false }).returning();
-  }
-  return { userId: u.id, isAdmin: !!u.isAdmin, profile };
-}
-function licensesOf(profile) {
-  const raw = profile.stateLicenses;
-  return Array.isArray(raw) ? raw.filter(isUsState).map((s) => s.toUpperCase()) : [];
-}
-async function requirePatient(req, res) {
-  const session2 = await getAuth().api.getSession({
-    headers: new Headers(req.headers)
-  });
-  if (!session2?.user) {
-    res.status(401).json({ error: "Unauthorized" });
-    return null;
-  }
-  return session2.user.id;
-}
-function logErr(event, error3) {
-  console.error(JSON.stringify({ event, error: error3 instanceof Error ? error3.message : String(error3) }));
-}
 
 // src/server/api/dispatch/me/GET.ts
 async function handler19(req, res) {

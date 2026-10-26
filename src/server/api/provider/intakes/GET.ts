@@ -4,6 +4,7 @@ import { intakeSessions, user, patientProfiles } from '../../../db/schema.js';
 import { eq, desc, inArray } from 'drizzle-orm';
 import { getAuth } from '../../../../lib/auth/auth.js';
 import { audit } from '../../../lib/audit.js';
+import { mfaRequired } from '../../../lib/dispatch.js';
 
 export default async function handler(req: Request, res: Response) {
   try {
@@ -15,6 +16,9 @@ export default async function handler(req: Request, res: Response) {
     const dbUser = await db.select().from(user).where(eq(user.id, session.user.id)).limit(1);
     if (!dbUser[0] || (dbUser[0].role !== 'provider' && !dbUser[0].isAdmin)) {
       return res.status(403).json({ error: 'Forbidden' });
+    }
+    if (mfaRequired() && !dbUser[0].twoFactorEnabled) {
+      return res.status(403).json({ error: 'Two-step verification is required for clinician access', code: 'mfa_required' });
     }
 
     // Fetch all completed intakes with patient info

@@ -7,6 +7,7 @@ import { ProtectedRoute } from '@/lib/auth/auth-client';
 import { provider } from 'virtual:content';
 import type { ClinicalBrief } from '@/lib/clinical-brief';
 import { ProviderNote } from '@/components/clinical-brief-view';
+import { MfaBanner } from '@/components/mfa-banner';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -373,6 +374,7 @@ function DashboardContent() {
   const [filter, setFilter] = useState<'all' | 'flagged'>('all');
   const [search, setSearch] = useState('');
   const [escalations, setEscalations] = useState<Escalation[]>([]);
+  const [mfaBlocked, setMfaBlocked] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -396,6 +398,10 @@ function DashboardContent() {
     async function load() {
       try {
         const res = await fetch('/api/provider/intakes');
+        if (res.status === 403) {
+          const d = (await res.json().catch(() => ({}))) as { code?: string };
+          if (d.code === 'mfa_required') setMfaBlocked(true);
+        }
         if (res.ok) {
           const data: ProviderIntake[] = await res.json();
           setIntakes(data);
@@ -503,6 +509,8 @@ function DashboardContent() {
       </header>
 
       <div className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+        <MfaBanner blocked={mfaBlocked} />
+
         {/* ── Escalated check-ins — needs attention ── */}
         {escalations.length > 0 && (
           <motion.div

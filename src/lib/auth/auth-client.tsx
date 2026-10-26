@@ -6,6 +6,7 @@
  */
 
 import { createAuthClient } from 'better-auth/react';
+import { twoFactorClient } from 'better-auth/client/plugins';
 import { ReactNode, useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router';
 
@@ -19,6 +20,14 @@ import {
 // window.location.origin works in all environments (local dev, iframe preview, published).
 const _authClient = createAuthClient({
   baseURL: typeof window !== 'undefined' ? window.location.origin : '',
+  plugins: [
+    twoFactorClient({
+      onTwoFactorRedirect() {
+        // Sign-in succeeded on password; a second factor is needed before a session exists.
+        if (typeof window !== 'undefined') window.location.assign('/2fa' + window.location.search);
+      },
+    }),
+  ],
 });
 
 // How long an unsettled session may stay pending before we treat it as a stuck

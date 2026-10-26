@@ -24,6 +24,8 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
+      // If MFA kicks in, the client redirects to /2fa?from=… so we land in the right place after.
+      if (from && from !== '/portal') window.history.replaceState(null, '', `/login?from=${encodeURIComponent(from)}`);
       const result = await signIn.email({ email, password });
       if (result.error) {
         setError(result.error.message || 'Invalid email or password.');
