@@ -34,6 +34,19 @@ interface IntakeSession {
   } | null;
 }
 
+interface Checkin {
+  id: number;
+  intakeSessionId: number;
+  reason: string;
+  dueAt: string;
+  status: 'scheduled' | 'sent' | 'answered' | 'escalated' | 'expired';
+  outcome: 'better' | 'same' | 'worse' | null;
+  chiefComplaint: string | null;
+  intakeCreatedAt: string | null;
+  providerName: string | null;
+  escalationNote: string | null;
+}
+
 interface PatientProfile {
   dateOfBirth: string | null;
   gender: string | null;
@@ -253,17 +266,24 @@ function PortalContent() {
   const navigate = useNavigate();
   const [intakes, setIntakes] = useState<IntakeSession[]>([]);
   const [profile, setProfile] = useState<PatientProfile | null>(null);
+  const [pendingCheckin, setPendingCheckin] = useState<Checkin | null>(null);
+  const [checkinDone, setCheckinDone] = useState<'better' | 'escalated' | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'profile'>('overview');
 
   useEffect(() => {
     async function load() {
       try {
-        const [intakesRes, profileRes] = await Promise.all([
+        const [intakesRes, profileRes, checkinRes] = await Promise.all([
           fetch('/api/patient/intakes'),
           fetch('/api/patient/profile'),
+          fetch('/api/companion/checkins'),
         ]);
         if (intakesRes.ok) setIntakes(await intakesRes.json());
+        if (checkinRes.ok) {
+          const d = (await checkinRes.json()) as { pending: Checkin | null };
+          setPendingCheckin(d.pending);
+        }
         if (profileRes.ok) {
           const data = await profileRes.json();
           setProfile(data.profile);
@@ -310,6 +330,25 @@ function PortalContent() {
     navigate('/intake', { state: { firstMessage: `I'm checking in about my visit from ${when}, when I reported: "${cc}".` } });
   }
   const lastCompleted = completedIntakes[0] ?? null;
+
+  // Ace's scheduled check-in: one tap, then (for same/worse) straight into Ace with the context attached.
+  async function answerCheckin(c: Checkin, outcome: 'better' | 'same' | 'worse') {
+    try {
+      const r = await fetch(`/api/companion/checkins/${c.id}/answer`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ outcome }) });
+      if (!r.ok) return;
+    } catch { return; }
+    if (outcome === 'better') { setCheckinDone('better'); setPendingCheckin(null); return; }
+    const when = c.intakeCreatedAt ? new Date(c.intakeCreatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'my last visit';
+    const cc = (c.chiefComplaint || 'my last visit').replace(/\s+/g, ' ').trim().slice(0, 140);
+    const feel = outcome === 'worse' ? "I'm feeling worse" : "I'm about the same";
+    navigate('/intake', {
+      state: {
+        firstMessage: `Checking in about my visit from ${when}, when I reported: "${cc}". ${feel} since then.`,
+        checkinId: c.id,
+        outcome,
+      },
+    });
+  }
 
   return (
     <div
@@ -466,8 +505,48 @@ function PortalContent() {
                   />
                 </div>
 
+                {/* Ace's scheduled check-in (due now) */}
+                {pendingCheckin && (
+                  <motion.div
+                    className="rounded-2xl p-6 mb-6"
+                    style={{ background: `hsl(var(--card))`, border: `1px solid hsl(var(--warning) / 0.45)`, boxShadow: `0 0 36px hsl(var(--warning) / 0.08)` }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <p className="text-[11px] uppercase tracking-widest mb-2" style={{ fontFamily: 'var(--font-mono)', color: 'hsl(var(--warning))' }}>
+                      Ace is checking in
+                    </p>
+                    <h3 className="text-base font-bold text-foreground mb-1" style={{ fontFamily: 'var(--font-heading)' }}>
+                      How are you doing since {pendingCheckin.intakeCreatedAt ? new Date(pendingCheckin.intakeCreatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'your visit'}?
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4" style={{ fontFamily: 'var(--font-sans)' }}>
+                      You {pendingCheckin.providerName ? `saw ${pendingCheckin.providerName}` : 'came in'} for “{(pendingCheckin.chiefComplaint || 'a visit').slice(0, 90)}”. One tap is enough — if it's not better, Ace will ask a few questions and flag your provider if needed.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {([['better', 'Better', 'var(--primary)'], ['same', 'About the same', 'var(--warning)'], ['worse', 'Worse', 'var(--destructive)']] as const).map(([v, label, h]) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => void answerCheckin(pendingCheckin, v)}
+                          className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                          style={{ background: `hsl(${h} / 0.12)`, color: `hsl(${h})`, border: `1px solid hsl(${h} / 0.45)`, fontFamily: 'var(--font-sans)' }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs mt-3" style={{ color: 'hsl(var(--text-dimmer))' }}>If this is an emergency, call 911 — don't wait for Ace.</p>
+                  </motion.div>
+                )}
+                {checkinDone === 'better' && (
+                  <div className="rounded-2xl p-4 mb-6 text-sm" style={{ background: 'hsl(var(--primary) / 0.08)', border: '1px solid hsl(var(--primary) / 0.3)', color: 'hsl(var(--foreground))' }}>
+                    Glad you're better. Logged on your timeline — your provider can see it.
+                  </div>
+                )}
+
                 {/* Companion check-in — since your last visit */}
-                {lastCompleted && (
+                {!pendingCheckin && lastCompleted && (
                   <motion.div
                     className="rounded-2xl p-6 mb-6"
                     style={{ background: `hsl(var(--card))`, border: `1px solid hsl(var(--primary) / 0.3)`, boxShadow: `0 0 36px hsl(var(--primary) / 0.06)` }}

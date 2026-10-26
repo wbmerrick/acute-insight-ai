@@ -179,3 +179,29 @@ export const visits = pgTable('visits', {
   completedAt: timestamp('completed_at'),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+// ─── Companion: scheduled check-ins ──────────────────────────────────────────
+// After a visit (or an urgent/telehealth intake with no visit), Ace checks in.
+// "Worse" or a higher-acuity follow-up escalates: the patient is pushed to request
+// a clinician and the provider dashboard flags it.
+
+export const checkins = pgTable('checkins', {
+  id: serial('id').primaryKey(),
+  intakeSessionId: integer('intake_session_id')
+    .notNull()
+    .references(() => intakeSessions.id, { onDelete: 'cascade' }),
+  patientUserId: varchar('patient_user_id', { length: 36 })
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  reason: varchar('reason', { length: 24 }).notNull(), // post_visit | urgent_intake | telehealth_intake
+  dueAt: timestamp('due_at').notNull(),
+  status: varchar('status', { length: 16 }).default('scheduled'), // scheduled | sent | answered | escalated | expired
+  sentAt: timestamp('sent_at'),
+  answeredAt: timestamp('answered_at'),
+  outcome: varchar('outcome', { length: 16 }), // better | same | worse
+  followupIntakeId: integer('followup_intake_id').references(() => intakeSessions.id, { onDelete: 'set null' }),
+  escalationNote: text('escalation_note'), // e.g. "Follow-up triaged urgent (was routine)"
+  acknowledgedBy: varchar('acknowledged_by', { length: 36 }).references(() => user.id, { onDelete: 'set null' }),
+  acknowledgedAt: timestamp('acknowledged_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+});

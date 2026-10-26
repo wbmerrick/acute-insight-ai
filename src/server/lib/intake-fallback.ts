@@ -232,7 +232,7 @@ export function buildTemplateClinicalBrief(
   // Conservative: concerning descriptions in free-text chat bump to "urgent"
   // (be seen today) even without a numeric severity. Over-triage is the safe error.
   const CONCERNING =
-    /chest (pain|tight|pressure|discomfort)|short(ness)? of breath|difficulty breathing|hard to breathe|radiat|numbness|weak(ness)?|slurred|vision (loss|change)|faint|pass(ed|ing) out|severe|worst|uncontrolled bleeding|coughing up blood|high fever|stiff neck|new confusion|severe dehydrat/i;
+    /chest (pain|tight|pressure|discomfort)|short(ness)? of breath|difficulty breathing|hard to breathe|radiat|numbness|weak(ness)?|slurred|vision (loss|change)|faint|pass(ed|ing) out|severe|worst|uncontrolled bleeding|coughing up blood|high fever|stiff neck|new confusion|severe dehydrat|fever (of |to |at |around |about )?(10[1-9]|11\d)|(shaking|teeth.chattering) chills|rigors|flank pain|(back|side) pain .{0,40}fever|fever .{0,40}(back|side) pain|blood in (my |the )?(urine|stool|pee)|can'?t keep (anything|fluids|water) down|vomiting .{0,20}(blood|days)|(hard|difficult|painful) to swallow .{0,30}(swollen|swelling|neck|drool)|drool|(swollen|swelling) .{0,20}neck|not (urinat|pee)ing|haven'?t (urinated|peed) in|worst headache|(infant|newborn|baby) .{0,30}fever|pregnan.{0,30}(bleeding|pain)|(bleeding|pain).{0,30}pregnan|testic|scrot|(sudden|severe) abdominal|belly .{0,20}(rigid|hard)|can'?t walk|can'?t bear weight|(red|hot) streak|spreading redness/i;
   // Drop short negated phrases ("no chest pain", "denies fever") so an explicitly
   // absent symptom doesn't trip the concerning-symptom scan.
   const denegBlob = blob.replace(/\b(no|not|without|denies?|deny|negative for|never had)\b(\s+\w+){0,3}/gi, ' ');

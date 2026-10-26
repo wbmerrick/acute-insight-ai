@@ -19,6 +19,20 @@ interface PatientProfile {
   allergies: string[] | null;
 }
 
+interface Escalation {
+  id: number;
+  intakeSessionId: number;
+  followupIntakeId: number | null;
+  outcome: string | null;
+  escalationNote: string | null;
+  answeredAt: string | null;
+  chiefComplaint: string | null;
+  providerName: string | null;
+  patientName: string | null;
+  patientEmail: string;
+  patientId: string;
+}
+
 interface ProviderIntake {
   id: number;
   status: string;
@@ -358,6 +372,25 @@ function DashboardContent() {
   const [selected, setSelected] = useState<ProviderIntake | null>(null);
   const [filter, setFilter] = useState<'all' | 'flagged'>('all');
   const [search, setSearch] = useState('');
+  const [escalations, setEscalations] = useState<Escalation[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const r = await fetch('/api/provider/checkins');
+        if (r.ok && !cancelled) setEscalations(await r.json());
+      } catch { /* retry next tick */ }
+    };
+    void load();
+    const t = window.setInterval(() => void load(), 30000);
+    return () => { cancelled = true; window.clearInterval(t); };
+  }, []);
+
+  async function acknowledge(e: Escalation) {
+    setEscalations((xs) => xs.filter((x) => x.id !== e.id));
+    try { await fetch(`/api/provider/checkins/${e.id}/acknowledge`, { method: 'POST' }); } catch { /* list refreshes on next poll */ }
+  }
 
   useEffect(() => {
     async function load() {
@@ -470,6 +503,50 @@ function DashboardContent() {
       </header>
 
       <div className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+        {/* ── Escalated check-ins — needs attention ── */}
+        {escalations.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl p-5 mb-8"
+            style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--destructive) / 0.45)', boxShadow: '0 0 36px hsl(var(--destructive) / 0.08)' }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>
+                Needs attention — {escalations.length} patient{escalations.length === 1 ? '' : 's'} got worse after care
+              </h2>
+              <span className="text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'hsl(var(--text-dimmer))' }}>from Ace check-ins</span>
+            </div>
+            <div className="grid gap-2">
+              {escalations.map((e) => {
+                const target = intakes.find((i) => i.id === (e.followupIntakeId ?? e.intakeSessionId));
+                return (
+                  <div key={e.id} className="flex items-start justify-between gap-3 rounded-xl px-4 py-3" style={{ background: 'hsl(var(--destructive) / 0.06)', border: '1px solid hsl(var(--destructive) / 0.2)' }}>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {e.patientName || e.patientEmail}
+                        <span className="font-normal" style={{ color: 'hsl(var(--text-dim))' }}> · {e.chiefComplaint || 'intake'}{e.providerName ? ` · seen by ${e.providerName}` : ''}</span>
+                      </p>
+                      <p className="text-xs mt-0.5" style={{ color: 'hsl(var(--destructive))' }}>{e.escalationNote || 'Escalated'}</p>
+                      {e.answeredAt && <p className="text-xs mt-0.5" style={{ color: 'hsl(var(--text-dimmer))' }}>{new Date(e.answeredAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {target && (
+                        <button type="button" onClick={() => setSelected(target)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ background: 'hsl(var(--primary) / 0.12)', color: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary) / 0.35)' }}>
+                          Open brief
+                        </button>
+                      )}
+                      <button type="button" onClick={() => void acknowledge(e)} className="text-xs px-3 py-1.5 rounded-lg" style={{ color: 'hsl(var(--text-dim))', border: '1px solid hsl(var(--border-subtle) / 0.5)' }}>
+                        Acknowledge
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
         {/* ── Welcome + stats ── */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}

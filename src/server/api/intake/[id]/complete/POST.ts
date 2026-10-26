@@ -6,6 +6,7 @@ import { getAuth } from '../../../../../lib/auth/auth.js';
 import { aiAvailable, generateClinicalBrief } from '../../../../lib/ai.js';
 import { buildTemplateClinicalBrief } from '../../../../lib/intake-fallback.js';
 import { ACUITY_LEVELS } from '../../../../../lib/clinical-brief.js';
+import { scheduleCheckin, intakeCheckinReason, resolveCheckin } from '../../../../lib/companion.js';
 
 interface QAPair {
   questionId: string;
@@ -23,9 +24,11 @@ export default async function handler(req: Request, res: Response) {
     const intakeId = Number(req.params.id);
     if (isNaN(intakeId)) return res.status(400).json({ error: 'Invalid intake ID' });
 
-    const { responses, chiefComplaint } = req.body as {
+    const { responses, chiefComplaint, checkinId, outcome } = req.body as {
       responses: QAPair[];
       chiefComplaint: string;
+      checkinId?: number;                       // set when this intake answers a companion check-in
+      outcome?: 'better' | 'same' | 'worse';    // what the patient tapped before talking to Ace
     };
     if (!Array.isArray(responses) || typeof chiefComplaint !== 'string') {
       return res.status(400).json({ error: 'responses array and chiefComplaint required' });
@@ -82,7 +85,26 @@ export default async function handler(req: Request, res: Response) {
         )
       );
 
-    res.json({ ok: true, aiSummary: brief.summary, aiFlags: brief.flags, disposition: brief.disposition });
+    // Companion: this intake either answers a check-in (and may escalate) or earns one.
+    let checkin: { escalated: boolean; note: string | null } | null = null;
+    try {
+      if (Number.isInteger(checkinId)) {
+        checkin = await resolveCheckin({
+          checkinId: Number(checkinId),
+          patientUserId: session.user.id,
+          followupIntakeId: intakeId,
+          followupBrief: brief,
+          outcome: outcome ?? null,
+        });
+      } else {
+        const reason = intakeCheckinReason(brief.disposition.level);
+        if (reason) await scheduleCheckin(intakeId, session.user.id, reason);
+      }
+    } catch (err) {
+      console.error(JSON.stringify({ event: 'intake.complete.checkin_failed', error: err instanceof Error ? err.message : String(err) }));
+    }
+
+    res.json({ ok: true, aiSummary: brief.summary, aiFlags: brief.flags, disposition: brief.disposition, checkin });
   } catch (error) {
     console.error(
       JSON.stringify({

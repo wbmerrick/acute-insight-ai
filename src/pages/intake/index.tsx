@@ -148,7 +148,7 @@ function AccountModal({ onClose, onAuthed }: { onClose: () => void; onAuthed: ()
 }
 
 // ─── Complete screen ──────────────────────────────────────────────────────────
-function CompleteScreen({ onReset, onPortal, disposition, intakeId }: { onReset: () => void; onPortal: () => void; disposition?: Disposition | null; intakeId?: number | null }) {
+function CompleteScreen({ onReset, onPortal, disposition, intakeId, escalation }: { onReset: () => void; onPortal: () => void; disposition?: Disposition | null; intakeId?: number | null; escalation?: { escalated: boolean; note: string | null } | null }) {
   return (
     <div className="ace-chat" style={{ maxWidth: 620, margin: '0 auto' }}>
       <div style={{ textAlign: 'center' }}>
@@ -160,6 +160,17 @@ function CompleteScreen({ onReset, onPortal, disposition, intakeId }: { onReset:
           Your provider will review your brief before your visit. You can see this intake any time in your portal.
         </p>
       </div>
+      {escalation?.escalated && disposition && disposition.level !== 'emergency' && (
+        <div style={{ marginBottom: 20, padding: '14px 16px', borderRadius: 14, background: 'hsl(var(--warning) / 0.08)', border: '1px solid hsl(var(--warning) / 0.4)' }}>
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'hsl(var(--foreground))' }}>
+            <span style={{ fontWeight: 600, color: 'hsl(var(--warning))' }}>Your provider has been flagged. </span>
+            {escalation.note ?? 'This check-in was escalated.'} Connect with a clinician below if you'd like to be seen now.
+          </p>
+        </div>
+      )}
+      {escalation && !escalation.escalated && disposition && (
+        <p style={{ textAlign: 'center', fontSize: 13, color: 'hsl(var(--text-dim))', marginBottom: 20 }}>Check-in recorded on your timeline. No escalation needed based on what you shared.</p>
+      )}
       {disposition && (
         <div style={{ marginBottom: 28 }}>
           <p style={{ textAlign: 'center', font: '12px var(--font-mono)', color: 'hsl(var(--text-dimmer))', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Your suggested next step</p>
@@ -181,14 +192,15 @@ function CompleteScreen({ onReset, onPortal, disposition, intakeId }: { onReset:
 }
 
 // ─── The chat ─────────────────────────────────────────────────────────────────
-function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal, initialMessage, autoStartVoice }: {
+function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal, initialMessage, autoStartVoice, checkin }: {
   hasAccount: boolean;
   onNeedAccount: () => void;
   intakeId: number | null;
-  onComplete: (disposition?: Disposition) => void;
+  onComplete: (disposition?: Disposition, checkin?: { escalated: boolean; note: string | null } | null) => void;
   onPortal: () => void;
   initialMessage?: string;      // handed off from the homepage hero composer
   autoStartVoice?: boolean;     // homepage "Talk" → start listening on arrival
+  checkin?: { id: number; outcome?: 'better' | 'same' | 'worse' }; // answering a companion check-in
 }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [streaming, setStreaming] = useState<string | null>(null); // active assistant text
@@ -456,11 +468,11 @@ function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal, in
       const chiefComplaint = patientTurns[0]?.content ?? 'General concern (chat intake)';
       const res = await fetch(`/api/intake/${id}/complete`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ responses, chiefComplaint }),
+        body: JSON.stringify({ responses, chiefComplaint, checkinId: checkin?.id, outcome: checkin?.outcome }),
       });
       if (!res.ok) throw new Error('submit');
-      const data = (await res.json().catch(() => ({}))) as { disposition?: Disposition };
-      onComplete(data.disposition);
+      const data = (await res.json().catch(() => ({}))) as { disposition?: Disposition; checkin?: { escalated: boolean; note: string | null } | null };
+      onComplete(data.disposition, data.checkin ?? null);
     } catch {
       setError('Failed to submit. Please try again.');
     } finally {
@@ -680,9 +692,11 @@ function IntakeFlow() {
 
   // First message / voice intent handed off from the homepage hero composer.
   // Captured once so a re-render or "Start over" doesn't replay it.
-  const handoff = useRef<{ firstMessage?: string; voice?: boolean }>(
-    (location.state as { firstMessage?: string; voice?: boolean } | null) ?? {},
+  const handoff = useRef<{ firstMessage?: string; voice?: boolean; checkinId?: number; outcome?: 'better' | 'same' | 'worse' }>(
+    (location.state as { firstMessage?: string; voice?: boolean; checkinId?: number; outcome?: 'better' | 'same' | 'worse' } | null) ?? {},
   );
+  const checkinCtx = resetKey === 0 && handoff.current.checkinId ? { id: handoff.current.checkinId, outcome: handoff.current.outcome } : undefined;
+  const [escalation, setEscalation] = useState<{ escalated: boolean; note: string | null } | null>(null);
   const initialMessage = resetKey === 0 ? handoff.current.firstMessage : undefined;
   const autoStartVoice = resetKey === 0 ? handoff.current.voice : undefined;
 
@@ -719,7 +733,8 @@ function IntakeFlow() {
             <CompleteScreen
               disposition={disposition}
               intakeId={intakeId}
-              onReset={() => { setDisposition(null); setPhase('chat'); setResetKey((k) => k + 1); void startIntake(); }}
+              escalation={escalation}
+              onReset={() => { setDisposition(null); setEscalation(null); setPhase('chat'); setResetKey((k) => k + 1); void startIntake(); }}
               onPortal={() => navigate('/portal')}
             />
           ) : (
@@ -737,7 +752,8 @@ function IntakeFlow() {
                 initialMessage={initialMessage}
                 autoStartVoice={autoStartVoice}
                 onNeedAccount={() => setShowModal(true)}
-                onComplete={(d) => { setDisposition(d ?? null); setPhase('complete'); }}
+                checkin={checkinCtx}
+                onComplete={(d, c) => { setDisposition(d ?? null); setEscalation(c ?? null); setPhase('complete'); }}
                 onPortal={() => navigate('/portal')}
               />
             </>

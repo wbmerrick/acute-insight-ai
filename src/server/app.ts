@@ -30,6 +30,11 @@ import dispatch__visits__id__cancel__post from "./api/dispatch/visits/[id]/cance
 import dispatch__pricing__get from "./api/dispatch/pricing/GET";
 import dispatch__sweep__get from "./api/dispatch/sweep/GET";
 import stripe__webhook__post from "./api/stripe/webhook/POST";
+import companion__checkins__get from "./api/companion/checkins/GET";
+import companion__checkins__id__answer__post from "./api/companion/checkins/[id]/answer/POST";
+import companion__run__get from "./api/companion/run/GET";
+import provider__checkins__get from "./api/provider/checkins/GET";
+import provider__checkins__id__acknowledge__post from "./api/provider/checkins/[id]/acknowledge/POST";
 // </api-imports>
 import { seoRoutes } from "../lib/seo-routes";
 import {
@@ -305,6 +310,11 @@ app.post("/api/dispatch/visits/:id/complete", dispatch__visits__id__complete__po
 app.post("/api/dispatch/visits/:id/cancel", dispatch__visits__id__cancel__post);
 app.get("/api/dispatch/pricing", dispatch__pricing__get);
 app.get("/api/dispatch/sweep", dispatch__sweep__get);
+app.get("/api/companion/checkins", companion__checkins__get);
+app.post("/api/companion/checkins/:id/answer", companion__checkins__id__answer__post);
+app.get("/api/companion/run", companion__run__get);
+app.get("/api/provider/checkins", provider__checkins__get);
+app.post("/api/provider/checkins/:id/acknowledge", provider__checkins__id__acknowledge__post);
 // </api-registrations>
 
 // Error middleware must be registered AFTER the routes it protects; Express

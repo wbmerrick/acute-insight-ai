@@ -49,3 +49,23 @@ describe('buildTemplateClinicalBrief — conservative triage disposition', () =>
     expect(brief('Headache', 'mild headache').disposition.safetyNet.length).toBeGreaterThan(0);
   });
 });
+
+describe('urgent concerning-symptom scan — red flags the fallback must not call routine', () => {
+  const urgent = (cc: string, answers: string[]) =>
+    buildTemplateClinicalBrief(cc, answers.map((a, i) => ({ questionId: `q${i}`, question: 'Q', answer: a }))).disposition.level;
+  it('fever + flank/back pain + rigors (possible pyelonephritis) → urgent', () => {
+    expect(urgent('UTI worse', ['Burning is worse, now I have a fever of 102 and pain in my back on the right side', 'Shaking chills'])).toBe('urgent');
+  });
+  it('sore throat with swollen neck and trouble swallowing → urgent', () => {
+    expect(urgent('Sore throat', ['Sore throat three days, fever 102, hard to swallow and my neck is swollen'])).toBe('urgent');
+  });
+  it('blood in urine → urgent', () => {
+    expect(urgent('Peeing blood', ['There is blood in my urine since this morning'])).toBe('urgent');
+  });
+  it('plain allergy symptoms stay routine', () => {
+    expect(urgent('Allergies', ['Sneezing and itchy eyes for a week', 'No fever, no wheeze'])).not.toBe('urgent');
+  });
+  it('negated red flags do not trip it', () => {
+    expect(urgent('Cold', ['Cough and stuffy nose, no fever, no back pain, no blood in urine'])).not.toBe('urgent');
+  });
+});

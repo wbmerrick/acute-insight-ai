@@ -20952,7 +20952,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler30) {
+    Route.prototype.all = function all(handler35) {
       const callbacks = flatten2.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -20970,7 +20970,7 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler30) {
+      Route.prototype[method] = function(handler35) {
         const callbacks = flatten2.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -21173,17 +21173,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler30) {
+    Router.prototype.use = function use2(handler35) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler30 !== "function") {
-        let arg = handler30;
+      if (typeof handler35 !== "function") {
+        let arg = handler35;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler30;
+          path2 = handler35;
         }
       }
       const callbacks = flatten2.call(slice.call(arguments, offset), Infinity);
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler30 = connection.cancelQuery;
-    if (!handler30) {
+    const handler35 = connection.cancelQuery;
+    if (!handler35) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler30.bind(connection);
+    return handler35.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler30 = connection.killSession;
-    if (!handler30) {
+    const handler35 = connection.killSession;
+    if (!handler35) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler30.bind(connection);
+    return handler35.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -65039,7 +65039,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler30 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler35 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65059,7 +65059,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler30(internalContext).catch(async (e) => {
+    const response = await handler35(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65089,20 +65089,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler30) => {
+  return (path2, options, handler35) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler30);
+    }, handler35);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler30) {
+function createMiddleware(optionsOrHandler, handler35) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler30;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler35;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65130,14 +65130,14 @@ function createMiddleware(optionsOrHandler, handler30) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler30) {
+  function fn(optionsOrHandler, handler35) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler30) throw new Error("Middleware handler is required");
+    if (!handler35) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler30);
+    }, handler35);
   }
   return fn;
 };
@@ -65577,16 +65577,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler30 = route.data;
+    const handler35 = route.data;
     try {
-      const allowedMediaTypes = handler30.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler35.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler30.options.disableBody ? void 0 : await getBody(handler30.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler35.options.disableBody ? void 0 : await getBody(handler35.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65601,7 +65601,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler30(context2);
+      return await handler35(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65658,11 +65658,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler30 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler35 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler30(ctx));
+      return await runWithEndpointContext(ctx, () => handler35(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75796,8 +75796,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler30 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler30(request));
+      const { handler: handler35 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler35(request));
     },
     api,
     options,
@@ -83344,6 +83344,7 @@ var schema_exports = {};
 __export(schema_exports, {
   accessRequests: () => accessRequests,
   account: () => account,
+  checkins: () => checkins,
   clinicianProfiles: () => clinicianProfiles,
   intakeSessions: () => intakeSessions,
   patientProfiles: () => patientProfiles,
@@ -83483,6 +83484,26 @@ var visits = pgTable("visits", {
   queuedAt: timestamp("queued_at").defaultNow(),
   acceptedAt: timestamp("accepted_at"),
   completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var checkins = pgTable("checkins", {
+  id: serial("id").primaryKey(),
+  intakeSessionId: integer2("intake_session_id").notNull().references(() => intakeSessions.id, { onDelete: "cascade" }),
+  patientUserId: varchar("patient_user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
+  reason: varchar("reason", { length: 24 }).notNull(),
+  // post_visit | urgent_intake | telehealth_intake
+  dueAt: timestamp("due_at").notNull(),
+  status: varchar("status", { length: 16 }).default("scheduled"),
+  // scheduled | sent | answered | escalated | expired
+  sentAt: timestamp("sent_at"),
+  answeredAt: timestamp("answered_at"),
+  outcome: varchar("outcome", { length: 16 }),
+  // better | same | worse
+  followupIntakeId: integer2("followup_intake_id").references(() => intakeSessions.id, { onDelete: "set null" }),
+  escalationNote: text("escalation_note"),
+  // e.g. "Follow-up triaged urgent (was routine)"
+  acknowledgedBy: varchar("acknowledged_by", { length: 36 }).references(() => user.id, { onDelete: "set null" }),
+  acknowledgedAt: timestamp("acknowledged_at"),
   createdAt: timestamp("created_at").defaultNow()
 });
 
@@ -84315,7 +84336,7 @@ function buildTemplateClinicalBrief(chiefComplaint, responses) {
   const { summary, flags } = buildTemplateSummary(chiefComplaint, responses);
   const blob = chiefComplaint + " " + responses.map((r) => Array.isArray(r.answer) ? r.answer.join(" ") : r.answer).join(" ");
   const isEmergency = detectEmergency(blob);
-  const CONCERNING = /chest (pain|tight|pressure|discomfort)|short(ness)? of breath|difficulty breathing|hard to breathe|radiat|numbness|weak(ness)?|slurred|vision (loss|change)|faint|pass(ed|ing) out|severe|worst|uncontrolled bleeding|coughing up blood|high fever|stiff neck|new confusion|severe dehydrat/i;
+  const CONCERNING = /chest (pain|tight|pressure|discomfort)|short(ness)? of breath|difficulty breathing|hard to breathe|radiat|numbness|weak(ness)?|slurred|vision (loss|change)|faint|pass(ed|ing) out|severe|worst|uncontrolled bleeding|coughing up blood|high fever|stiff neck|new confusion|severe dehydrat|fever (of |to |at |around |about )?(10[1-9]|11\d)|(shaking|teeth.chattering) chills|rigors|flank pain|(back|side) pain .{0,40}fever|fever .{0,40}(back|side) pain|blood in (my |the )?(urine|stool|pee)|can'?t keep (anything|fluids|water) down|vomiting .{0,20}(blood|days)|(hard|difficult|painful) to swallow .{0,30}(swollen|swelling|neck|drool)|drool|(swollen|swelling) .{0,20}neck|not (urinat|pee)ing|haven'?t (urinated|peed) in|worst headache|(infant|newborn|baby) .{0,30}fever|pregnan.{0,30}(bleeding|pain)|(bleeding|pain).{0,30}pregnan|testic|scrot|(sudden|severe) abdominal|belly .{0,20}(rigid|hard)|can'?t walk|can'?t bear weight|(red|hot) streak|spreading redness/i;
   const denegBlob = blob.replace(/\b(no|not|without|denies?|deny|negative for|never had)\b(\s+\w+){0,3}/gi, " ");
   const isUrgent = flags.some((f) => /high severity|serious associated/i.test(f)) || CONCERNING.test(denegBlob);
   let level;
@@ -84354,6 +84375,64 @@ function buildTemplateClinicalBrief(chiefComplaint, responses) {
   };
 }
 
+// src/server/lib/companion.ts
+var HOURS = 3600 * 1e3;
+function checkinDelayMs(reason) {
+  switch (reason) {
+    case "post_visit":
+      return 48 * HOURS;
+    case "urgent_intake":
+      return 24 * HOURS;
+    case "telehealth_intake":
+      return 48 * HOURS;
+  }
+}
+function intakeCheckinReason(level) {
+  if (level === "urgent") return "urgent_intake";
+  if (level === "telehealth") return "telehealth_intake";
+  return null;
+}
+function acuityRank(level) {
+  const i = ACUITY_LEVELS.indexOf(level);
+  return i < 0 ? ACUITY_LEVELS.length : i;
+}
+function shouldEscalate(originalLevel, followupLevel) {
+  const f = acuityRank(followupLevel);
+  if (f <= acuityRank("urgent")) return true;
+  if (!originalLevel) return false;
+  return f < acuityRank(originalLevel);
+}
+function escalationNote(originalLevel, followupLevel, outcome) {
+  const o = originalLevel ? ACUITY_LABEL[originalLevel] ?? originalLevel : "unknown";
+  const f = followupLevel ? ACUITY_LABEL[followupLevel] ?? followupLevel : "unknown";
+  const said = outcome === "worse" ? "Patient reports worse. " : "";
+  return `${said}Follow-up triaged ${f} (was ${o}).`;
+}
+async function scheduleCheckin(intakeSessionId, patientUserId, reason, from = /* @__PURE__ */ new Date()) {
+  const dueAt = new Date(from.getTime() + checkinDelayMs(reason));
+  await db.update(checkins).set({ status: "expired" }).where(and(eq(checkins.intakeSessionId, intakeSessionId), inArray(checkins.status, ["scheduled", "sent"])));
+  const [row] = await db.insert(checkins).values({ intakeSessionId, patientUserId, reason, dueAt }).returning({ id: checkins.id, dueAt: checkins.dueAt });
+  return row;
+}
+async function resolveCheckin(opts) {
+  const [c] = await db.select({ id: checkins.id, intakeSessionId: checkins.intakeSessionId, status: checkins.status, outcome: checkins.outcome }).from(checkins).where(and(eq(checkins.id, opts.checkinId), eq(checkins.patientUserId, opts.patientUserId))).limit(1);
+  if (!c) return null;
+  const [orig] = await db.select({ brief: intakeSessions.aiBrief }).from(intakeSessions).where(eq(intakeSessions.id, c.intakeSessionId)).limit(1);
+  const origLevel = orig?.brief?.disposition?.level ?? null;
+  const fLevel = opts.followupBrief.disposition.level;
+  const outcome = opts.outcome ?? c.outcome ?? null;
+  const escalate = outcome === "worse" || shouldEscalate(origLevel, fLevel);
+  const note = escalate ? escalationNote(origLevel, fLevel, outcome) : null;
+  await db.update(checkins).set({
+    status: escalate ? "escalated" : "answered",
+    answeredAt: /* @__PURE__ */ new Date(),
+    followupIntakeId: opts.followupIntakeId,
+    outcome: outcome ?? void 0,
+    escalationNote: note
+  }).where(eq(checkins.id, c.id));
+  return { escalated: escalate, note };
+}
+
 // src/server/api/intake/[id]/complete/POST.ts
 async function handler11(req, res) {
   try {
@@ -84363,7 +84442,7 @@ async function handler11(req, res) {
     if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
     const intakeId = Number(req.params.id);
     if (isNaN(intakeId)) return res.status(400).json({ error: "Invalid intake ID" });
-    const { responses, chiefComplaint } = req.body;
+    const { responses, chiefComplaint, checkinId, outcome } = req.body;
     if (!Array.isArray(responses) || typeof chiefComplaint !== "string") {
       return res.status(400).json({ error: "responses array and chiefComplaint required" });
     }
@@ -84402,7 +84481,24 @@ async function handler11(req, res) {
         eq(intakeSessions.userId, session2.user.id)
       )
     );
-    res.json({ ok: true, aiSummary: brief.summary, aiFlags: brief.flags, disposition: brief.disposition });
+    let checkin = null;
+    try {
+      if (Number.isInteger(checkinId)) {
+        checkin = await resolveCheckin({
+          checkinId: Number(checkinId),
+          patientUserId: session2.user.id,
+          followupIntakeId: intakeId,
+          followupBrief: brief,
+          outcome: outcome ?? null
+        });
+      } else {
+        const reason = intakeCheckinReason(brief.disposition.level);
+        if (reason) await scheduleCheckin(intakeId, session2.user.id, reason);
+      }
+    } catch (err) {
+      console.error(JSON.stringify({ event: "intake.complete.checkin_failed", error: err instanceof Error ? err.message : String(err) }));
+    }
+    res.json({ ok: true, aiSummary: brief.summary, aiFlags: brief.flags, disposition: brief.disposition, checkin });
   } catch (error3) {
     console.error(
       JSON.stringify({
@@ -85318,11 +85414,16 @@ async function handler25(req, res) {
     if (!ctx) return;
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid visit id" });
-    const [done] = await db.update(visits).set({ status: "completed", completedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, id), eq(visits.status, "accepted"), eq(visits.clinicianUserId, ctx.userId))).returning({ id: visits.id, intakeSessionId: visits.intakeSessionId });
+    const [done] = await db.update(visits).set({ status: "completed", completedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, id), eq(visits.status, "accepted"), eq(visits.clinicianUserId, ctx.userId))).returning({ id: visits.id, intakeSessionId: visits.intakeSessionId, patientUserId: visits.patientUserId });
     if (!done) return res.status(404).json({ error: "No active visit to complete" });
     const name = ctx.profile.displayName?.trim();
     if (name) {
       await db.update(intakeSessions).set({ providerName: name }).where(eq(intakeSessions.id, done.intakeSessionId));
+    }
+    try {
+      await scheduleCheckin(done.intakeSessionId, done.patientUserId, "post_visit");
+    } catch (err) {
+      logErr("dispatch.complete.schedule_checkin_failed", err);
     }
     res.json({ ok: true });
   } catch (error3) {
@@ -85418,6 +85519,134 @@ async function handler29(req, res) {
   } catch (error3) {
     logErr("stripe.webhook.error", error3);
     res.status(500).json({ error: "Webhook handling failed" });
+  }
+}
+
+// src/server/api/companion/checkins/GET.ts
+async function handler30(req, res) {
+  try {
+    const userId = await requirePatient(req, res);
+    if (!userId) return;
+    const rows = await db.select({
+      id: checkins.id,
+      intakeSessionId: checkins.intakeSessionId,
+      reason: checkins.reason,
+      dueAt: checkins.dueAt,
+      status: checkins.status,
+      outcome: checkins.outcome,
+      followupIntakeId: checkins.followupIntakeId,
+      escalationNote: checkins.escalationNote,
+      chiefComplaint: intakeSessions.chiefComplaint,
+      intakeCreatedAt: intakeSessions.createdAt,
+      providerName: intakeSessions.providerName
+    }).from(checkins).innerJoin(intakeSessions, eq(intakeSessions.id, checkins.intakeSessionId)).where(eq(checkins.patientUserId, userId)).orderBy(desc(checkins.dueAt)).limit(20);
+    const now2 = Date.now();
+    const iso = (d) => d ? d.toISOString() : null;
+    const all = rows.map((r) => ({ ...r, dueAt: iso(r.dueAt), intakeCreatedAt: iso(r.intakeCreatedAt) }));
+    const pending = all.find((r) => r.status === "sent" || r.status === "scheduled" && new Date(r.dueAt).getTime() <= now2) ?? null;
+    res.json({ pending, checkins: all });
+  } catch (error3) {
+    logErr("companion.checkins.get.error", error3);
+    res.status(500).json({ error: "Failed to load check-ins" });
+  }
+}
+
+// src/server/api/companion/checkins/[id]/answer/POST.ts
+async function handler31(req, res) {
+  try {
+    const userId = await requirePatient(req, res);
+    if (!userId) return;
+    const id = Number(req.params.id);
+    const { outcome } = req.body ?? {};
+    if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid check-in id" });
+    if (outcome !== "better" && outcome !== "same" && outcome !== "worse") return res.status(400).json({ error: "outcome must be better, same or worse" });
+    const [row] = await db.update(checkins).set({
+      outcome,
+      answeredAt: /* @__PURE__ */ new Date(),
+      status: outcome === "better" ? "answered" : outcome === "worse" ? "escalated" : "sent",
+      escalationNote: outcome === "worse" ? "Patient reports worse since the visit." : void 0
+    }).where(and(eq(checkins.id, id), eq(checkins.patientUserId, userId), inArray(checkins.status, ["scheduled", "sent"]))).returning({ id: checkins.id, status: checkins.status, intakeSessionId: checkins.intakeSessionId });
+    if (!row) return res.status(404).json({ error: "No open check-in" });
+    res.json({ ok: true, ...row });
+  } catch (error3) {
+    logErr("companion.answer.error", error3);
+    res.status(500).json({ error: "Failed to record answer" });
+  }
+}
+
+// src/server/api/companion/run/GET.ts
+var EXPIRE_AFTER_DAYS = Number(process.env.CHECKIN_EXPIRE_DAYS ?? 7);
+async function handler32(req, res) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
+  try {
+    const now2 = /* @__PURE__ */ new Date();
+    const due = await db.update(checkins).set({ status: "sent", sentAt: now2 }).where(and(eq(checkins.status, "scheduled"), lte(checkins.dueAt, now2))).returning({ id: checkins.id, patientUserId: checkins.patientUserId, intakeSessionId: checkins.intakeSessionId });
+    let texted = 0;
+    if (smsAvailable() && due.length > 0) {
+      const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
+      for (const c of due) {
+        try {
+          const [p] = await db.select({ phone: patientProfiles.phone }).from(patientProfiles).where(eq(patientProfiles.userId, c.patientUserId)).limit(1);
+          const [i] = await db.select({ createdAt: intakeSessions.createdAt }).from(intakeSessions).where(eq(intakeSessions.id, c.intakeSessionId)).limit(1);
+          const to = toE164(p?.phone);
+          if (!to) continue;
+          const when = i?.createdAt ? i.createdAt.toLocaleDateString("en-US", { month: "long", day: "numeric" }) : "your recent visit";
+          const ok2 = await sendSms(to, `Acute Insight: how are you doing since ${when}? Tap to tell Ace \u2014 better, same, or worse: ${base}/portal?checkin=${c.id}. If this is an emergency, call 911.`);
+          if (ok2) texted++;
+        } catch (err) {
+          logErr("companion.run.text_failed", err);
+        }
+      }
+    }
+    const expireBefore = new Date(now2.getTime() - EXPIRE_AFTER_DAYS * 86400 * 1e3);
+    const expired = await db.update(checkins).set({ status: "expired" }).where(and(inArray(checkins.status, ["scheduled", "sent"]), lt(checkins.dueAt, expireBefore))).returning({ id: checkins.id });
+    console.log(JSON.stringify({ event: "companion.run", sent: due.length, texted, expired: expired.length }));
+    res.json({ ok: true, sent: due.length, texted, expired: expired.length });
+  } catch (error3) {
+    logErr("companion.run.error", error3);
+    res.status(500).json({ error: "Companion run failed" });
+  }
+}
+
+// src/server/api/provider/checkins/GET.ts
+async function handler33(req, res) {
+  try {
+    const ctx = await requireClinician(req, res);
+    if (!ctx) return;
+    const rows = await db.select({
+      id: checkins.id,
+      intakeSessionId: checkins.intakeSessionId,
+      followupIntakeId: checkins.followupIntakeId,
+      outcome: checkins.outcome,
+      escalationNote: checkins.escalationNote,
+      answeredAt: checkins.answeredAt,
+      chiefComplaint: intakeSessions.chiefComplaint,
+      providerName: intakeSessions.providerName,
+      patientName: user.name,
+      patientEmail: user.email,
+      patientId: user.id
+    }).from(checkins).innerJoin(intakeSessions, eq(intakeSessions.id, checkins.intakeSessionId)).innerJoin(user, eq(user.id, checkins.patientUserId)).where(and(eq(checkins.status, "escalated"), isNull2(checkins.acknowledgedAt))).orderBy(desc(checkins.answeredAt)).limit(50);
+    res.json(rows.map((r) => ({ ...r, answeredAt: r.answeredAt ? r.answeredAt.toISOString() : null })));
+  } catch (error3) {
+    logErr("provider.checkins.error", error3);
+    res.status(500).json({ error: "Failed to load escalations" });
+  }
+}
+
+// src/server/api/provider/checkins/[id]/acknowledge/POST.ts
+async function handler34(req, res) {
+  try {
+    const ctx = await requireClinician(req, res);
+    if (!ctx) return;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid check-in id" });
+    const [row] = await db.update(checkins).set({ acknowledgedBy: ctx.userId, acknowledgedAt: /* @__PURE__ */ new Date() }).where(and(eq(checkins.id, id), eq(checkins.status, "escalated"), isNull2(checkins.acknowledgedAt))).returning({ id: checkins.id });
+    if (!row) return res.status(404).json({ error: "Nothing to acknowledge" });
+    res.json({ ok: true });
+  } catch (error3) {
+    logErr("provider.checkins.ack.error", error3);
+    res.status(500).json({ error: "Failed to acknowledge" });
   }
 }
 
@@ -85595,6 +85824,11 @@ app.post("/api/dispatch/visits/:id/complete", handler25);
 app.post("/api/dispatch/visits/:id/cancel", handler26);
 app.get("/api/dispatch/pricing", handler27);
 app.get("/api/dispatch/sweep", handler28);
+app.get("/api/companion/checkins", handler30);
+app.post("/api/companion/checkins/:id/answer", handler31);
+app.get("/api/companion/run", handler32);
+app.get("/api/provider/checkins", handler33);
+app.post("/api/provider/checkins/:id/acknowledge", handler34);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;

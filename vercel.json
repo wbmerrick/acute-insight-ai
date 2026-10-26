@@ -37,6 +37,10 @@
     {
       "path": "/api/dispatch/sweep",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/companion/run",
+      "schedule": "30 * * * *"
     }
   ]
 }
