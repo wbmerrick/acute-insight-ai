@@ -12,7 +12,7 @@ import type { Acuity } from '../../lib/clinical-brief.js';
 
 export interface ValidationCase {
   id: string;
-  group: 'emergency' | 'urgent' | 'telehealth' | 'routine' | 'selfcare' | 'trap' | 'peds' | 'ob' | 'psych' | 'geriatric' | 'messy';
+  group: 'emergency' | 'urgent' | 'telehealth' | 'routine' | 'selfcare' | 'trap' | 'peds' | 'ob' | 'psych' | 'geriatric' | 'messy' | 'spanish' | 'voice' | 'special';
   chiefComplaint: string;
   answers: string[];
   expected: Acuity;           // minimum acceptable
@@ -128,4 +128,36 @@ export const VALIDATION_SET: ValidationCase[] = [
   { id: 'W06', group: 'messy', chiefComplaint: 'cold', answers: ['got a cold', 'runny nose sneezing', 'no fever no trouble breathing feel ok'], expected: 'routine', mustNotExceed: 'routine' },
   { id: 'W07', group: 'messy', chiefComplaint: 'allergic', answers: ['took amoxicillin an hour ago now hives everywhere and my toung feels thick'], expected: 'emergency', note: '"toung"' },
   { id: 'W08', group: 'messy', chiefComplaint: 'sucide', answers: ['i want to kill my self'], expected: 'emergency', note: '"kill my self" with a space' },
+
+  // ── Round 3 (2026-10-27) ──
+  // Spanish (West TN has a real Spanish-speaking population; the regex screen must at least catch emergencies)
+  { id: 'ES01', group: 'spanish', chiefComplaint: 'dolor', answers: ['Tengo un dolor fuerte en el pecho desde hace una hora y me cuesta respirar'], expected: 'emergency' },
+  { id: 'ES02', group: 'spanish', chiefComplaint: 'no puedo respirar', answers: ['No puedo respirar bien, los labios se me ponen morados'], expected: 'emergency' },
+  { id: 'ES03', group: 'spanish', chiefComplaint: 'derrame', answers: ['A mi esposo se le cayó la cara de un lado y habla raro, empezó hace media hora'], expected: 'emergency', note: 'stroke in Spanish' },
+  { id: 'ES04', group: 'spanish', chiefComplaint: 'quiero morir', answers: ['Ya no quiero vivir, he pensado en quitarme la vida'], expected: 'emergency', note: 'self-harm in Spanish' },
+  { id: 'ES05', group: 'spanish', chiefComplaint: 'convulsión', answers: ['Mi hijo tuvo una convulsión y no despierta bien'], expected: 'emergency' },
+  { id: 'ES06', group: 'spanish', chiefComplaint: 'infección de orina', answers: ['Me arde al orinar desde hace dos días, sin fiebre, sin dolor de espalda'], expected: 'routine', mustNotExceed: 'urgent', note: 'negated in Spanish — must not over-fire' },
+  { id: 'ES07', group: 'spanish', chiefComplaint: 'fiebre y dolor de espalda', answers: ['Fiebre de 39 y dolor en la espalda del lado derecho con escalofríos'], expected: 'urgent', note: 'pyelo in Spanish' },
+  { id: 'ES08', group: 'spanish', chiefComplaint: 'gripe', answers: ['Tengo gripe, mocos y estornudos, sin fiebre, me siento bien'], expected: 'routine', mustNotExceed: 'routine' },
+
+  // Voice-transcription artifacts (what speech-to-text actually produces)
+  { id: 'V01', group: 'voice', chiefComplaint: 'chest pane', answers: ['I have chest pane and I am short of breadth it started twenty minutes ago'], expected: 'emergency', note: '"pane", "breadth"' },
+  { id: 'V02', group: 'voice', chiefComplaint: 'cant breath', answers: ['I cant breath right my chest is tight'], expected: 'emergency' },
+  { id: 'V03', group: 'voice', chiefComplaint: 'passed out', answers: ['I past out in the kitchen and hit my head'], expected: 'emergency', note: '"past out"' },
+  { id: 'V04', group: 'voice', chiefComplaint: 'throat', answers: ['my throat is closing up after I ate peanuts'], expected: 'emergency' },
+  { id: 'V05', group: 'voice', chiefComplaint: 'sore throat', answers: ['soar throat for three days no fever swallowing is fine'], expected: 'routine', mustNotExceed: 'routine', note: '"soar"' },
+
+  // Sepsis / infection without a single red-flag word
+  { id: 'SP01', group: 'special', chiefComplaint: 'Feeling awful', answers: ['Fever of 103, heart racing, shaking, feel terrible and confused, had a kidney infection last week'], expected: 'urgent', note: 'sepsis picture — arguably emergency' },
+  { id: 'SP02', group: 'special', chiefComplaint: 'Chemo, fever', answers: ['I am on chemotherapy and have a fever of 100.9 tonight'], expected: 'urgent', note: 'neutropenic fever → ED' },
+  { id: 'SP03', group: 'special', chiefComplaint: 'Transplant, fever', answers: ['Kidney transplant two years ago, fever of 101 and chills today'], expected: 'urgent' },
+  { id: 'SP04', group: 'special', chiefComplaint: 'Missed dialysis', answers: ['Missed my last two dialysis sessions, now short of breath lying down and my legs are swollen'], expected: 'urgent', note: 'volume overload / hyperkalemia risk — arguably emergency' },
+  { id: 'SP05', group: 'special', chiefComplaint: 'Diabetic foot', answers: ['Diabetic, a sore on the bottom of my foot has turned black and smells bad, some fever'], expected: 'urgent' },
+
+  // Ectopic / torsion / overdose-as-dose
+  { id: 'SP06', group: 'special', chiefComplaint: 'Pregnant, one-sided pain', answers: ['Positive pregnancy test last week, sharp pain on my right side and pain in my shoulder tip, feel faint'], expected: 'emergency', note: 'ectopic' },
+  { id: 'SP07', group: 'special', chiefComplaint: 'Pelvic pain', answers: ['Sudden severe pain in my lower left belly with vomiting, came on an hour ago, not pregnant'], expected: 'urgent', note: 'ovarian torsion' },
+  { id: 'SP08', group: 'special', chiefComplaint: 'Took too much', answers: ['I took 30 of my 500 mg Tylenol about an hour ago'], expected: 'emergency', note: 'overdose stated as a count, not the word' },
+  { id: 'SP09', group: 'special', chiefComplaint: 'Medication', answers: ['I take 2 of my 500 mg Tylenol twice a day for my knee'], expected: 'routine', mustNotExceed: 'routine', note: 'normal dosing must not trip the overdose pattern' },
+  { id: 'SP10', group: 'special', chiefComplaint: 'Insulin', answers: ['I accidentally took my long acting insulin twice tonight and now I feel shaky and sweaty'], expected: 'emergency', note: 'insulin double dose with hypoglycemia symptoms' },
 ];
