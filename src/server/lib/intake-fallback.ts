@@ -22,15 +22,16 @@ export interface ChatTurn {
  */
 export const EMERGENCY_PATTERNS: { re: RegExp; neverSuppress?: boolean; label: string }[] = [
   // cardiac
-  { re: /\bchest (pain|pressure|tightness|tight|heaviness|heavy|discomfort|squeez)/i, label: 'chest pain/pressure' },
+  { re: /\bchest (pain|pressure|tightness|tight|heaviness|heavy|discomfort|squeez|hurts?|hurting|aches?|aching)|\bmy chest (is )?(hurting|killing me)/i, label: 'chest pain/pressure' },
   { re: /\bcrushing (chest|pain)|\belephant on my chest|\bheart attack\b/i, label: 'heart attack' },
   // breathing / airway
-  { re: /\bcan'?t (breathe|catch my breath|get (a|enough) breath)|\bcannot breathe|\bnot breathing|\bstopped breathing|\bgasping\b/i, label: 'cannot breathe' },
-  { re: /\b(lips|face|fingers?|skin) (are |is |look |looks |turning )?(blue|purple|gr[ae]y)\b|\bblue lips\b/i, label: 'cyanosis' },
-  { re: /\bthroat (is )?(closing|tight|swelling|swollen)|\b(tongue|lips?) (is |are )?(swelling|swollen)|\banaphyla|\bepipen (used|injected)|\bused my epipen/i, label: 'airway / anaphylaxis' },
+  { re: /\bcan'?t (breathe?|breath good|catch my breath|get (a|enough|any) (breath|air))|\bcannot breathe?|\bnot breathing|\bstopped breathing|\bgasping\b|\bstruggling to breathe?|\bhard to breathe? (at rest|sitting|lying|laying)/i, label: 'cannot breathe' },
+  { re: /\b(lips?|face|fingers?|skin|nails?)[^.]{0,25}\b(blue|purple|gr[ae]y|dusky)\b|\bblue (lips|in the face)\b|\bturning blue/i, label: 'cyanosis' },
+  { re: /\b(throat|toung|tounge|tongue|lips?)[^.]{0,15}\b(closing|tight|thick|swelling|swollen|swell)/i, label: 'airway swelling' },
+  { re: /\banaphyla|\bepipen (used|injected)|\bused my epipen|\bhives[^.]{0,60}(tongue|toung|throat|breath|swell)/i, label: 'anaphylaxis' },
   // neuro
-  { re: /\bstroke\b|\bface (is )?droop|\bdroop(ing|y)? (face|mouth|eyelid)|\bslurr(ed|ing) (speech|words)|\bwords (are |were )?slurred|\bcan'?t (speak|talk|get (my )?words)|\bsudden(ly)? (weak|numb)|\b(weakness|numbness) (on|in|of) (one|my (right|left)) (side|arm|leg)|\bone side of my (body|face)|\bcan'?t (move|lift|hold) (my )?(arm|leg|cup)/i, label: 'stroke signs' },
-  { re: /\bseizure|\bconvuls|\bfitting\b|\bworst headache|\bthunderclap|\bheadache .{0,40}(stiff neck|neck (is )?stiff)|\bstiff neck .{0,40}headache/i, label: 'seizure / thunderclap headache' },
+  { re: /\bstroke\b|\bface (is |looks )?(droop|dropp|uneven|lopsided|crooked)|\b(droop|dropp)(ing|y)?[^.]{0,15}(face|mouth|eyelid|side)|\bslurr(ed|ing)|\btalking funny|\bspeech (is )?(funny|off|strange|garbled)|\bcan'?t (speak|talk|get (my )?words|talk right)|\bsudden(ly)? (weak|numb)|\b(weakness|numbness) (on|in|of) (one|my (right|left)) (side|arm|leg)|\bone side of (my|his|her) (body|face)|\bcan'?t (move|lift|hold) (my )?(arm|leg|cup)/i, label: 'stroke signs' },
+  { re: /\bseizure|\bconvuls|\bfitting\b|\bwors[te] ?(head ?ache?|headach)|\bthunderclap|\b(headache|headach)[^.]{0,40}(stiff neck|neck (is )?stiff)|\bstiff neck[^.]{0,40}headach/i, label: 'seizure / thunderclap headache' },
   { re: /\bunconscious|\bunresponsive|\bnot waking up|\bwon'?t wake up|\bpassed out|\bblacked out|\bfainted|\blost consciousness|\bcollapsed\b/i, label: 'loss of consciousness' },
   { re: /\bparaly[sz]|\bcan'?t feel my (legs|arms|body)|\bcan'?t move my (legs|arms)/i, label: 'paralysis' },
   // bleeding / GI
@@ -39,9 +40,18 @@ export const EMERGENCY_PATTERNS: { re: RegExp; neverSuppress?: boolean; label: s
   // toxic
   { re: /\boverdos|\btook (a whole|the whole|all (of )?my|too many|a bottle of)|\bswallowed (bleach|poison|pills)|\bpoison(ed|ing)\b/i, label: 'overdose / poisoning' },
   // self-harm — never suppressed
-  { re: /\bsuicid|\bkill(ing)? myself|\bend (my|it all|my life)|\btake my (own )?life|\bdon'?t want to (be here|be alive|live|wake up)|\bbetter off dead|\bhurt(ing)? myself|\bharm(ing)? myself|\bself.?harm|\bplan to (die|kill)/i, neverSuppress: true, label: 'self-harm' },
+  { re: /\bsu[ic]{1,2}id|\bkill(ing)? my ?self|\bend (my|it all|my life)|\btake my (own )?life|\bdon'?t want to (be here|be alive|live|wake up)|\bbetter off (dead|without me)|\bhurt(ing)? my ?self|\bharm(ing)? my ?self|\bself.?harm|\bplan to (die|kill)|\bending my life/i, neverSuppress: true, label: 'self-harm' },
   // pregnancy / pediatric red lines
-  { re: /\b(baby|infant|newborn|my \d+ ?(week|day) old) .{0,40}(not breathing|blue|limp|unresponsive|won'?t wake)/i, label: 'infant emergency' },
+  { re: /\b(baby|infant|newborn|toddler|my \d+ ?(week|day|month|year) old|son|daughter|child|kid)[^.]{0,80}(not breathing|blue|limp|floppy|unresponsive|won'?t wake|hard to wake|difficult to wake|can'?t wake)/i, label: 'child: unresponsive / cyanotic' },
+  { re: /\b(barking|seal|croupy) cough[^.]{0,100}(noise|stridor|whistl|pull|retract|struggl)|\bstridor|\bhigh.?pitched (noise|sound)[^.]{0,40}breath|\bpulling in (at|around|under) (the |her |his )?(ribs|chest)|\bretractions/i, label: 'child: stridor / respiratory distress' },
+  { re: /\b(hit|bump(ed)?|struck|smacked) (his|her|my|their) head[^.]{0,150}(vomit|thrown up|threw up|confus|not (acting|making sense)|won'?t wake|seizure|passed out)|\bhead injury[^.]{0,100}(vomit|confus)/i, label: 'head injury with red flags' },
+  { re: /\b(does not|doesn'?t|won'?t|did not|didn'?t) (fade|blanch|go away|disappear)[^.]{0,40}(glass|press)|\bglass test|\bpurple (spotty |spots |spotted |)rash|\brash[^.]{0,50}(purple|dark red|doesn'?t fade|does not fade|non.?blanching)/i, label: 'non-blanching rash' },
+  { re: /\bbutton battery|\bswallowed (a |an |some )?(battery|batteries|magnet)/i, label: 'button battery / magnet ingestion' },
+  { re: /\bpregnan[^.]{0,120}(seeing spots|spots in my vision|blurry vision|vision change|severe headache|bad headache|worst headache|swollen (hands|face)|face (is )?swollen)|\b(seeing spots|severe headache|bad headache)[^.]{0,120}pregnan/i, label: 'pregnancy: preeclampsia signs' },
+  { re: /\bsoak(ed|ing|s) (a |through |\d+ |one |two )?pads?|\bbleeding (heavily|a lot|through)[^.]{0,30}pad/i, label: 'heavy vaginal bleeding' },
+  { re: /\bvoices? (are |is )?(telling|told|saying)[^.]{0,40}(hurt|kill|harm)|\b(hurt|kill|harm) (my (roommate|wife|husband|kids?|children|family|mother|father|baby)|someone|somebody|other people|them|him|her)\b|\bscared i (might|will|could) (hurt|do it)/i, label: 'harm to others / command hallucinations' },
+  { re: /\b(stopped|quit|haven'?t had a|no) (drinking|alcohol|drink)[^.]{0,200}(hallucinat|seeing (things|bugs|people)|bugs on|shaking and sweating|seizure)|\b(see|saw|seeing) (bugs|things|people) (on the wall |)?that (are|were|aren'?t|weren'?t|wasn'?t) (not )?(there|real)/i, label: 'alcohol withdrawal with hallucinations' },
+  { re: /\bfell[^.]{0,120}(leg|hip)[^.]{0,80}(shorter|turned out|rotated)|\b(leg|foot) (looks|is|seems) (shorter|turned out|rotated)|\bhip[^.]{0,40}(fracture|broke)/i, label: 'hip fracture pattern' },
 ];
 
 /** @deprecated kept for callers that list keywords; patterns are the source of truth. */
@@ -57,7 +67,11 @@ type Topic = (typeof COVERED_TOPICS)[number];
 // Contexts in which an emergency keyword is NOT the patient's own current problem.
 // Applied only to the text immediately before an occurrence (tight windows), so a
 // real mention elsewhere still fires. Over-triage is the safe error.
-const FAMILY_HX_CTX = /\b(dad|mom|father|mother|parent|grandparent|grand(father|mother|pa|ma)|brother|sister|sibling|uncle|aunt|cousin|relative)('?s)?( (had|has|have|got|with|died of|died from))?\s*(a |an )?\s*$/;
+// Family HISTORY needs the verb: "my dad had a heart attack". "My father fell / is confused" is a caregiver
+// reporting something happening now, and must not be suppressed.
+const FAMILY_HX_CTX = /\b(dad|mom|father|mother|parent|grandparent|grand(father|mother|pa|ma)|brother|sister|sibling|uncle|aunt|cousin|relative)('?s)?\s+(had|has had|have had|got|died of|died from|has|have|with)\s+(a\s+|an\s+)?$/;
+// …unless the text right after says it's happening now.
+const CURRENT_AFTER = /^[^.]{0,50}\b(right now|currently|today|just now|at the moment|this morning|an hour ago|minutes ago|since (this|last|an hour|yesterday)|is having|and (is|can'?t|cannot|won'?t))/;
 const HISTORY_CTX = /\b(family history of|fhx(\s+of)?|hx\s+of|history of|previous|prior|past)\s+(a\s+|an\s+)?$/;
 const NEGATION_CTX = /\b(no|not|without|denies?|deny|negative for|never had|never have|never)\s+(a\s+|an\s+|any\s+|the\s+)?$/;
 // Self-harm is only stood down by an explicit, tight denial ("not suicidal", "no thoughts of hurting myself").
@@ -83,7 +97,7 @@ export function detectEmergency(text: string): boolean {
       }
       const after = text.slice(m.index + m[0].length, m.index + m[0].length + 40).toLowerCase();
       const suppressed =
-        FAMILY_HX_CTX.test(before) || HISTORY_CTX.test(before) || NEGATION_CTX.test(before) || LONG_AGO_AFTER.test(after);
+        (FAMILY_HX_CTX.test(before) && !CURRENT_AFTER.test(after)) || HISTORY_CTX.test(before) || NEGATION_CTX.test(before) || LONG_AGO_AFTER.test(after);
       if (!suppressed) return true;
       if (m[0].length === 0) re.lastIndex++;
     }
@@ -277,11 +291,13 @@ export function buildTemplateClinicalBrief(
   // Conservative: concerning descriptions in free-text chat bump to "urgent"
   // (be seen today) even without a numeric severity. Over-triage is the safe error.
   const CONCERNING =
-    /chest (pain|tight|pressure|discomfort)|short(ness)? of breath|difficulty breathing|hard to breathe|radiat|numbness|weak(ness)?|slurred|vision (loss|change)|faint|pass(ed|ing) out|severe|worst|uncontrolled bleeding|coughing up blood|high fever|stiff neck|new confusion|severe dehydrat|fever (of |to |at |around |about )?(10[1-9]|11\d)|(shaking|teeth.chattering) chills|rigors|flank pain|(back|side) pain .{0,40}fever|fever .{0,40}(back|side) pain|blood in (my |the )?(urine|stool|pee)|can'?t keep (anything|fluids|water) down|vomiting .{0,20}(blood|days)|(hard|difficult|painful) to swallow .{0,30}(swollen|swelling|neck|drool)|drool|(swollen|swelling) .{0,20}neck|not (urinat|pee)ing|haven'?t (urinated|peed) in|worst headache|(infant|newborn|baby) .{0,30}fever|pregnan.{0,30}(bleeding|pain)|(bleeding|pain).{0,30}pregnan|testic|scrot|(sudden|severe) abdominal|belly .{0,20}(rigid|hard)|can'?t walk|can'?t bear weight|(red|hot) streak|spreading redness|lower right (belly|abdomen|side|quadrant)|pain .{0,60}moved to (the )?(lower|right|left)|(belly|abdominal|stomach) pain .{0,40}fever|fever .{0,40}(belly|abdominal|stomach) pain|(calf|leg)[^.]{0,40}(swollen|swelling)[^.]{0,50}(warm|hot|painful|tender)|(swollen|swelling)[^.]{0,20}(calf|leg)[^.]{0,40}(warm|hot|painful|tender)|(unable|not able|can'?t|haven'?t been able) to (urinate|pee|pass urine|empty my bladder)|sugar[^.]{0,20}(over|above) [34]\d\d|(blood )?sugar[^.]{0,15}(400|500|600)/i;
+    /chest (pain|tight|pressure|discomfort)|short(ness)? of breath|difficulty breathing|hard to breathe|radiat|numbness|weak(ness)?|slurred|vision (loss|change)|faint|pass(ed|ing) out|severe|worst|uncontrolled bleeding|coughing up blood|high fever|stiff neck|new confusion|severe dehydrat|fever (of |to |at |around |about )?(10[1-9]|11\d)|(shaking|teeth.chattering) chills|rigors|flank pain|(back|side) pain .{0,40}fever|fever .{0,40}(back|side) pain|blood in (my |the )?(urine|stool|pee)|can'?t keep (anything|fluids|water) down|vomiting .{0,20}(blood|days)|(hard|difficult|painful) to swallow .{0,30}(swollen|swelling|neck|drool)|drool|(swollen|swelling) .{0,20}neck|not (urinat|pee)ing|haven'?t (urinated|peed) in|worst headache|(infant|newborn|baby) .{0,30}fever|pregnan.{0,30}(bleeding|pain)|(bleeding|pain).{0,30}pregnan|testic|scrot|(sudden|severe) abdominal|belly .{0,20}(rigid|hard)|can'?t walk|can'?t bear weight|(red|hot) streak|spreading redness|lower right (belly|abdomen|side|quadrant)|pain .{0,60}moved to (the )?(lower|right|left)|(belly|abdominal|stomach) pain .{0,40}fever|fever .{0,40}(belly|abdominal|stomach) pain|(calf|leg)[^.]{0,40}(swollen|swelling)[^.]{0,50}(warm|hot|painful|tender)|(swollen|swelling)[^.]{0,20}(calf|leg)[^.]{0,40}(warm|hot|painful|tender)|(unable|not able|can'?t|haven'?t been able) to (urinate|pee|pass urine|empty my bladder)|sugar[^.]{0,20}(over|above) [34]\d\d|(blood )?sugar[^.]{0,15}(400|500|600)|(not|haven'?t|hasn'?t) felt (the |my )?baby move|baby (hasn'?t|has not|isn'?t|is not|stopped) (moved|moving)|(decreased|less|no) (fetal|baby) move|(sudden(ly)?|new(ly)?|acute(ly)?) confus|confused since (this morning|last night|yesterday|today)|(does not|doesn'?t) know what (day|year) it is|(warfarin|coumadin|eliquis|xarelto|pradaxa|blood thinner|anticoag)[^.]{0,150}(hit|bump|struck|fell)[^.]{0,30}head|(hit|bump|struck)[^.]{0,20}head[^.]{0,150}(warfarin|coumadin|eliquis|xarelto|pradaxa|blood thinner|anticoag)|haven'?t slept in (\d+|three|four|five|six) (days|nights)|(no|not) sleep(ing)? (for|in) (\d+|three|four|five) (days|nights)|spent (my|all my|our) (savings|money)|(family|wife|husband|parents) say[s]? i am not making sense|foul.?smelling (discharge|drainage)[^.]{0,60}(fever|pain)|fever[^.]{0,60}foul.?smelling|no wet diaper in|(not|hasn'?t) (peed|urinated|had a wet diaper) in \d+ hours|(cant|can'?t) stand up straight/i;
   // Drop short negated phrases ("no chest pain", "denies fever") so an explicitly
   // absent symptom doesn't trip the concerning-symptom scan.
   const denegBlob = blob.replace(/\b(no|not|without|denies?|deny|negative for|never had)\b(\s+\w+){0,3}/gi, ' ');
-  const isUrgent = flags.some((f) => /high severity|serious associated/i.test(f)) || CONCERNING.test(denegBlob);
+  // Phrases where the negation IS the symptom — matched on the raw text, before negation stripping.
+  const URGENT_RAW = /(not|haven'?t|hasn'?t|no longer|can'?t) (felt|feel)[^.]{0,12}(the |my |any )?baby (move|moving|kick)|baby (hasn'?t|has not|isn'?t|is not|stopped) (moved|moving|kicking)|no wet diaper|(no|not|hasn'?t) (peed|urinated|passed urine|had a wet diaper)[^.]{0,20}(hours|since|all day)|(unable|not able|can'?t|haven'?t been able) to (urinate|pee|pass urine)/i;
+  const isUrgent = flags.some((f) => /high severity|serious associated/i.test(f)) || CONCERNING.test(denegBlob) || URGENT_RAW.test(blob);
 
   let level: Acuity;
   let label: string, timeframe: string, rationale: string, safetyNet: string;

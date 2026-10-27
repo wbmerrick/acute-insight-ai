@@ -12,7 +12,7 @@ import type { Acuity } from '../../lib/clinical-brief.js';
 
 export interface ValidationCase {
   id: string;
-  group: 'emergency' | 'urgent' | 'telehealth' | 'routine' | 'selfcare' | 'trap';
+  group: 'emergency' | 'urgent' | 'telehealth' | 'routine' | 'selfcare' | 'trap' | 'peds' | 'ob' | 'psych' | 'geriatric' | 'messy';
   chiefComplaint: string;
   answers: string[];
   expected: Acuity;           // minimum acceptable
@@ -86,4 +86,46 @@ export const VALIDATION_SET: ValidationCase[] = [
   { id: 'X04', group: 'trap', chiefComplaint: 'Family history question', answers: ['My mother had a heart attack and my sister has seizures, I want to know what screening I should get, I feel fine'], expected: 'routine', mustNotExceed: 'urgent', note: 'family history only' },
   { id: 'X05', group: 'trap', chiefComplaint: 'Grief', answers: ['My father died last month, I am sad and not sleeping, I am not suicidal and have no thoughts of hurting myself'], expected: 'routine', mustNotExceed: 'urgent', note: 'negated self-harm' },
   { id: 'X06', group: 'trap', chiefComplaint: 'Medication list', answers: ['Taking an EpiPen for a peanut allergy — never had to use it — and a daily inhaler, just updating my records'], expected: 'routine', mustNotExceed: 'urgent', note: 'anaphylaxis device mentioned, no reaction' },
+
+  // ── Round 2 (2026-10-27) ──
+  // Pediatrics (caregiver reporting)
+  { id: 'P01', group: 'peds', chiefComplaint: 'Toddler breathing', answers: ['My 2 year old has a barking cough and is making a high pitched noise when she breathes in, pulling in at her ribs'], expected: 'emergency', note: 'stridor + retractions' },
+  { id: 'P02', group: 'peds', chiefComplaint: 'Child vomiting', answers: ['My 4 year old has been vomiting all day, no wet diaper in 10 hours, very sleepy and hard to wake'], expected: 'emergency', note: 'dehydration + lethargy' },
+  { id: 'P03', group: 'peds', chiefComplaint: 'Head bump', answers: ['My 7 year old fell off the monkey bars, hit his head, has thrown up twice and seems confused'], expected: 'emergency' },
+  { id: 'P04', group: 'peds', chiefComplaint: 'Rash with fever', answers: ['My 3 year old has a fever of 103 and a purple spotty rash that does not fade when I press a glass on it'], expected: 'emergency', note: 'non-blanching rash' },
+  { id: 'P05', group: 'peds', chiefComplaint: 'Ear infection', answers: ['My 5 year old has been tugging her ear and had a fever of 101 last night, eating and drinking fine, playing today'], expected: 'routine', mustNotExceed: 'urgent' },
+  { id: 'P06', group: 'peds', chiefComplaint: 'Swallowed something', answers: ['My toddler swallowed a button battery about an hour ago, seems fine right now'], expected: 'emergency', note: 'button battery = ED now even if asymptomatic' },
+  { id: 'P07', group: 'peds', chiefComplaint: 'Fever', answers: ['My 10 year old has had a fever of 101 for two days with a sore throat, drinking fine, no stiff neck, no rash'], expected: 'routine', mustNotExceed: 'urgent' },
+
+  // Obstetrics
+  { id: 'O01', group: 'ob', chiefComplaint: 'Pregnant, headache', answers: ['I am 34 weeks pregnant with a bad headache, seeing spots, and my hands and face are swollen'], expected: 'emergency', note: 'preeclampsia' },
+  { id: 'O02', group: 'ob', chiefComplaint: 'Baby not moving', answers: ['32 weeks pregnant and I have not felt the baby move since this morning, usually very active'], expected: 'urgent', note: 'decreased fetal movement → L&D now' },
+  { id: 'O03', group: 'ob', chiefComplaint: 'Pregnant, bleeding', answers: ['36 weeks pregnant, bright red bleeding that soaked a pad in an hour, no pain'], expected: 'emergency' },
+  { id: 'O04', group: 'ob', chiefComplaint: 'Morning sickness', answers: ['8 weeks pregnant, nauseated every morning, keeping fluids down, no bleeding, no pain'], expected: 'routine', mustNotExceed: 'urgent' },
+  { id: 'O05', group: 'ob', chiefComplaint: 'Postpartum', answers: ['Had my baby 10 days ago, now fever of 101.5, foul smelling discharge and belly pain'], expected: 'urgent', note: 'endometritis' },
+  { id: 'O06', group: 'ob', chiefComplaint: 'Postpartum mood', answers: ['Baby is 3 weeks old and I feel like I am a terrible mother, I keep thinking everyone would be better off without me'], expected: 'emergency', note: 'passive SI postpartum' },
+
+  // Psychiatric
+  { id: 'M01', group: 'psych', chiefComplaint: 'Hearing voices', answers: ['The voices started telling me to hurt my roommate and I am scared I might do it'], expected: 'emergency', note: 'command hallucinations, harm to others' },
+  { id: 'M02', group: 'psych', chiefComplaint: 'Panic', answers: ['Had a panic attack this morning, heart racing and shaky, it passed in 20 minutes, no chest pain now, have had these before'], expected: 'routine', mustNotExceed: 'urgent' },
+  { id: 'M03', group: 'psych', chiefComplaint: 'Not sleeping', answers: ["Haven't slept in four days, have so much energy, spent my savings yesterday, my family says I am not making sense"], expected: 'urgent', note: 'mania' },
+  { id: 'M04', group: 'psych', chiefComplaint: 'Drinking', answers: ['Stopped drinking two days ago after years of heavy use, now shaking, sweating, and I saw bugs on the wall that were not there'], expected: 'emergency', note: 'withdrawal with hallucinations' },
+  { id: 'M05', group: 'psych', chiefComplaint: 'Low mood', answers: ['Feeling down for a few weeks, still going to work, no thoughts of ending my life, want to talk to someone'], expected: 'routine', mustNotExceed: 'urgent', note: 'denied SI phrasing variant' },
+
+  // Geriatric atypicals
+  { id: 'G01', group: 'geriatric', chiefComplaint: 'Confused', answers: ['My 82 year old mother is suddenly confused since this morning, does not know what day it is, she was fine yesterday'], expected: 'urgent', note: 'acute delirium — arguably ED' },
+  { id: 'G02', group: 'geriatric', chiefComplaint: 'Fall', answers: ['My 78 year old father fell in the bathroom, now can\'t put weight on his right leg and it looks shorter and turned out'], expected: 'emergency', note: 'hip fracture' },
+  { id: 'G03', group: 'geriatric', chiefComplaint: 'Just tired', answers: ['I am 75, very weak and short of breath for a day, nauseated, no chest pain, I am diabetic'], expected: 'urgent', note: 'silent MI pattern; "no chest pain" must not hide it' },
+  { id: 'G04', group: 'geriatric', chiefComplaint: 'Fall, on blood thinner', answers: ['I am 80 and on warfarin, I fell and hit my head two hours ago, small bump, feel okay'], expected: 'urgent', note: 'anticoagulated head injury → CT' },
+  { id: 'G05', group: 'geriatric', chiefComplaint: 'Knee', answers: ['I am 70, my knee has been stiff in the mornings for months, no swelling, no fever, walking fine'], expected: 'routine', mustNotExceed: 'routine' },
+
+  // Messy input: misspellings, no punctuation, texting style, late red flag
+  { id: 'W01', group: 'messy', chiefComplaint: 'chest', answers: ['chest hurts real bad cant breath good sweating'], expected: 'emergency', note: '"cant breath" misspelling' },
+  { id: 'W02', group: 'messy', chiefComplaint: 'headach', answers: ['worse headach of my life came on all the sudden'], expected: 'emergency', note: 'worse/worst misspelling' },
+  { id: 'W03', group: 'messy', chiefComplaint: 'stroke?', answers: ['my husbands face is droppy on one side and hes talking funny'], expected: 'emergency', note: '"droppy", "talking funny"' },
+  { id: 'W04', group: 'messy', chiefComplaint: 'sick', answers: ['been sick 3 days', 'fever and cough', 'yeah kinda hard to breathe laying down and my lips look kinda blue my wife says'], expected: 'emergency', note: 'red flag in turn 3' },
+  { id: 'W05', group: 'messy', chiefComplaint: 'stomach', answers: ['stomach ache since yesterday', 'now its in my lower right side and i cant stand up straight', 'temp 101'], expected: 'urgent', note: 'appendicitis across turns' },
+  { id: 'W06', group: 'messy', chiefComplaint: 'cold', answers: ['got a cold', 'runny nose sneezing', 'no fever no trouble breathing feel ok'], expected: 'routine', mustNotExceed: 'routine' },
+  { id: 'W07', group: 'messy', chiefComplaint: 'allergic', answers: ['took amoxicillin an hour ago now hives everywhere and my toung feels thick'], expected: 'emergency', note: '"toung"' },
+  { id: 'W08', group: 'messy', chiefComplaint: 'sucide', answers: ['i want to kill my self'], expected: 'emergency', note: '"kill my self" with a space' },
 ];
