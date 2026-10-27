@@ -36,8 +36,11 @@ describe('buildTemplateClinicalBrief — conservative triage disposition', () =>
   it('emergency for a first-person emergency', () => {
     expect(brief('Chest pain', 'I have crushing chest pain and cannot breathe').disposition.level).toBe('emergency');
   });
-  it('urgent for concerning exertional symptoms with family history only', () => {
-    expect(brief('Chest tightness', 'Chest tightness on stairs, eases with rest. My dad had a heart attack at 55.').disposition.level).toBe('urgent');
+  it('at least urgent for exertional chest tightness; family history alone does not decide it', () => {
+    // Policy (2026-10-27): new chest tightness fires the emergency screen even when exertional —
+    // unstable angina until proven otherwise; over-triage is the accepted error. Will to confirm.
+    expect(['emergency', 'urgent']).toContain(brief('Chest tightness', 'Chest tightness on stairs, eases with rest. My dad had a heart attack at 55.').disposition.level);
+    expect(brief('Checkup', 'Feeling fine. My dad had a heart attack at 55.').disposition.level).toBe('routine');
   });
   it('routine for an explicitly negated concern', () => {
     expect(brief('Headache', 'Mild headache for 2 days. No chest pain, no fever.').disposition.level).toBe('routine');

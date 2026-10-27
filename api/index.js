@@ -85662,42 +85662,56 @@ ${transcript}`
 }
 
 // src/server/lib/intake-fallback.ts
-var EMERGENCY_KEYWORDS = [
-  "chest pain",
-  "can't breathe",
-  "cannot breathe",
-  "stroke",
-  "seizure",
-  "unconscious",
-  "unresponsive",
-  "overdose",
-  "suicidal",
-  "kill myself",
-  "heart attack",
-  "anaphylaxis",
-  "throat closing",
-  "paralyzed",
-  "paralysis"
+var EMERGENCY_PATTERNS = [
+  // cardiac
+  { re: /\bchest (pain|pressure|tightness|tight|heaviness|heavy|discomfort|squeez)/i, label: "chest pain/pressure" },
+  { re: /\bcrushing (chest|pain)|\belephant on my chest|\bheart attack\b/i, label: "heart attack" },
+  // breathing / airway
+  { re: /\bcan'?t (breathe|catch my breath|get (a|enough) breath)|\bcannot breathe|\bnot breathing|\bstopped breathing|\bgasping\b/i, label: "cannot breathe" },
+  { re: /\b(lips|face|fingers?|skin) (are |is |look |looks |turning )?(blue|purple|gr[ae]y)\b|\bblue lips\b/i, label: "cyanosis" },
+  { re: /\bthroat (is )?(closing|tight|swelling|swollen)|\b(tongue|lips?) (is |are )?(swelling|swollen)|\banaphyla|\bepipen (used|injected)|\bused my epipen/i, label: "airway / anaphylaxis" },
+  // neuro
+  { re: /\bstroke\b|\bface (is )?droop|\bdroop(ing|y)? (face|mouth|eyelid)|\bslurr(ed|ing) (speech|words)|\bwords (are |were )?slurred|\bcan'?t (speak|talk|get (my )?words)|\bsudden(ly)? (weak|numb)|\b(weakness|numbness) (on|in|of) (one|my (right|left)) (side|arm|leg)|\bone side of my (body|face)|\bcan'?t (move|lift|hold) (my )?(arm|leg|cup)/i, label: "stroke signs" },
+  { re: /\bseizure|\bconvuls|\bfitting\b|\bworst headache|\bthunderclap|\bheadache .{0,40}(stiff neck|neck (is )?stiff)|\bstiff neck .{0,40}headache/i, label: "seizure / thunderclap headache" },
+  { re: /\bunconscious|\bunresponsive|\bnot waking up|\bwon'?t wake up|\bpassed out|\bblacked out|\bfainted|\blost consciousness|\bcollapsed\b/i, label: "loss of consciousness" },
+  { re: /\bparaly[sz]|\bcan'?t feel my (legs|arms|body)|\bcan'?t move my (legs|arms)/i, label: "paralysis" },
+  // bleeding / GI
+  { re: /\b(vomit(ing|ed)?|throw(ing|n)? up|threw up) .{0,25}blood|\bblood in (my |the )?vomit|\bcoffee.?ground|\bcoughing up blood|\bcough(ed|ing)? .{0,10}blood|\bblack (tarry )?stools?/i, label: "GI bleeding" },
+  { re: /\b(severe|heavy|uncontrolled|won'?t stop|can'?t stop) bleeding|\bbleeding (heavily|a lot|won'?t stop)|\bgunshot|\bstabbed|\bstab wound/i, label: "major bleeding / trauma" },
+  // toxic
+  { re: /\boverdos|\btook (a whole|the whole|all (of )?my|too many|a bottle of)|\bswallowed (bleach|poison|pills)|\bpoison(ed|ing)\b/i, label: "overdose / poisoning" },
+  // self-harm — never suppressed
+  { re: /\bsuicid|\bkill(ing)? myself|\bend (my|it all|my life)|\btake my (own )?life|\bdon'?t want to (be here|be alive|live|wake up)|\bbetter off dead|\bhurt(ing)? myself|\bharm(ing)? myself|\bself.?harm|\bplan to (die|kill)/i, neverSuppress: true, label: "self-harm" },
+  // pregnancy / pediatric red lines
+  { re: /\b(baby|infant|newborn|my \d+ ?(week|day) old) .{0,40}(not breathing|blue|limp|unresponsive|won'?t wake)/i, label: "infant emergency" }
 ];
+var EMERGENCY_KEYWORDS = EMERGENCY_PATTERNS.map((p) => p.label);
 var FAMILY_HX_CTX = /\b(dad|mom|father|mother|parent|grandparent|grand(father|mother|pa|ma)|brother|sister|sibling|uncle|aunt|cousin|relative)('?s)?( (had|has|have|got|with|died of|died from))?\s*(a |an )?\s*$/;
 var HISTORY_CTX = /\b(family history of|fhx(\s+of)?|hx\s+of|history of|previous|prior|past)\s+(a\s+|an\s+)?$/;
-var NEGATION_CTX = /\b(no|not|without|denies?|deny|negative for|never had)\s+$/;
-var NEVER_SUPPRESS = /* @__PURE__ */ new Set(["suicidal", "kill myself"]);
+var NEGATION_CTX = /\b(no|not|without|denies?|deny|negative for|never had|never have|never)\s+(a\s+|an\s+|any\s+|the\s+)?$/;
+var SELF_HARM_DENIAL_CTX = /\b((am|i'?m|is|are|was)\s+not|no|not having|without|denies?|deny)\s+(any\s+|current\s+|active\s+)?((thoughts?|ideas?|ideation|plans?|intention|urges?|feelings?)\s+(of|to|about)\s+|)$/;
+var LONG_AGO_AFTER = /^[^.]{0,30}\b((\d+|two|three|four|five|six|seven|eight|nine|ten|several|many|few|couple of) (years?|months?|weeks?) ago|in (19|20)\d\d|years ago|when i was)/;
 function detectEmergency(text2) {
-  const lower = text2.toLowerCase();
-  for (const kw of EMERGENCY_KEYWORDS) {
-    const canSuppress = !NEVER_SUPPRESS.has(kw);
-    let from = 0;
-    for (; ; ) {
-      const idx = lower.indexOf(kw, from);
-      if (idx === -1) break;
-      const before = lower.slice(Math.max(0, idx - 32), idx);
-      const suppressed = canSuppress && (FAMILY_HX_CTX.test(before) || HISTORY_CTX.test(before) || NEGATION_CTX.test(before));
+  for (const p of EMERGENCY_PATTERNS) {
+    const re2 = new RegExp(p.re.source, p.re.flags.includes("g") ? p.re.flags : p.re.flags + "g");
+    let m;
+    while ((m = re2.exec(text2)) !== null) {
+      const before = text2.slice(Math.max(0, m.index - 32), m.index).toLowerCase();
+      if (p.neverSuppress) {
+        if (SELF_HARM_DENIAL_CTX.test(before)) continue;
+        return true;
+      }
+      const after = text2.slice(m.index + m[0].length, m.index + m[0].length + 40).toLowerCase();
+      const suppressed = FAMILY_HX_CTX.test(before) || HISTORY_CTX.test(before) || NEGATION_CTX.test(before) || LONG_AGO_AFTER.test(after);
       if (!suppressed) return true;
-      from = idx + kw.length;
+      if (m[0].length === 0) re2.lastIndex++;
     }
   }
   return false;
+}
+function mentionsSelfHarm(text2) {
+  const p = EMERGENCY_PATTERNS.find((x) => x.neverSuppress);
+  return !!p && p.re.test(text2);
 }
 function extractCoveredTopics(messages) {
   const covered = /* @__PURE__ */ new Set();
@@ -85814,13 +85828,17 @@ function buildTemplateSummary(chiefComplaint, responses) {
     }
   }
   const summary = summaryParts.length > 0 ? `Patient presents with chief complaint: ${chiefComplaint}. ${summaryParts.join(" ")}` : `Patient presents with chief complaint: ${chiefComplaint}.`;
+  const everything = [chiefComplaint, ...responses.map((q) => Array.isArray(q.answer) ? q.answer.join(" ") : q.answer)].join(" ");
+  if (mentionsSelfHarm(everything)) {
+    flags.push(detectEmergency(everything) ? "Self-harm ideation expressed \u2014 emergency path shown" : "Self-harm mentioned and denied \u2014 screen directly at the visit");
+  }
   return { summary, flags };
 }
 function buildTemplateClinicalBrief(chiefComplaint, responses) {
   const { summary, flags } = buildTemplateSummary(chiefComplaint, responses);
   const blob = chiefComplaint + " " + responses.map((r) => Array.isArray(r.answer) ? r.answer.join(" ") : r.answer).join(" ");
   const isEmergency = detectEmergency(blob);
-  const CONCERNING = /chest (pain|tight|pressure|discomfort)|short(ness)? of breath|difficulty breathing|hard to breathe|radiat|numbness|weak(ness)?|slurred|vision (loss|change)|faint|pass(ed|ing) out|severe|worst|uncontrolled bleeding|coughing up blood|high fever|stiff neck|new confusion|severe dehydrat|fever (of |to |at |around |about )?(10[1-9]|11\d)|(shaking|teeth.chattering) chills|rigors|flank pain|(back|side) pain .{0,40}fever|fever .{0,40}(back|side) pain|blood in (my |the )?(urine|stool|pee)|can'?t keep (anything|fluids|water) down|vomiting .{0,20}(blood|days)|(hard|difficult|painful) to swallow .{0,30}(swollen|swelling|neck|drool)|drool|(swollen|swelling) .{0,20}neck|not (urinat|pee)ing|haven'?t (urinated|peed) in|worst headache|(infant|newborn|baby) .{0,30}fever|pregnan.{0,30}(bleeding|pain)|(bleeding|pain).{0,30}pregnan|testic|scrot|(sudden|severe) abdominal|belly .{0,20}(rigid|hard)|can'?t walk|can'?t bear weight|(red|hot) streak|spreading redness/i;
+  const CONCERNING = /chest (pain|tight|pressure|discomfort)|short(ness)? of breath|difficulty breathing|hard to breathe|radiat|numbness|weak(ness)?|slurred|vision (loss|change)|faint|pass(ed|ing) out|severe|worst|uncontrolled bleeding|coughing up blood|high fever|stiff neck|new confusion|severe dehydrat|fever (of |to |at |around |about )?(10[1-9]|11\d)|(shaking|teeth.chattering) chills|rigors|flank pain|(back|side) pain .{0,40}fever|fever .{0,40}(back|side) pain|blood in (my |the )?(urine|stool|pee)|can'?t keep (anything|fluids|water) down|vomiting .{0,20}(blood|days)|(hard|difficult|painful) to swallow .{0,30}(swollen|swelling|neck|drool)|drool|(swollen|swelling) .{0,20}neck|not (urinat|pee)ing|haven'?t (urinated|peed) in|worst headache|(infant|newborn|baby) .{0,30}fever|pregnan.{0,30}(bleeding|pain)|(bleeding|pain).{0,30}pregnan|testic|scrot|(sudden|severe) abdominal|belly .{0,20}(rigid|hard)|can'?t walk|can'?t bear weight|(red|hot) streak|spreading redness|lower right (belly|abdomen|side|quadrant)|pain .{0,60}moved to (the )?(lower|right|left)|(belly|abdominal|stomach) pain .{0,40}fever|fever .{0,40}(belly|abdominal|stomach) pain|(calf|leg)[^.]{0,40}(swollen|swelling)[^.]{0,50}(warm|hot|painful|tender)|(swollen|swelling)[^.]{0,20}(calf|leg)[^.]{0,40}(warm|hot|painful|tender)|(unable|not able|can'?t|haven'?t been able) to (urinate|pee|pass urine|empty my bladder)|sugar[^.]{0,20}(over|above) [34]\d\d|(blood )?sugar[^.]{0,15}(400|500|600)/i;
   const denegBlob = blob.replace(/\b(no|not|without|denies?|deny|negative for|never had)\b(\s+\w+){0,3}/gi, " ");
   const isUrgent = flags.some((f) => /high severity|serious associated/i.test(f)) || CONCERNING.test(denegBlob);
   let level;
