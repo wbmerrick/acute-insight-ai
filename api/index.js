@@ -20952,7 +20952,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler41) {
+    Route.prototype.all = function all(handler43) {
       const callbacks = flatten2.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -20970,7 +20970,7 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler41) {
+      Route.prototype[method] = function(handler43) {
         const callbacks = flatten2.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -21173,17 +21173,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler41) {
+    Router.prototype.use = function use2(handler43) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler41 !== "function") {
-        let arg = handler41;
+      if (typeof handler43 !== "function") {
+        let arg = handler43;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler41;
+          path2 = handler43;
         }
       }
       const callbacks = flatten2.call(slice.call(arguments, offset), Infinity);
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler41 = connection.cancelQuery;
-    if (!handler41) {
+    const handler43 = connection.cancelQuery;
+    if (!handler43) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler41.bind(connection);
+    return handler43.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler41 = connection.killSession;
-    if (!handler41) {
+    const handler43 = connection.killSession;
+    if (!handler43) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler41.bind(connection);
+    return handler43.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -65064,7 +65064,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler41 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler43 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65084,7 +65084,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler41(internalContext).catch(async (e) => {
+    const response = await handler43(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65114,20 +65114,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler41) => {
+  return (path2, options, handler43) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler41);
+    }, handler43);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler41) {
+function createMiddleware(optionsOrHandler, handler43) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler41;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler43;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65155,14 +65155,14 @@ function createMiddleware(optionsOrHandler, handler41) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler41) {
+  function fn(optionsOrHandler, handler43) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler41) throw new Error("Middleware handler is required");
+    if (!handler43) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler41);
+    }, handler43);
   }
   return fn;
 };
@@ -65602,16 +65602,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler41 = route.data;
+    const handler43 = route.data;
     try {
-      const allowedMediaTypes = handler41.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler43.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler41.options.disableBody ? void 0 : await getBody(handler41.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler43.options.disableBody ? void 0 : await getBody(handler43.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65626,7 +65626,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler41(context2);
+      return await handler43(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65683,11 +65683,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler41 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler43 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler41(ctx));
+      return await runWithEndpointContext(ctx, () => handler43(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75826,8 +75826,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler41 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler41(request));
+      const { handler: handler43 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler43(request));
     },
     api,
     options,
@@ -85175,36 +85175,6 @@ async function handler8(req, res) {
   }
 }
 
-// src/server/lib/audit.ts
-function clientIp(req) {
-  const xf = req.headers["x-forwarded-for"];
-  const first = Array.isArray(xf) ? xf[0] : (xf ?? "").split(",")[0];
-  return (first || req.ip || "").trim().slice(0, 64);
-}
-function safeMeta(meta2) {
-  if (!meta2) return null;
-  const out = {};
-  for (const [k, v] of Object.entries(meta2)) {
-    if (typeof v === "string" && v.length > 64) continue;
-    out[k] = v;
-  }
-  return Object.keys(out).length ? out : null;
-}
-function audit(req, input) {
-  const row = {
-    actorUserId: input.actorUserId ?? null,
-    actorRole: input.actorRole ?? (input.actorUserId ? "patient" : "anon"),
-    action: input.action.slice(0, 64),
-    resourceType: input.resourceType ?? null,
-    resourceId: input.resourceId == null ? null : String(input.resourceId).slice(0, 64),
-    patientUserId: input.patientUserId ?? null,
-    ip: req ? clientIp(req) : null,
-    userAgent: req ? String(req.headers["user-agent"] ?? "").slice(0, 255) : null,
-    meta: safeMeta(input.meta)
-  };
-  db.insert(auditEvents).values(row).catch((err) => console.error(JSON.stringify({ event: "audit.write_failed", action: row.action, error: err instanceof Error ? err.message : String(err) })));
-}
-
 // src/lib/clinical-brief.ts
 var ACUITY_LABEL = {
   emergency: "Emergency",
@@ -85369,6 +85339,239 @@ function logErr(event, error3) {
   console.error(JSON.stringify({ event, error: error3 instanceof Error ? error3.message : String(error3) }));
 }
 
+// src/server/lib/audit.ts
+function clientIp(req) {
+  const xf = req.headers["x-forwarded-for"];
+  const first = Array.isArray(xf) ? xf[0] : (xf ?? "").split(",")[0];
+  return (first || req.ip || "").trim().slice(0, 64);
+}
+function safeMeta(meta2) {
+  if (!meta2) return null;
+  const out = {};
+  for (const [k, v] of Object.entries(meta2)) {
+    if (typeof v === "string" && v.length > 64) continue;
+    out[k] = v;
+  }
+  return Object.keys(out).length ? out : null;
+}
+function audit(req, input) {
+  const row = {
+    actorUserId: input.actorUserId ?? null,
+    actorRole: input.actorRole ?? (input.actorUserId ? "patient" : "anon"),
+    action: input.action.slice(0, 64),
+    resourceType: input.resourceType ?? null,
+    resourceId: input.resourceId == null ? null : String(input.resourceId).slice(0, 64),
+    patientUserId: input.patientUserId ?? null,
+    ip: req ? clientIp(req) : null,
+    userAgent: req ? String(req.headers["user-agent"] ?? "").slice(0, 255) : null,
+    meta: safeMeta(input.meta)
+  };
+  db.insert(auditEvents).values(row).catch((err) => console.error(JSON.stringify({ event: "audit.write_failed", action: row.action, error: err instanceof Error ? err.message : String(err) })));
+}
+
+// src/server/api/patient/export/GET.ts
+async function handler9(req, res) {
+  try {
+    const userId = await requirePatient(req, res);
+    if (!userId) return;
+    const [u] = await db.select({ id: user.id, name: user.name, email: user.email, emailVerified: user.emailVerified, createdAt: user.createdAt }).from(user).where(eq(user.id, userId)).limit(1);
+    const [profile] = await db.select().from(patientProfiles).where(eq(patientProfiles.userId, userId)).limit(1);
+    const intakes = await db.select().from(intakeSessions).where(eq(intakeSessions.userId, userId)).orderBy(desc(intakeSessions.createdAt));
+    const vs = await db.select({ id: visits.id, intakeSessionId: visits.intakeSessionId, acuity: visits.acuity, patientState: visits.patientState, status: visits.status, queuedAt: visits.queuedAt, acceptedAt: visits.acceptedAt, completedAt: visits.completedAt, paymentStatus: visits.paymentStatus, amountCents: visits.amountCents, clinicianName: clinicianProfiles.displayName, clinicianCredential: clinicianProfiles.credential }).from(visits).leftJoin(clinicianProfiles, eq(clinicianProfiles.userId, visits.clinicianUserId)).where(eq(visits.patientUserId, userId));
+    const cs = await db.select({ id: checkins.id, intakeSessionId: checkins.intakeSessionId, reason: checkins.reason, dueAt: checkins.dueAt, status: checkins.status, outcome: checkins.outcome, answeredAt: checkins.answeredAt, escalationNote: checkins.escalationNote }).from(checkins).where(eq(checkins.patientUserId, userId));
+    const payload = {
+      exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      about: "Everything Acute Insight holds about you. Intake briefs are AI-prepared drafts for your clinician, not a diagnosis.",
+      account: u,
+      profile: profile ? { dateOfBirth: profile.dateOfBirth, gender: profile.gender, phone: profile.phone, state: profile.state, conditions: profile.conditions, medications: profile.medications, allergies: profile.allergies } : null,
+      intakes: intakes.map((i) => ({ id: i.id, status: i.status, chiefComplaint: i.chiefComplaint, yourAnswers: i.responses, draftSummary: i.aiSummary, flags: i.aiFlags, brief: i.aiBrief, providerName: i.providerName, createdAt: i.createdAt })),
+      visits: vs,
+      checkins: cs
+    };
+    audit(req, { action: "patient.export", actorUserId: userId, actorRole: "patient", resourceType: "user", resourceId: userId, patientUserId: userId, meta: { intakes: intakes.length, visits: vs.length } });
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader("Content-Disposition", `attachment; filename="acute-insight-my-data-${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10)}.json"`);
+    res.send(JSON.stringify(payload, null, 2));
+  } catch (error3) {
+    logErr("patient.export.error", error3);
+    res.status(500).json({ error: "Failed to export your data" });
+  }
+}
+
+// src/server/lib/stripe.ts
+import { createHmac, timingSafeEqual as timingSafeEqual2 } from "node:crypto";
+var API = process.env.STRIPE_API_BASE ?? "https://api.stripe.com/v1";
+function stripeConfigured() {
+  return !!process.env.STRIPE_SECRET_KEY;
+}
+function priceCentsFor(acuity, env3 = process.env) {
+  const key = `PRICE_${acuity.toUpperCase()}_CENTS`;
+  const raw = env3[key];
+  if (!raw) return null;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+function pricing(env3 = process.env) {
+  const configured = !!env3.STRIPE_SECRET_KEY;
+  const get = (a) => configured ? priceCentsFor(a, env3) : null;
+  return {
+    configured,
+    emergency: null,
+    urgent: get("urgent"),
+    telehealth: get("telehealth"),
+    routine: get("routine"),
+    selfcare: get("selfcare")
+  };
+}
+function flatten(obj, prefix = "", out = new URLSearchParams()) {
+  for (const [k, v] of Object.entries(obj)) {
+    const key = prefix ? `${prefix}[${k}]` : k;
+    if (v === void 0 || v === null) continue;
+    if (Array.isArray(v)) v.forEach((item, i) => typeof item === "object" ? flatten(item, `${key}[${i}]`, out) : out.append(`${key}[${i}]`, String(item)));
+    else if (typeof v === "object") flatten(v, key, out);
+    else out.append(key, String(v));
+  }
+  return out;
+}
+async function stripePost(path2, body, idempotencyKey) {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error("Stripe not configured");
+  const res = await fetch(`${API}${path2}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+      ...idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}
+    },
+    body: flatten(body).toString()
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`Stripe ${path2}: ${data.error?.message ?? res.status}`);
+  return data;
+}
+async function createVisitCheckout(opts) {
+  return stripePost(
+    "/checkout/sessions",
+    {
+      mode: "payment",
+      customer_email: opts.customerEmail,
+      success_url: opts.successUrl,
+      cancel_url: opts.cancelUrl,
+      client_reference_id: String(opts.visitId),
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: opts.amountCents,
+            product_data: {
+              name: `${opts.acuityLabel} visit \u2014 Acute Insight`,
+              description: "Your card is held now and charged only when a clinician accepts your visit."
+            }
+          }
+        }
+      ],
+      payment_intent_data: {
+        capture_method: "manual",
+        description: `Acute Insight visit #${opts.visitId}`,
+        metadata: { visit_id: String(opts.visitId) }
+      },
+      metadata: { visit_id: String(opts.visitId) },
+      expires_at: Math.floor(Date.now() / 1e3) + 30 * 60
+      // 30 min to finish checkout
+    },
+    `visit-${opts.visitId}-checkout`
+  );
+}
+async function capturePayment(paymentIntent) {
+  await stripePost(`/payment_intents/${paymentIntent}/capture`, {}, `capture-${paymentIntent}`);
+}
+async function releasePayment(paymentIntent) {
+  await stripePost(`/payment_intents/${paymentIntent}/cancel`, { cancellation_reason: "abandoned" }, `cancel-${paymentIntent}`);
+}
+function verifyWebhook(rawBody, sigHeader, secret, toleranceSec = 300, now2 = Date.now()) {
+  if (!sigHeader) return false;
+  const parts = Object.fromEntries(sigHeader.split(",").map((p) => p.split("=")));
+  const t = parts.t;
+  const v1 = parts.v1;
+  if (!t || !v1) return false;
+  if (Math.abs(now2 / 1e3 - Number(t)) > toleranceSec) return false;
+  const expected = createHmac("sha256", secret).update(`${t}.${rawBody}`).digest("hex");
+  const a = Buffer.from(expected);
+  const b = Buffer.from(v1);
+  return a.length === b.length && timingSafeEqual2(a, b);
+}
+function connectEnabled() {
+  return stripeConfigured() && process.env.STRIPE_CONNECT_ENABLED === "true";
+}
+function payoutCentsFor(acuity, env3 = process.env) {
+  const raw = env3[`CLINICIAN_PAYOUT_${acuity.toUpperCase()}_CENTS`];
+  if (!raw) return null;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+function payoutsConfigured(env3 = process.env) {
+  return ["urgent", "telehealth", "routine", "selfcare"].some((a) => payoutCentsFor(a, env3) !== null);
+}
+async function createConnectAccount(email3, userId) {
+  return stripePost("/accounts", {
+    type: "express",
+    country: "US",
+    email: email3,
+    capabilities: { transfers: { requested: true } },
+    business_type: "individual",
+    metadata: { user_id: userId }
+  }, `connect-account-${userId}`);
+}
+async function createAccountLink(accountId, refreshUrl, returnUrl) {
+  return stripePost("/account_links", { account: accountId, refresh_url: refreshUrl, return_url: returnUrl, type: "account_onboarding" });
+}
+async function createTransfer(accountId, amountCents, visitId) {
+  return stripePost("/transfers", {
+    amount: amountCents,
+    currency: "usd",
+    destination: accountId,
+    description: `Acute Insight visit #${visitId}`,
+    metadata: { visit_id: String(visitId) }
+  }, `transfer-visit-${visitId}`);
+}
+
+// src/server/api/patient/delete/POST.ts
+async function handler10(req, res) {
+  try {
+    const userId = await requirePatient(req, res);
+    if (!userId) return;
+    const [u] = await db.select({ email: user.email, role: user.role, isAdmin: user.isAdmin }).from(user).where(eq(user.id, userId)).limit(1);
+    if (!u) return res.status(404).json({ error: "Account not found" });
+    const { confirmEmail } = req.body ?? {};
+    if (!confirmEmail || confirmEmail.trim().toLowerCase() !== u.email.toLowerCase()) {
+      return res.status(400).json({ error: "Type your account email exactly to confirm" });
+    }
+    if (u.role === "provider" || u.isAdmin) {
+      return res.status(409).json({ error: "Clinician and admin accounts are removed by an administrator, not self-service" });
+    }
+    const [active] = await db.select({ id: visits.id }).from(visits).where(and(eq(visits.patientUserId, userId), eq(visits.status, "accepted"))).limit(1);
+    if (active) return res.status(409).json({ error: "A clinician has accepted a visit with you. Finish or cancel that visit first." });
+    const open2 = await db.update(visits).set({ status: "cancelled" }).where(and(eq(visits.patientUserId, userId), inArray(visits.status, ["queued", "pending_payment"]))).returning({ id: visits.id, paymentStatus: visits.paymentStatus, pi: visits.stripePaymentIntent });
+    for (const v of open2) {
+      if (v.paymentStatus === "authorized" && v.pi) {
+        try {
+          await releasePayment(v.pi);
+        } catch (err) {
+          logErr("patient.delete.release_failed", err);
+        }
+      }
+    }
+    audit(req, { action: "patient.delete", actorUserId: userId, actorRole: "patient", resourceType: "user", resourceId: userId, patientUserId: userId, meta: { cancelledRequests: open2.length } });
+    await db.delete(user).where(eq(user.id, userId));
+    res.clearCookie("better-auth.session_token", { path: "/" });
+    res.json({ ok: true });
+  } catch (error3) {
+    logErr("patient.delete.error", error3);
+    res.status(500).json({ error: "Failed to delete your account" });
+  }
+}
+
 // src/server/lib/scope.ts
 function providerScope() {
   return process.env.PROVIDER_SCOPE === "assigned" ? "assigned" : "all";
@@ -85383,7 +85586,7 @@ async function visiblePatientIds(providerUserId, isAdmin) {
 }
 
 // src/server/api/provider/intakes/GET.ts
-async function handler9(req, res) {
+async function handler11(req, res) {
   try {
     const session2 = await getAuth().api.getSession({ headers: req.headers });
     if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
@@ -85433,7 +85636,7 @@ async function handler9(req, res) {
 }
 
 // src/server/api/intake/start/POST.ts
-async function handler10(req, res) {
+async function handler12(req, res) {
   try {
     const session2 = await getAuth().api.getSession({
       headers: new Headers(req.headers)
@@ -86062,7 +86265,7 @@ async function notifyClinicianOfEscalation(opts) {
 }
 
 // src/server/api/intake/[id]/complete/POST.ts
-async function handler11(req, res) {
+async function handler13(req, res) {
   try {
     const session2 = await getAuth().api.getSession({
       headers: new Headers(req.headers)
@@ -86154,7 +86357,7 @@ var GUEST_TURNS = 2;
 function patientTurns(messages) {
   return messages.filter((m) => m.role === "patient" && !/^Visit basics/i.test(m.content)).length;
 }
-async function handler12(req, res) {
+async function handler14(req, res) {
   try {
     const session2 = await getAuth().api.getSession({ headers: new Headers(req.headers) }).catch(() => null);
     const { messages, intakeId } = req.body;
@@ -86232,7 +86435,7 @@ async function handler12(req, res) {
 }
 
 // src/server/api/admin/users/GET.ts
-async function handler13(req, res) {
+async function handler15(req, res) {
   try {
     const session2 = await getAuth().api.getSession({
       headers: new Headers(req.headers)
@@ -86261,7 +86464,7 @@ async function handler13(req, res) {
 }
 
 // src/server/api/admin/users/[id]/role/PUT.ts
-async function handler14(req, res) {
+async function handler16(req, res) {
   try {
     const session2 = await getAuth().api.getSession({
       headers: new Headers(req.headers)
@@ -86293,7 +86496,7 @@ async function handler14(req, res) {
 var MAX = { name: 160, email: 255, organization: 200, message: 2e3 };
 var submissionsThisInstance = 0;
 var INSTANCE_CAP = 200;
-async function handler15(req, res) {
+async function handler17(req, res) {
   try {
     const { name, email: email3, organization, message: message2, website } = req.body ?? {};
     if (typeof website === "string" && website.trim() !== "") {
@@ -86391,7 +86594,7 @@ async function synthesizeGatewaySpeech(text2, model, opts) {
   const buf = await bufferFromAudioField(j?.audio || j?.data?.audio || "");
   return { buf, contentType: opts.outputFormat === "wav" ? "audio/wav" : "audio/mpeg" };
 }
-async function handler16(req, res) {
+async function handler18(req, res) {
   try {
     const text2 = sanitize2(req.body?.text);
     if (!text2) return res.status(400).json({ error: "empty" });
@@ -86440,7 +86643,7 @@ async function handler16(req, res) {
 }
 
 // src/server/api/admin/access-requests/GET.ts
-async function handler17(req, res) {
+async function handler19(req, res) {
   try {
     const session2 = await getAuth().api.getSession({
       headers: new Headers(req.headers)
@@ -86467,7 +86670,7 @@ async function handler17(req, res) {
 }
 
 // src/server/api/admin/audit/GET.ts
-async function handler18(req, res) {
+async function handler20(req, res) {
   try {
     const session2 = await getAuth().api.getSession({ headers: new Headers(req.headers) });
     if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
@@ -86488,7 +86691,7 @@ async function handler18(req, res) {
 }
 
 // src/server/api/admin/assignments/GET.ts
-async function handler19(req, res) {
+async function handler21(req, res) {
   try {
     const session2 = await getAuth().api.getSession({ headers: new Headers(req.headers) });
     if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
@@ -86505,7 +86708,7 @@ async function handler19(req, res) {
 }
 
 // src/server/api/admin/assignments/POST.ts
-async function handler20(req, res) {
+async function handler22(req, res) {
   try {
     const session2 = await getAuth().api.getSession({ headers: new Headers(req.headers) });
     if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
@@ -86570,7 +86773,7 @@ function rateLimit(opts) {
 var byIp = (req) => `ip:${clientIp(req)}`;
 
 // src/server/api/dispatch/me/GET.ts
-async function handler21(req, res) {
+async function handler23(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -86593,7 +86796,7 @@ async function handler21(req, res) {
 
 // src/server/api/dispatch/me/PUT.ts
 var CREDENTIALS = /* @__PURE__ */ new Set(["MD", "DO", "NP", "PA"]);
-async function handler22(req, res) {
+async function handler24(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -86653,7 +86856,7 @@ async function handler22(req, res) {
 }
 
 // src/server/api/dispatch/queue/GET.ts
-async function handler23(req, res) {
+async function handler25(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -86716,147 +86919,9 @@ async function handler23(req, res) {
   }
 }
 
-// src/server/lib/stripe.ts
-import { createHmac, timingSafeEqual as timingSafeEqual2 } from "node:crypto";
-var API = process.env.STRIPE_API_BASE ?? "https://api.stripe.com/v1";
-function stripeConfigured() {
-  return !!process.env.STRIPE_SECRET_KEY;
-}
-function priceCentsFor(acuity, env3 = process.env) {
-  const key = `PRICE_${acuity.toUpperCase()}_CENTS`;
-  const raw = env3[key];
-  if (!raw) return null;
-  const n = Number(raw);
-  return Number.isInteger(n) && n > 0 ? n : null;
-}
-function pricing(env3 = process.env) {
-  const configured = !!env3.STRIPE_SECRET_KEY;
-  const get = (a) => configured ? priceCentsFor(a, env3) : null;
-  return {
-    configured,
-    emergency: null,
-    urgent: get("urgent"),
-    telehealth: get("telehealth"),
-    routine: get("routine"),
-    selfcare: get("selfcare")
-  };
-}
-function flatten(obj, prefix = "", out = new URLSearchParams()) {
-  for (const [k, v] of Object.entries(obj)) {
-    const key = prefix ? `${prefix}[${k}]` : k;
-    if (v === void 0 || v === null) continue;
-    if (Array.isArray(v)) v.forEach((item, i) => typeof item === "object" ? flatten(item, `${key}[${i}]`, out) : out.append(`${key}[${i}]`, String(item)));
-    else if (typeof v === "object") flatten(v, key, out);
-    else out.append(key, String(v));
-  }
-  return out;
-}
-async function stripePost(path2, body, idempotencyKey) {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error("Stripe not configured");
-  const res = await fetch(`${API}${path2}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-      ...idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}
-    },
-    body: flatten(body).toString()
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(`Stripe ${path2}: ${data.error?.message ?? res.status}`);
-  return data;
-}
-async function createVisitCheckout(opts) {
-  return stripePost(
-    "/checkout/sessions",
-    {
-      mode: "payment",
-      customer_email: opts.customerEmail,
-      success_url: opts.successUrl,
-      cancel_url: opts.cancelUrl,
-      client_reference_id: String(opts.visitId),
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "usd",
-            unit_amount: opts.amountCents,
-            product_data: {
-              name: `${opts.acuityLabel} visit \u2014 Acute Insight`,
-              description: "Your card is held now and charged only when a clinician accepts your visit."
-            }
-          }
-        }
-      ],
-      payment_intent_data: {
-        capture_method: "manual",
-        description: `Acute Insight visit #${opts.visitId}`,
-        metadata: { visit_id: String(opts.visitId) }
-      },
-      metadata: { visit_id: String(opts.visitId) },
-      expires_at: Math.floor(Date.now() / 1e3) + 30 * 60
-      // 30 min to finish checkout
-    },
-    `visit-${opts.visitId}-checkout`
-  );
-}
-async function capturePayment(paymentIntent) {
-  await stripePost(`/payment_intents/${paymentIntent}/capture`, {}, `capture-${paymentIntent}`);
-}
-async function releasePayment(paymentIntent) {
-  await stripePost(`/payment_intents/${paymentIntent}/cancel`, { cancellation_reason: "abandoned" }, `cancel-${paymentIntent}`);
-}
-function verifyWebhook(rawBody, sigHeader, secret, toleranceSec = 300, now2 = Date.now()) {
-  if (!sigHeader) return false;
-  const parts = Object.fromEntries(sigHeader.split(",").map((p) => p.split("=")));
-  const t = parts.t;
-  const v1 = parts.v1;
-  if (!t || !v1) return false;
-  if (Math.abs(now2 / 1e3 - Number(t)) > toleranceSec) return false;
-  const expected = createHmac("sha256", secret).update(`${t}.${rawBody}`).digest("hex");
-  const a = Buffer.from(expected);
-  const b = Buffer.from(v1);
-  return a.length === b.length && timingSafeEqual2(a, b);
-}
-function connectEnabled() {
-  return stripeConfigured() && process.env.STRIPE_CONNECT_ENABLED === "true";
-}
-function payoutCentsFor(acuity, env3 = process.env) {
-  const raw = env3[`CLINICIAN_PAYOUT_${acuity.toUpperCase()}_CENTS`];
-  if (!raw) return null;
-  const n = Number(raw);
-  return Number.isInteger(n) && n > 0 ? n : null;
-}
-function payoutsConfigured(env3 = process.env) {
-  return ["urgent", "telehealth", "routine", "selfcare"].some((a) => payoutCentsFor(a, env3) !== null);
-}
-async function createConnectAccount(email3, userId) {
-  return stripePost("/accounts", {
-    type: "express",
-    country: "US",
-    email: email3,
-    capabilities: { transfers: { requested: true } },
-    business_type: "individual",
-    metadata: { user_id: userId }
-  }, `connect-account-${userId}`);
-}
-async function createAccountLink(accountId, refreshUrl, returnUrl) {
-  return stripePost("/account_links", { account: accountId, refresh_url: refreshUrl, return_url: returnUrl, type: "account_onboarding" });
-}
-async function createTransfer(accountId, amountCents, visitId) {
-  return stripePost("/transfers", {
-    amount: amountCents,
-    currency: "usd",
-    destination: accountId,
-    description: `Acute Insight visit #${visitId}`,
-    metadata: { visit_id: String(visitId) }
-  }, `transfer-visit-${visitId}`);
-}
-
 // src/server/api/dispatch/visits/POST.ts
 var CLINICIAN_TEXT_WINDOW_MS = 10 * 60 * 1e3;
-async function handler24(req, res) {
+async function handler26(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -86930,7 +86995,7 @@ async function notifyClinicians(acuity, state, base) {
 }
 
 // src/server/api/dispatch/visits/[id]/GET.ts
-async function handler25(req, res) {
+async function handler27(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -86969,7 +87034,7 @@ async function handler25(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/accept/POST.ts
-async function handler26(req, res) {
+async function handler28(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87014,7 +87079,7 @@ async function handler26(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/release/POST.ts
-async function handler27(req, res) {
+async function handler29(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87031,7 +87096,7 @@ async function handler27(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/complete/POST.ts
-async function handler28(req, res) {
+async function handler30(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87061,7 +87126,7 @@ async function handler28(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/cancel/POST.ts
-async function handler29(req, res) {
+async function handler31(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87086,13 +87151,13 @@ async function handler29(req, res) {
 }
 
 // src/server/api/dispatch/pricing/GET.ts
-function handler30(_req, res) {
+function handler32(_req, res) {
   res.json(pricing());
 }
 
 // src/server/api/dispatch/sweep/GET.ts
 var HOLD_HOURS = Number(process.env.VISIT_HOLD_HOURS ?? 4);
-async function handler31(req, res) {
+async function handler33(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -87160,7 +87225,7 @@ function rate(n, d) {
 }
 
 // src/server/api/dispatch/metrics/GET.ts
-async function handler32(req, res) {
+async function handler34(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87223,7 +87288,7 @@ async function handler32(req, res) {
 }
 
 // src/server/api/dispatch/earnings/GET.ts
-async function handler33(req, res) {
+async function handler35(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87245,7 +87310,7 @@ async function handler33(req, res) {
 }
 
 // src/server/api/dispatch/connect/onboard/POST.ts
-async function handler34(req, res) {
+async function handler36(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87267,7 +87332,7 @@ async function handler34(req, res) {
 }
 
 // src/server/api/stripe/webhook/POST.ts
-async function handler35(req, res) {
+async function handler37(req, res) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) return res.status(503).json({ error: "Webhook not configured" });
   const raw = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
@@ -87303,7 +87368,7 @@ async function handler35(req, res) {
 }
 
 // src/server/api/companion/checkins/GET.ts
-async function handler36(req, res) {
+async function handler38(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87332,7 +87397,7 @@ async function handler36(req, res) {
 }
 
 // src/server/api/companion/checkins/[id]/answer/POST.ts
-async function handler37(req, res) {
+async function handler39(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87359,7 +87424,7 @@ async function handler37(req, res) {
 
 // src/server/api/companion/run/GET.ts
 var EXPIRE_AFTER_DAYS = Number(process.env.CHECKIN_EXPIRE_DAYS ?? 7);
-async function handler38(req, res) {
+async function handler40(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -87393,7 +87458,7 @@ async function handler38(req, res) {
 }
 
 // src/server/api/provider/checkins/GET.ts
-async function handler39(req, res) {
+async function handler41(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87420,7 +87485,7 @@ async function handler39(req, res) {
 }
 
 // src/server/api/provider/checkins/[id]/acknowledge/POST.ts
-async function handler40(req, res) {
+async function handler42(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87579,7 +87644,7 @@ function normalizeCommerceApiBaseUrlEnv() {
 normalizeCommerceApiBaseUrlEnv();
 var app = (0, import_express.default)();
 app.set("trust proxy", true);
-app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler35);
+app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler37);
 app.use(import_express.default.json());
 app.use(import_express.default.urlencoded({ extended: true }));
 app.get("/api/auth/:action", handler);
@@ -87597,37 +87662,39 @@ app.get("/api/health", handler5);
 app.get("/api/patient/intakes", handler6);
 app.get("/api/patient/profile", handler7);
 app.put("/api/patient/profile", handler8);
-app.get("/api/provider/intakes", handler9);
-app.post("/api/intake/start", handler10);
-app.post("/api/intake/:id/complete", handler11);
-app.post("/api/intake/chat", rlChat, handler12);
-app.get("/api/admin/users", handler13);
-app.put("/api/admin/users/:id/role", handler14);
-app.post("/api/access-request", rlAccess, handler15);
-app.post("/api/speak", rlSpeak, handler16);
-app.get("/api/admin/access-requests", handler17);
-app.get("/api/admin/audit", handler18);
-app.get("/api/admin/assignments", handler19);
-app.post("/api/admin/assignments", handler20);
-app.get("/api/dispatch/me", handler21);
-app.put("/api/dispatch/me", handler22);
-app.get("/api/dispatch/queue", handler23);
-app.post("/api/dispatch/visits", rlRequest, handler24);
-app.get("/api/dispatch/visits/:id", handler25);
-app.post("/api/dispatch/visits/:id/accept", handler26);
-app.post("/api/dispatch/visits/:id/release", handler27);
-app.post("/api/dispatch/visits/:id/complete", handler28);
-app.post("/api/dispatch/visits/:id/cancel", handler29);
-app.get("/api/dispatch/pricing", handler30);
-app.get("/api/dispatch/sweep", handler31);
-app.get("/api/dispatch/metrics", handler32);
-app.get("/api/dispatch/earnings", handler33);
-app.post("/api/dispatch/connect/onboard", handler34);
-app.get("/api/companion/checkins", handler36);
-app.post("/api/companion/checkins/:id/answer", rlAnswer, handler37);
-app.get("/api/companion/run", handler38);
-app.get("/api/provider/checkins", handler39);
-app.post("/api/provider/checkins/:id/acknowledge", handler40);
+app.get("/api/patient/export", handler9);
+app.post("/api/patient/delete", handler10);
+app.get("/api/provider/intakes", handler11);
+app.post("/api/intake/start", handler12);
+app.post("/api/intake/:id/complete", handler13);
+app.post("/api/intake/chat", rlChat, handler14);
+app.get("/api/admin/users", handler15);
+app.put("/api/admin/users/:id/role", handler16);
+app.post("/api/access-request", rlAccess, handler17);
+app.post("/api/speak", rlSpeak, handler18);
+app.get("/api/admin/access-requests", handler19);
+app.get("/api/admin/audit", handler20);
+app.get("/api/admin/assignments", handler21);
+app.post("/api/admin/assignments", handler22);
+app.get("/api/dispatch/me", handler23);
+app.put("/api/dispatch/me", handler24);
+app.get("/api/dispatch/queue", handler25);
+app.post("/api/dispatch/visits", rlRequest, handler26);
+app.get("/api/dispatch/visits/:id", handler27);
+app.post("/api/dispatch/visits/:id/accept", handler28);
+app.post("/api/dispatch/visits/:id/release", handler29);
+app.post("/api/dispatch/visits/:id/complete", handler30);
+app.post("/api/dispatch/visits/:id/cancel", handler31);
+app.get("/api/dispatch/pricing", handler32);
+app.get("/api/dispatch/sweep", handler33);
+app.get("/api/dispatch/metrics", handler34);
+app.get("/api/dispatch/earnings", handler35);
+app.post("/api/dispatch/connect/onboard", handler36);
+app.get("/api/companion/checkins", handler38);
+app.post("/api/companion/checkins/:id/answer", rlAnswer, handler39);
+app.get("/api/companion/run", handler40);
+app.get("/api/provider/checkins", handler41);
+app.post("/api/provider/checkins/:id/acknowledge", handler42);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;

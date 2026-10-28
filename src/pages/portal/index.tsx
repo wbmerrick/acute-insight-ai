@@ -10,6 +10,7 @@ import { acuityMeta } from '@/components/clinical-brief-view';
 import { RequestClinician } from '@/components/request-clinician';
 import { VerifyEmailNudge } from '@/components/verify-email-nudge';
 import { IdleGuard } from '@/components/idle-guard';
+import { DataRights } from '@/components/data-rights';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -715,6 +716,7 @@ function PortalContent() {
                 transition={{ duration: 0.25 }}
               >
                 <ProfileTab profile={profile} userEmail={user?.email ?? ''} userName={user?.name ?? ''} />
+                <DataRights email={user?.email ?? ''} />
               </motion.div>
             )}
           </>
