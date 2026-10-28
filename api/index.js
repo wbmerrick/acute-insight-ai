@@ -85138,7 +85138,7 @@ async function handler7(req, res) {
     if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
     const [profile] = await db.select().from(patientProfiles).where(eq(patientProfiles.userId, session2.user.id)).limit(1);
     const [userData] = await db.select({ name: user.name, email: user.email, createdAt: user.createdAt }).from(user).where(eq(user.id, session2.user.id)).limit(1);
-    res.json({ profile: profile ?? null, user: userData ?? null });
+    res.json({ profile: profile ?? null, user: userData ?? null, deleteMode: process.env.ACCOUNT_DELETE_MODE === "deidentify" ? "deidentify" : "delete" });
   } catch (error3) {
     console.error(JSON.stringify({ event: "api.error", route: "patient/profile/GET.ts", error: error3 instanceof Error ? error3.message : String(error3) }));
     res.status(500).json({ error: "Failed to fetch profile" });
@@ -85562,10 +85562,19 @@ async function handler10(req, res) {
         }
       }
     }
-    audit(req, { action: "patient.delete", actorUserId: userId, actorRole: "patient", resourceType: "user", resourceId: userId, patientUserId: userId, meta: { cancelledRequests: open2.length } });
-    await db.delete(user).where(eq(user.id, userId));
+    const mode = process.env.ACCOUNT_DELETE_MODE === "deidentify" ? "deidentify" : "delete";
+    audit(req, { action: mode === "deidentify" ? "patient.deidentify" : "patient.delete", actorUserId: userId, actorRole: "patient", resourceType: "user", resourceId: userId, patientUserId: userId, meta: { cancelledRequests: open2.length, mode } });
+    if (mode === "deidentify") {
+      await db.delete(session).where(eq(session.userId, userId));
+      await db.delete(account).where(eq(account.userId, userId));
+      await db.delete(twoFactor2).where(eq(twoFactor2.userId, userId));
+      await db.delete(patientProfiles).where(eq(patientProfiles.userId, userId));
+      await db.update(user).set({ name: "Deleted patient", email: `deleted+${userId}@deleted.invalid`, emailVerified: false, role: "deleted", twoFactorEnabled: false, image: null }).where(eq(user.id, userId));
+    } else {
+      await db.delete(user).where(eq(user.id, userId));
+    }
     res.clearCookie("better-auth.session_token", { path: "/" });
-    res.json({ ok: true });
+    res.json({ ok: true, mode });
   } catch (error3) {
     logErr("patient.delete.error", error3);
     res.status(500).json({ error: "Failed to delete your account" });

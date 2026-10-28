@@ -22,7 +22,7 @@ export default async function handler(req: Request, res: Response) {
       .where(eq(user.id, session.user.id))
       .limit(1);
 
-    res.json({ profile: profile ?? null, user: userData ?? null });
+    res.json({ profile: profile ?? null, user: userData ?? null, deleteMode: process.env.ACCOUNT_DELETE_MODE === 'deidentify' ? 'deidentify' : 'delete' });
   } catch (error) {
     console.error(JSON.stringify({ event: 'api.error', route: 'patient/profile/GET.ts', error: error instanceof Error ? error.message : String(error) }));
     res.status(500).json({ error: 'Failed to fetch profile' });

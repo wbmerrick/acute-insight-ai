@@ -1,12 +1,18 @@
 import type { Request, Response } from 'express';
 import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
-import { user, visits } from '../../../db/schema.js';
+import { user, visits, session as sessionTable, account as accountTable, twoFactor, patientProfiles } from '../../../db/schema.js';
 import { requirePatient, logErr } from '../../../lib/dispatch.js';
 import { audit } from '../../../lib/audit.js';
 import { releasePayment } from '../../../lib/stripe.js';
 
 /**
+ * ACCOUNT_DELETE_MODE
+ *   delete      (default) — remove the user; everything cascades away.
+ *   deidentify  — remove identity and access (name, email, phone, DOB, sessions, MFA) but keep the
+ *                 clinical record (intakes, briefs, visits, check-ins) under a tombstone user, for
+ *                 jurisdictions where the practice must retain medical records after the patient leaves.
+ *
  * Delete my account. Body: { confirmEmail }. Refused while a visit is accepted
  * (a clinician is mid-care); queued requests are cancelled and any card hold
  * released first. Cascades remove profile, intakes, visits, check-ins, sessions.
@@ -40,10 +46,24 @@ export default async function handler(req: Request, res: Response) {
       }
     }
 
-    audit(req, { action: 'patient.delete', actorUserId: userId, actorRole: 'patient', resourceType: 'user', resourceId: userId, patientUserId: userId, meta: { cancelledRequests: open.length } });
-    await db.delete(user).where(eq(user.id, userId)); // cascades: sessions, accounts, profile, intakes, visits, checkins, two_factor
+    const mode = process.env.ACCOUNT_DELETE_MODE === 'deidentify' ? 'deidentify' : 'delete';
+    audit(req, { action: mode === 'deidentify' ? 'patient.deidentify' : 'patient.delete', actorUserId: userId, actorRole: 'patient', resourceType: 'user', resourceId: userId, patientUserId: userId, meta: { cancelledRequests: open.length, mode } });
+
+    if (mode === 'deidentify') {
+      // Identity and access go; the clinical record stays under a tombstone.
+      await db.delete(sessionTable).where(eq(sessionTable.userId, userId));
+      await db.delete(accountTable).where(eq(accountTable.userId, userId));
+      await db.delete(twoFactor).where(eq(twoFactor.userId, userId));
+      await db.delete(patientProfiles).where(eq(patientProfiles.userId, userId));
+      await db
+        .update(user)
+        .set({ name: 'Deleted patient', email: `deleted+${userId}@deleted.invalid`, emailVerified: false, role: 'deleted', twoFactorEnabled: false, image: null })
+        .where(eq(user.id, userId));
+    } else {
+      await db.delete(user).where(eq(user.id, userId)); // cascades: sessions, accounts, profile, intakes, visits, checkins, two_factor
+    }
     res.clearCookie('better-auth.session_token', { path: '/' });
-    res.json({ ok: true });
+    res.json({ ok: true, mode });
   } catch (error) {
     logErr('patient.delete.error', error);
     res.status(500).json({ error: 'Failed to delete your account' });

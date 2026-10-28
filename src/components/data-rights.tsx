@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { signOut } from '@/lib/auth/auth-client';
 
 /** Your data, your account: download everything, or delete it. */
-export function DataRights({ email }: { email: string }) {
+export function DataRights({ email, deleteMode = 'delete' }: { email: string; deleteMode?: 'delete' | 'deidentify' }) {
   const navigate = useNavigate();
   const [confirm, setConfirm] = useState('');
   const [open, setOpen] = useState(false);
@@ -38,7 +38,11 @@ export function DataRights({ email }: { email: string }) {
       </div>
       {open && (
         <div className="mt-5 pt-5 grid gap-3" style={{ borderTop: '1px solid hsl(var(--destructive) / 0.3)' }}>
-          <p className="text-sm text-foreground">This permanently deletes your account, every intake, and your visit history. It can't be undone. If a clinician has accepted a visit with you, finish that first.</p>
+          <p className="text-sm text-foreground">
+            {deleteMode === 'deidentify'
+              ? "This permanently removes your name, email, phone, and login. Because a clinician treated you, the law requires the practice to keep the clinical record itself for a set period — it will no longer be linked to your identity. It can't be undone. If a clinician has accepted a visit with you, finish that first."
+              : "This permanently deletes your account, every intake, and your visit history. It can't be undone. If a clinician has accepted a visit with you, finish that first."}
+          </p>
           <label className="text-xs" style={{ color: 'hsl(var(--text-dim))' }}>Type <span className="text-foreground" style={{ fontFamily: 'var(--font-mono)' }}>{email}</span> to confirm
             <input value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="off" className="mt-1 w-full rounded-lg px-3 py-2 text-sm text-foreground outline-none" style={{ background: 'hsl(var(--surface-deeper))', border: '1px solid hsl(var(--border-subtle))' }} />
           </label>
@@ -46,7 +50,7 @@ export function DataRights({ email }: { email: string }) {
           <div className="flex gap-2 justify-end">
             <button type="button" onClick={() => { setOpen(false); setConfirm(''); setErr(''); }} className="text-sm px-3 py-2" style={{ color: 'hsl(var(--text-dim))' }}>Keep my account</button>
             <button type="button" disabled={busy || confirm.trim().toLowerCase() !== email.toLowerCase()} onClick={() => void del()} className="text-sm font-semibold px-4 py-2 rounded-lg disabled:opacity-40" style={{ background: 'hsl(var(--destructive))', color: '#fff', fontFamily: 'var(--font-heading)' }}>
-              {busy ? 'Deleting…' : 'Delete everything'}
+              {busy ? 'Deleting…' : deleteMode === 'deidentify' ? 'Delete my account' : 'Delete everything'}
             </button>
           </div>
         </div>

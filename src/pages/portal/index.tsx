@@ -269,6 +269,7 @@ function PortalContent() {
   const navigate = useNavigate();
   const [intakes, setIntakes] = useState<IntakeSession[]>([]);
   const [profile, setProfile] = useState<PatientProfile | null>(null);
+  const [deleteMode, setDeleteMode] = useState<'delete' | 'deidentify'>('delete');
   const [pendingCheckin, setPendingCheckin] = useState<Checkin | null>(null);
   const [checkinDone, setCheckinDone] = useState<'better' | 'escalated' | null>(null);
   const [loading, setLoading] = useState(true);
@@ -290,6 +291,7 @@ function PortalContent() {
         if (profileRes.ok) {
           const data = await profileRes.json();
           setProfile(data.profile);
+          if (data.deleteMode === 'deidentify') setDeleteMode('deidentify');
         }
       } finally {
         setLoading(false);
@@ -716,7 +718,7 @@ function PortalContent() {
                 transition={{ duration: 0.25 }}
               >
                 <ProfileTab profile={profile} userEmail={user?.email ?? ''} userName={user?.name ?? ''} />
-                <DataRights email={user?.email ?? ''} />
+                <DataRights email={user?.email ?? ''} deleteMode={deleteMode} />
               </motion.div>
             )}
           </>
