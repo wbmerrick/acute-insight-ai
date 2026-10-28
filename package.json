@@ -23,7 +23,8 @@
     "build:client": "vite build",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:check": "drizzle-kit check"
+    "db:check": "drizzle-kit check",
+    "e2e": "node scripts/e2e/run.mjs"
   },
   "dependencies": {
     "@dr.pogodin/react-helmet": "~3.1.1",

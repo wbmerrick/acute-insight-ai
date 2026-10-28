@@ -1,0 +1,25 @@
+import { execSync } from 'child_process';
+const BASE = 'http://127.0.0.1:5173'; const DB = 'postgres://acute:localdev@127.0.0.1:5432/acute_insight'; const T = Date.now();
+const ok = (l, c, x = '') => console.log(`${c ? 'PASS' : 'FAIL'}  ${l}${x ? '  — ' + x : ''}`);
+function client() { let cookie = ''; const cap = (res) => { const sc = res.headers.getSetCookie ? res.headers.getSetCookie() : []; for (const c of sc) { const kv = c.split(';')[0]; const [k] = kv.split('='); const parts = cookie ? cookie.split('; ').filter((p) => !p.startsWith(k + '=')) : []; if (!/=;?$/.test(kv)) parts.push(kv); cookie = parts.join('; '); } }; const j = async (path, opts = {}) => { const res = await fetch(BASE + path, { ...opts, headers: { 'content-type': 'application/json', origin: BASE, referer: BASE + '/', ...(cookie ? { cookie } : {}), ...(opts.headers || {}) } }); cap(res); let body; try { body = await res.json(); } catch { body = null; } return { status: res.status, body }; }; return { j, clear: () => { cookie = ''; } }; }
+const sql = (q) => execSync(`psql "${DB}" -qtAc "${q.replace(/"/g, '\\"')}"`).toString().trim();
+const pt = client(); const email = `deid_${T}@example.test`;
+let r = await pt.j('/api/auth/sign-up/email', { method: 'POST', body: JSON.stringify({ name: 'Deid Patient', email, password: 'Testpass123!' }) });
+const uid = r.body.user.id;
+await pt.j('/api/patient/profile', { method: 'PUT', body: JSON.stringify({ phone: '731-555-0100', dateOfBirth: '1980-01-01', state: 'TN' }) });
+const st = await pt.j('/api/intake/start', { method: 'POST' });
+await pt.j(`/api/intake/${st.body.id}/complete`, { method: 'POST', body: JSON.stringify({ chiefComplaint: 'Burning with urination', responses: [{ questionId: 'q0', question: 'Q', answer: 'Burning when I pee for two days, no fever' }] }) });
+r = await pt.j('/api/patient/profile');
+ok('profile reports deleteMode=deidentify', r.body.deleteMode === 'deidentify');
+r = await pt.j('/api/patient/delete', { method: 'POST', body: JSON.stringify({ confirmEmail: email }) });
+ok('delete ok with mode deidentify', r.status === 200 && r.body.mode === 'deidentify', JSON.stringify(r.body));
+ok('user row remains as tombstone', sql(`select name||'|'||email||'|'||role||'|'||two_factor_enabled::text from "user" where id='${uid}'`) === `Deleted patient|deleted+${uid}@deleted.invalid|deleted|false`);
+ok('profile (phone/DOB) gone', sql(`select count(*) from patient_profiles where user_id='${uid}'`) === '0');
+ok('sessions + credentials gone', sql(`select (select count(*) from session where user_id='${uid}') + (select count(*) from account where user_id='${uid}')`) === '0');
+ok('clinical record retained', sql(`select count(*) from intake_sessions where user_id='${uid}'`) === '1');
+ok('audit shows patient.deidentify', sql(`select count(*) from audit_events where patient_user_id='${uid}' and action='patient.deidentify'`) === '1');
+r = await pt.j('/api/patient/intakes');
+ok('old session rejected', r.status === 401);
+pt.clear();
+r = await pt.j('/api/auth/sign-in/email', { method: 'POST', body: JSON.stringify({ email, password: 'Testpass123!' }) });
+ok('cannot sign in with the old email', r.status !== 200);

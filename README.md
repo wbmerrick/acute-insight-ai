@@ -97,6 +97,7 @@ v8-app-template/
 - `npm run db:generate` - Write a migration file from changes to `src/server/db/schema.ts`
 - `npm run db:push` - Apply the schema to the database in `DATABASE_URL`
 - `npm run db:check` - Verify the migration folder is consistent (runs in CI)
+- `npm run e2e` - Run the end-to-end suites (dispatch, payments, money, payouts, companion, rights, deid, scope, MFA, email) against a local Postgres with Stripe/Resend stand-ins; `npm run e2e -- money` for one
 
 ## 🗄️ Database
 
