@@ -89,3 +89,4 @@ pids
 # Local dev secrets and deploy staging (never commit)
 .localdb/
 deploy-dist/
+ai-brief-validation.md
