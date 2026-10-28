@@ -1,0 +1,22 @@
+name: CI
+
+# Typecheck + the full test suite (incl. the 108-case triage set) on every push and PR.
+# The triage set is the safety floor; a change that under-triages any case fails here before it can deploy.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx vitest run
