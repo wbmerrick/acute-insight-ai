@@ -19,4 +19,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx tsc --noEmit
+      - run: npx drizzle-kit check
+        env:
+          DATABASE_URL: postgres://ci:ci@localhost:5432/ci   # config only; check never connects
       - run: npx vitest run

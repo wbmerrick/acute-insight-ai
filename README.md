@@ -94,6 +94,22 @@ v8-app-template/
 - `npm run format` - Format source files with Prettier
 - `npm run clean` - Remove build output and Vite's dependency cache
 - `npm run reset` - Clean the project and reinstall dependencies
+- `npm run db:generate` - Write a migration file from changes to `src/server/db/schema.ts`
+- `npm run db:push` - Apply the schema to the database in `DATABASE_URL`
+- `npm run db:check` - Verify the migration folder is consistent (runs in CI)
+
+## 🗄️ Database
+
+`src/server/db/schema.ts` is the single source of truth for tables, constraints and indexes; `drizzle/` is the migration history generated from it. Role, grants and row-level security live in `db/roles-and-rls.sql` because Drizzle does not manage them.
+
+Fresh database (local or a new Supabase project):
+
+```bash
+DATABASE_URL=postgres://… npm run db:push
+psql "$DATABASE_URL" -f db/roles-and-rls.sql
+```
+
+Schema change: edit `schema.ts` → `npm run db:generate` → review the file in `drizzle/` → `npm run db:push` against local, then production. The server connects as `acute_app`, which cannot update or delete audit rows.
 
 ## 🎨 UI Components
 

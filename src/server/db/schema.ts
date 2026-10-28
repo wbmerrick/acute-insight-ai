@@ -7,6 +7,8 @@ import {
   serial,
   integer,
   jsonb,
+  index,
+  unique,
 } from 'drizzle-orm/pg-core';
 
 // ─── BetterAuth tables ───────────────────────────────────────────────────────
@@ -39,7 +41,9 @@ export const session = pgTable('session', {
   updatedAt: timestamp('updated_at')
     .defaultNow()
     .$onUpdate(() => new Date()),
-});
+}, (t) => [
+  index('session_user_idx').on(t.userId),
+]);
 
 export const account = pgTable('account', {
   id: varchar('id', { length: 36 }).primaryKey(),
@@ -59,7 +63,9 @@ export const account = pgTable('account', {
   updatedAt: timestamp('updated_at')
     .defaultNow()
     .$onUpdate(() => new Date()),
-});
+}, (t) => [
+  index('account_user_idx').on(t.userId),
+]);
 
 export const verification = pgTable('verification', {
   id: varchar('id', { length: 36 }).primaryKey(),
@@ -80,7 +86,9 @@ export const twoFactor = pgTable('two_factor', {
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
   verified: boolean('verified').default(true),
-});
+}, (t) => [
+  index('two_factor_user_idx').on(t.userId),
+]);
 
 // ─── Patient intake sessions ─────────────────────────────────────────────────
 
@@ -101,7 +109,9 @@ export const intakeSessions = pgTable('intake_sessions', {
   updatedAt: timestamp('updated_at')
     .defaultNow()
     .$onUpdate(() => new Date()),
-});
+}, (t) => [
+  index('intake_sessions_user_idx').on(t.userId, t.createdAt),
+]);
 
 // ─── Provider early-access requests ──────────────────────────────────────────
 
@@ -195,7 +205,13 @@ export const visits = pgTable('visits', {
   acceptedAt: timestamp('accepted_at'),
   completedAt: timestamp('completed_at'),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (t) => [
+  index('visits_queue_idx').on(t.status, t.patientState, t.queuedAt),
+  index('visits_clinician_idx').on(t.clinicianUserId, t.status),
+  index('visits_patient_idx').on(t.patientUserId),
+  index('visits_checkout_idx').on(t.stripeCheckoutId),
+  index('visits_payout_idx').on(t.payoutStatus, t.clinicianUserId),
+]);
 
 // ─── Companion: scheduled check-ins ──────────────────────────────────────────
 // After a visit (or an urgent/telehealth intake with no visit), Ace checks in.
@@ -221,7 +237,13 @@ export const checkins = pgTable('checkins', {
   acknowledgedBy: varchar('acknowledged_by', { length: 36 }).references(() => user.id, { onDelete: 'set null' }),
   acknowledgedAt: timestamp('acknowledged_at'),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (t) => [
+  index('checkins_due_idx').on(t.status, t.dueAt),
+  index('checkins_intake_idx').on(t.intakeSessionId),
+  index('checkins_patient_idx').on(t.patientUserId, t.status),
+  index('checkins_followup_idx').on(t.followupIntakeId),
+  index('checkins_acknowledged_by_idx').on(t.acknowledgedBy),
+]);
 
 // ─── Dispatch: online sessions (for "visits per online clinician-hour") ──────
 export const clinicianOnlineLog = pgTable('clinician_online_log', {
@@ -231,7 +253,9 @@ export const clinicianOnlineLog = pgTable('clinician_online_log', {
     .references(() => user.id, { onDelete: 'cascade' }),
   wentOnlineAt: timestamp('went_online_at').notNull(),
   wentOfflineAt: timestamp('went_offline_at'), // null while still online
-});
+}, (t) => [
+  index('clinician_online_log_user_idx').on(t.userId, t.wentOfflineAt),
+]);
 
 // ─── Audit log — append-only record of who touched what ──────────────────────
 // Ids and action names only. Never request bodies, never clinical text.
@@ -247,7 +271,11 @@ export const auditEvents = pgTable('audit_events', {
   userAgent: varchar('user_agent', { length: 255 }),
   meta: jsonb('meta'),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (t) => [
+  index('audit_events_created_idx').on(t.createdAt.desc()),
+  index('audit_events_actor_idx').on(t.actorUserId, t.createdAt.desc()),
+  index('audit_events_patient_idx').on(t.patientUserId, t.createdAt.desc()),
+]);
 
 // ─── Provider–patient assignment (minimum necessary) ─────────────────────────
 // With PROVIDER_SCOPE=assigned, a provider sees only patients assigned to them
@@ -262,4 +290,9 @@ export const patientAssignments = pgTable('patient_assignments', {
     .references(() => user.id, { onDelete: 'cascade' }),
   assignedBy: varchar('assigned_by', { length: 36 }).references(() => user.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (t) => [
+  unique('patient_assignments_provider_user_id_patient_user_id_unique').on(t.providerUserId, t.patientUserId),
+  index('patient_assignments_provider_idx').on(t.providerUserId),
+  index('patient_assignments_patient_idx').on(t.patientUserId),
+  index('patient_assignments_assigned_by_idx').on(t.assignedBy),
+]);
