@@ -434,8 +434,9 @@ export default function ProvidersPage() {
                     />
                   )}
                   <span
+                    aria-hidden="true"
                     className="block text-4xl font-bold mb-4 leading-none"
-                    style={{ color: `hsl(var(--primary) / 0.2)`, fontFamily: 'var(--font-heading)' }}
+                    style={{ color: `hsl(var(--primary) / 0.5)`, fontFamily: 'var(--font-heading)' }}
                   >
                     {step.number}
                   </span>

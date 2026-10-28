@@ -635,7 +635,7 @@ function ClinicianContent() {
       <header className="sticky top-0 z-40 px-6 py-4 shrink-0" style={{ background: 'hsl(var(--card) / 0.9)', borderBottom: `1px solid hsl(var(--border-subtle) / 0.4)`, backdropFilter: 'blur(12px)' }}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2" aria-label="Acute Insight home">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--primary) / 0.15)', border: '1px solid hsl(var(--primary) / 0.3)' }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
               </div>

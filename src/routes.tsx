@@ -24,6 +24,7 @@ const DemoPage = lazy(() => import('./pages/demo'));
 const PrivacyPage = lazy(() => import('./pages/privacy'));
 const TermsPage = lazy(() => import('./pages/terms'));
 const SecurityPage = lazy(() => import('./pages/security'));
+const AccessibilityPage = lazy(() => import('./pages/accessibility'));
 
 export const routes: RouteObject[] = [
   {
@@ -105,6 +106,10 @@ export const routes: RouteObject[] = [
   {
     path: '/security',
     element: <SecurityPage />,
+  },
+  {
+    path: '/accessibility',
+    element: <AccessibilityPage />,
   },
   {
     id: 'airo-not-found',

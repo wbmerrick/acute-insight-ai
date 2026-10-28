@@ -299,7 +299,7 @@ function AccessRequestsPanel() {
         </p>
       )}
       {!error && rows !== null && rows.length > 0 && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0}>
           <table className="w-full text-sm">
             <thead>
               <tr style={{ borderBottom: '1px solid hsl(var(--border-subtle) / 0.5)' }}>
@@ -458,7 +458,7 @@ function AuditPanel() {
       {!error && rows === null && <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--text-dim))' }}>Loading…</p>}
       {!error && rows !== null && shown.length === 0 && <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--text-dim))' }}>No events{filter ? ' match' : ' yet'}.</p>}
       {!error && shown.length > 0 && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" tabIndex={0}>
           <table className="w-full text-sm">
             <thead>
               <tr style={{ borderBottom: '1px solid hsl(var(--border-subtle) / 0.5)' }}>
@@ -959,7 +959,7 @@ export default function AdminProvidersPage() {
                         {u.isAdmin || isCurrentUser ? (
                           <span
                             className="text-xs"
-                            style={{ color: `hsl(var(--muted-foreground) / 0.5)`, fontFamily: 'var(--font-sans)' }}
+                            style={{ color: `hsl(var(--text-dimmer))`, fontFamily: 'var(--font-sans)' }}
                           >
                             {isCurrentUser ? admin_providers.labelYou : admin_providers.labelAdmin}
                           </span>

@@ -88,7 +88,7 @@ function PatientBriefCard({
         <div
           className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0"
           style={{
-            background: hasFlags ? `hsl(var(--destructive) / 0.12)` : `hsl(var(--primary) / 0.12)`,
+            background: hasFlags ? `hsl(var(--destructive) / 0.06)` : `hsl(var(--primary) / 0.12)`,
             color: hasFlags ? `hsl(var(--destructive))` : `hsl(var(--primary))`,
             fontFamily: 'var(--font-heading)',
           }}
@@ -151,7 +151,7 @@ function DetailPanel({ intake }: { intake: ProviderIntake }) {
       initial={{ opacity: 0, x: 12 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="h-full overflow-y-auto"
+      className="h-full overflow-y-auto" tabIndex={0} aria-label="Patient brief"
     >
       {/* Patient header */}
       <div
@@ -450,7 +450,7 @@ function DashboardContent() {
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2" aria-label="Acute Insight home">
               <div
                 className="w-7 h-7 rounded-lg flex items-center justify-center"
                 style={{ background: `hsl(var(--primary) / 0.15)`, border: `1px solid hsl(var(--primary) / 0.3)` }}

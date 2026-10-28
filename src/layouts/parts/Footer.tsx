@@ -25,6 +25,7 @@ const columns: { heading: string; links: { label: string; to: string }[] }[] = [
       { label: 'Privacy policy', to: '/privacy' },
       { label: 'Terms of use', to: '/terms' },
       { label: 'Security', to: '/security' },
+      { label: 'Accessibility', to: '/accessibility' },
     ],
   },
 ];

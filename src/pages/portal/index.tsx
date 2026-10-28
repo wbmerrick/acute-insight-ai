@@ -202,7 +202,7 @@ function IntakeRow({ intake, onCheckIn, onChanged }: { intake: IntakeSession; on
           {disp && dm && (
             <span
               className="px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide"
-              style={{ fontFamily: 'var(--font-mono)', background: `hsl(${dm.h} / 0.12)`, color: `hsl(${dm.h})`, border: `1px solid hsl(${dm.h} / 0.3)` }}
+              style={{ fontFamily: 'var(--font-mono)', background: `hsl(${dm.h} / 0.06)`, color: `hsl(${dm.h})`, border: `1px solid hsl(${dm.h} / 0.3)` }}
             >
               {dm.tag}
             </span>
@@ -371,7 +371,7 @@ function PortalContent() {
       >
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2" aria-label="Acute Insight home">
               <div
                 className="w-7 h-7 rounded-lg flex items-center justify-center"
                 style={{ background: `hsl(var(--primary) / 0.15)`, border: `1px solid hsl(var(--primary) / 0.3)` }}
@@ -536,7 +536,7 @@ function PortalContent() {
                           type="button"
                           onClick={() => void answerCheckin(pendingCheckin, v)}
                           className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
-                          style={{ background: `hsl(${h} / 0.12)`, color: `hsl(${h})`, border: `1px solid hsl(${h} / 0.45)`, fontFamily: 'var(--font-sans)' }}
+                          style={{ background: `hsl(${h} / 0.06)`, color: `hsl(${h})`, border: `1px solid hsl(${h} / 0.45)`, fontFamily: 'var(--font-sans)' }}
                         >
                           {label}
                         </button>
