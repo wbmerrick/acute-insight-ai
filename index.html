@@ -2,17 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <script>
-      (function () {
-        try {
-          var u = new URL(location.href);
-          if (u.searchParams.has('airoShareToken')) {
-            u.searchParams.delete('airoShareToken');
-            history.replaceState(null, '', u.toString());
-          }
-        } catch (e) {}
-      })();
-    </script>
     <meta name="referrer" content="same-origin" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -35,9 +24,8 @@
     <script src="/airo-video-slots.js"></script>
     <script src="/airo-logo-orientation.js"></script>
   </head>
-  <body class="fs-unmask-airo-app-builder">
-    <div id="app" class="fs-unmask-airo-app-builder"><!--app-html--></div>
+  <body>
+    <div id="app"><!--app-html--></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script src="/analytics.js"></script>
   </body>
 </html>

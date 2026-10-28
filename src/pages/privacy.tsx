@@ -71,18 +71,17 @@ export default function PrivacyPage() {
       <ul>
         <li>You can view your intake history in your portal at any time.</li>
         <li>
-          You can request an export or deletion of your account and data, and
-          we will honor it. During the beta, send the request through the{' '}
-          <Link to="/providers#early-access">contact form</Link> or tell your
-          participating provider.
+          You can download everything we hold about you, or delete your
+          account, yourself from your portal (Profile → Your data). Deletion
+          is blocked only while a clinician visit is in progress.
         </li>
       </ul>
 
       <h2>Cookies</h2>
       <p>
-        We use a session cookie to keep you signed in and basic analytics to
-        understand site usage. We do not use advertising cookies. You can
-        decline non-essential cookies in the consent banner.
+        We use one cookie: the session cookie that keeps you signed in. We do
+        not use analytics or advertising cookies, and no third-party tracking
+        scripts run on this site.
       </p>
 
       <h2>Who this service is for</h2>

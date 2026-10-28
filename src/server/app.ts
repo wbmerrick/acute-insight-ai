@@ -284,6 +284,15 @@ const app = express();
 // the sitemap origin in robots.txt.
 app.set("trust proxy", true);
 
+// API responses can carry PHI: never cache them anywhere (browser, proxy, CDN).
+// Vercel's edge adds the site-wide security headers from vercel.json; this keeps
+// the no-store guarantee when the server runs outside Vercel (local, tests).
+app.use("/api", (_req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  next();
+});
+
 // Stripe signs the raw bytes — this route must see them before express.json() runs.
 app.post("/api/stripe/webhook", express.raw({ type: "*/*" }), stripe__webhook__post);
 
