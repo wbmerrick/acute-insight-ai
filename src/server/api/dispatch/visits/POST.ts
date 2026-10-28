@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
 import { visits, intakeSessions, patientProfiles, clinicianProfiles } from '../../../db/schema.js';
-import { requirePatient, isUsState, DISPATCHABLE, logErr } from '../../../lib/dispatch.js';
+import { requirePatient, isUsState, DISPATCHABLE, logErr, publicBaseUrl } from '../../../lib/dispatch.js';
 import type { ClinicalBrief, Acuity } from '../../../../lib/clinical-brief.js';
 import { sendSms, newVisitText, shouldThrottle, smsAvailable } from '../../../lib/sms.js';
 import { stripeConfigured, priceCentsFor, createVisitCheckout } from '../../../lib/stripe.js';
@@ -49,7 +49,7 @@ export default async function handler(req: Request, res: Response) {
     if (existing) await db.update(patientProfiles).set(profilePatch).where(eq(patientProfiles.userId, userId));
     else await db.insert(patientProfiles).values({ userId, ...profilePatch });
 
-    const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
+    const base = publicBaseUrl(req);
     const price = stripeConfigured() ? priceCentsFor(acuity) : null;
 
     // One request per intake — re-requesting returns the existing visit (or re-opens checkout if unpaid).

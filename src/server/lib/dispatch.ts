@@ -103,3 +103,16 @@ export async function requirePatient(req: Request, res: Response): Promise<strin
 export function logErr(event: string, error: unknown) {
   console.error(JSON.stringify({ event, error: error instanceof Error ? error.message : String(error) }));
 }
+
+/**
+ * Public origin for links we put in texts and emails. Never derived from the
+ * request's Host header when a configured value exists — behind a proxy that
+ * header is attacker-influenced, and a link in a clinician's text must be ours.
+ */
+export function publicBaseUrl(req: Request): string {
+  const env = process.env;
+  if (env.PUBLIC_BASE_URL) return env.PUBLIC_BASE_URL.replace(/\/$/, '');
+  if (env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  if (env.VERCEL_URL) return `https://${env.VERCEL_URL}`;
+  return `${req.protocol}://${req.get('host')}`;
+}

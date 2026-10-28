@@ -50,6 +50,13 @@ function usd(cents: number) {
   return cents % 100 === 0 ? `$${cents / 100}` : `$${(cents / 100).toFixed(2)}`;
 }
 
+/** Truthful money line for a cancelled request — depends on what actually happened to the card. */
+export function cancelledMoneyLine(paymentStatus?: string | null): string {
+  if (paymentStatus === 'refunded') return 'Your payment has been refunded in full; it can take a few days to show on your statement.';
+  if (paymentStatus === 'captured') return 'Your payment is being refunded.';
+  return 'No charge was made.';
+}
+
 export function RequestClinician({ intakeId, disposition }: { intakeId: number; disposition: Disposition }) {
   const [price, setPrice] = useState<number | null>(null);
   const [profile, setProfile] = useState<{ state: string; phone: string } | null>(null);
@@ -180,7 +187,7 @@ export function RequestClinician({ intakeId, disposition }: { intakeId: number; 
         {visit.status === 'cancelled' && (
           <>
             <h3 style={{ margin: '0 0 6px', fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: 17, color: 'hsl(var(--foreground))' }}>Request cancelled</h3>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'hsl(var(--text-dim))' }}>No charge was made. If you still need care, use the suggested next step above.</p>
+            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'hsl(var(--text-dim))' }}>{cancelledMoneyLine(visit.paymentStatus)} If you still need care, use the suggested next step above.</p>
           </>
         )}
         {visit.status === 'completed' && (

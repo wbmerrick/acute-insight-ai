@@ -85033,10 +85033,10 @@ function getAuth() {
       try {
         const originUrl = new URL(origin);
         const hostname = originUrl.hostname;
-        if (originUrl.protocol === "https:" && hostname.endsWith(".vercel.app")) {
+        if (originUrl.protocol === "https:" && (hostname === "acuteinsight.ai" || hostname === "www.acuteinsight.ai")) {
           return [origin];
         }
-        if (hostname.endsWith(".airoapp.ai") || hostname.endsWith(".test-airoapp.ai")) {
+        if (originUrl.protocol === "https:" && hostname.endsWith(".vercel.app") && /^acute-insight(-[a-z0-9-]+)?\.vercel\.app$/.test(hostname)) {
           return [origin];
         }
         if (hostname === "localhost" || hostname === "127.0.0.1") {
@@ -85481,12 +85481,22 @@ async function requirePatient(req, res) {
 function logErr(event, error3) {
   console.error(JSON.stringify({ event, error: error3 instanceof Error ? error3.message : String(error3) }));
 }
+function publicBaseUrl(req) {
+  const env3 = process.env;
+  if (env3.PUBLIC_BASE_URL) return env3.PUBLIC_BASE_URL.replace(/\/$/, "");
+  if (env3.VERCEL_PROJECT_PRODUCTION_URL) return `https://${env3.VERCEL_PROJECT_PRODUCTION_URL}`;
+  if (env3.VERCEL_URL) return `https://${env3.VERCEL_URL}`;
+  return `${req.protocol}://${req.get("host")}`;
+}
 
 // src/server/lib/audit.ts
 function clientIp(req) {
+  const real2 = req.headers["x-real-ip"];
+  if (typeof real2 === "string" && real2.trim()) return real2.trim().slice(0, 64);
   const xf = req.headers["x-forwarded-for"];
-  const first = Array.isArray(xf) ? xf[0] : (xf ?? "").split(",")[0];
-  return (first || req.ip || "").trim().slice(0, 64);
+  const list = (Array.isArray(xf) ? xf.join(",") : xf ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const last = list[list.length - 1];
+  return (last || req.socket?.remoteAddress || "").slice(0, 64);
 }
 function safeMeta(meta2) {
   if (!meta2) return null;
@@ -85576,20 +85586,37 @@ function flatten(obj, prefix = "", out = new URLSearchParams()) {
   }
   return out;
 }
+var StripeError = class extends Error {
+  constructor(message2, status, code) {
+    super(message2);
+    this.status = status;
+    this.code = code;
+  }
+  status;
+  code;
+  get transient() {
+    return this.status === 0 || this.status >= 500 || this.status === 429;
+  }
+};
 async function stripePost(path2, body, idempotencyKey) {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("Stripe not configured");
-  const res = await fetch(`${API}${path2}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-      ...idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}
-    },
-    body: flatten(body).toString()
-  });
+  let res;
+  try {
+    res = await fetch(`${API}${path2}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+        ...idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}
+      },
+      body: flatten(body).toString()
+    });
+  } catch (err) {
+    throw new StripeError(`Stripe ${path2}: ${err.message}`, 0);
+  }
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(`Stripe ${path2}: ${data.error?.message ?? res.status}`);
+  if (!res.ok) throw new StripeError(`Stripe ${path2}: ${data.error?.message ?? res.status}`, res.status, data.error?.code);
   return data;
 }
 async function createVisitCheckout(opts) {
@@ -85623,14 +85650,45 @@ async function createVisitCheckout(opts) {
       expires_at: Math.floor(Date.now() / 1e3) + 30 * 60
       // 30 min to finish checkout
     },
-    `visit-${opts.visitId}-checkout`
+    // Same key within a minute dedupes double-clicks; a later re-open (after the
+    // first session expired) gets a fresh key — Stripe rejects a reused key with
+    // different params (expires_at moves), which used to make re-opening fail.
+    `visit-${opts.visitId}-checkout-${Math.floor(Date.now() / 6e4)}`
   );
+}
+async function expireCheckout(sessionId) {
+  await stripePost(`/checkout/sessions/${sessionId}/expire`, {});
+}
+async function refundPayment(paymentIntent) {
+  await stripePost("/refunds", { payment_intent: paymentIntent }, `refund-${paymentIntent}`);
 }
 async function capturePayment(paymentIntent) {
   await stripePost(`/payment_intents/${paymentIntent}/capture`, {}, `capture-${paymentIntent}`);
 }
 async function releasePayment(paymentIntent) {
   await stripePost(`/payment_intents/${paymentIntent}/cancel`, { cancellation_reason: "abandoned" }, `cancel-${paymentIntent}`);
+}
+async function settleCancelledVisit(v) {
+  try {
+    if (v.paymentStatus === "authorized" && v.pi) {
+      await releasePayment(v.pi);
+      await db.update(visits).set({ paymentStatus: "released" }).where(eq(visits.id, v.id));
+      return "released";
+    }
+    if (v.paymentStatus === "captured" && v.pi) {
+      await refundPayment(v.pi);
+      await db.update(visits).set({ paymentStatus: "refunded" }).where(eq(visits.id, v.id));
+      return "refunded";
+    }
+    if (v.paymentStatus === "pending" && v.checkout && stripeConfigured()) {
+      await expireCheckout(v.checkout);
+      return "checkout_closed";
+    }
+    return "none";
+  } catch (err) {
+    console.error(JSON.stringify({ event: "stripe.settle_failed", visit: v.id, paymentStatus: v.paymentStatus, error: err.message }));
+    return "failed";
+  }
 }
 function verifyWebhook(rawBody, sigHeader, secret, toleranceSec = 300, now2 = Date.now()) {
   if (!sigHeader) return false;
@@ -85693,31 +85751,35 @@ async function handler10(req, res) {
     if (u.role === "provider" || u.isAdmin) {
       return res.status(409).json({ error: "Clinician and admin accounts are removed by an administrator, not self-service" });
     }
-    const [active] = await db.select({ id: visits.id }).from(visits).where(and(eq(visits.patientUserId, userId), eq(visits.status, "accepted"))).limit(1);
-    if (active) return res.status(409).json({ error: "A clinician has accepted a visit with you. Finish or cancel that visit first." });
-    const open2 = await db.update(visits).set({ status: "cancelled" }).where(and(eq(visits.patientUserId, userId), inArray(visits.status, ["queued", "pending_payment"]))).returning({ id: visits.id, paymentStatus: visits.paymentStatus, pi: visits.stripePaymentIntent });
-    for (const v of open2) {
-      if (v.paymentStatus === "authorized" && v.pi) {
-        try {
-          await releasePayment(v.pi);
-        } catch (err) {
-          logErr("patient.delete.release_failed", err);
-        }
+    const configured = process.env.ACCOUNT_DELETE_MODE === "deidentify" ? "deidentify" : "delete";
+    const outcome = await db.transaction(async (tx) => {
+      const mine = await tx.select({ id: visits.id, status: visits.status, paymentStatus: visits.paymentStatus, payoutStatus: visits.payoutStatus, pi: visits.stripePaymentIntent, checkout: visits.stripeCheckoutId }).from(visits).where(eq(visits.patientUserId, userId)).for("update");
+      if (mine.some((v) => v.status === "accepted")) return { blocked: true };
+      const open2 = mine.filter((v) => v.status === "queued" || v.status === "pending_payment");
+      if (open2.length) {
+        await tx.update(visits).set({ status: "cancelled" }).where(inArray(visits.id, open2.map((v) => v.id)));
       }
-    }
-    const mode = process.env.ACCOUNT_DELETE_MODE === "deidentify" ? "deidentify" : "delete";
-    audit(req, { action: mode === "deidentify" ? "patient.deidentify" : "patient.delete", actorUserId: userId, actorRole: "patient", resourceType: "user", resourceId: userId, patientUserId: userId, meta: { cancelledRequests: open2.length, mode } });
-    if (mode === "deidentify") {
-      await db.delete(session).where(eq(session.userId, userId));
-      await db.delete(account).where(eq(account.userId, userId));
-      await db.delete(twoFactor2).where(eq(twoFactor2.userId, userId));
-      await db.delete(patientProfiles).where(eq(patientProfiles.userId, userId));
-      await db.update(user).set({ name: "Deleted patient", email: `deleted+${userId}@deleted.invalid`, emailVerified: false, role: "deleted", twoFactorEnabled: false, image: null }).where(eq(user.id, userId));
-    } else {
-      await db.delete(user).where(eq(user.id, userId));
-    }
+      const hasLedger = mine.some(
+        (v) => v.paymentStatus === "captured" || v.paymentStatus === "refunded" || v.payoutStatus === "owed" || v.payoutStatus === "transferred"
+      );
+      const mode = configured === "deidentify" || hasLedger ? "deidentify" : "delete";
+      if (mode === "deidentify") {
+        await tx.delete(session).where(eq(session.userId, userId));
+        await tx.delete(account).where(eq(account.userId, userId));
+        await tx.delete(twoFactor2).where(eq(twoFactor2.userId, userId));
+        await tx.delete(patientProfiles).where(eq(patientProfiles.userId, userId));
+        await tx.update(user).set({ name: "Deleted patient", email: `deleted+${userId}@deleted.invalid`, emailVerified: false, role: "deleted", twoFactorEnabled: false, image: null }).where(eq(user.id, userId));
+      } else {
+        await tx.delete(user).where(eq(user.id, userId));
+      }
+      return { blocked: false, mode, open: open2, hasLedger };
+    });
+    if (outcome.blocked) return res.status(409).json({ error: "A clinician has accepted a visit with you. Finish or cancel that visit first." });
+    for (const v of outcome.open) await settleCancelledVisit(v);
+    audit(req, { action: outcome.mode === "deidentify" ? "patient.deidentify" : "patient.delete", actorUserId: userId, actorRole: "patient", resourceType: "user", resourceId: userId, patientUserId: userId, meta: { cancelledRequests: outcome.open.length, mode: outcome.mode, ledgerRetained: outcome.hasLedger } });
     res.clearCookie("better-auth.session_token", { path: "/" });
-    res.json({ ok: true, mode });
+    res.clearCookie("__Secure-better-auth.session_token", { path: "/", secure: true });
+    res.json({ ok: true, mode: outcome.mode, ledgerRetained: outcome.hasLedger });
   } catch (error3) {
     logErr("patient.delete.error", error3);
     res.status(500).json({ error: "Failed to delete your account" });
@@ -86292,8 +86354,8 @@ var sendSms = async (to, body) => {
       body: new URLSearchParams({ To: to, From: from, Body: body }).toString()
     });
     if (!res.ok) {
-      const text2 = await res.text().catch(() => "");
-      console.error(JSON.stringify({ event: "sms.failed", status: res.status, to: mask2(to), detail: text2.slice(0, 200) }));
+      const body2 = await res.json().catch(() => ({}));
+      console.error(JSON.stringify({ event: "sms.failed", status: res.status, to: mask2(to), code: body2.code ?? null, message: (body2.message ?? "").replace(/\+?\d{7,}/g, "[number]").slice(0, 120) }));
       return false;
     }
     console.log(JSON.stringify({ event: "sms.sent", to: mask2(to) }));
@@ -86479,7 +86541,7 @@ async function handler13(req, res) {
             intakeSessionId: checkin.intakeSessionId,
             patientUserId: session2.user.id,
             followupLevel: brief.disposition.level,
-            base: process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`
+            base: publicBaseUrl(req)
           });
         }
       } else {
@@ -86636,6 +86698,7 @@ async function handler16(req, res) {
     const [target] = await db.select().from(user).where(eq(user.id, targetId)).limit(1);
     if (!target) return res.status(404).json({ error: "User not found" });
     await db.update(user).set({ role }).where(eq(user.id, targetId));
+    if (role === "patient") await db.update(clinicianProfiles).set({ online: false, lastSeenAt: /* @__PURE__ */ new Date() }).where(eq(clinicianProfiles.userId, targetId));
     audit(req, { action: "admin.role.change", actorUserId: session2.user.id, actorRole: "admin", resourceType: "user", resourceId: String(targetId), meta: { from: target.role ?? null, to: role } });
     res.json({ ok: true, id: targetId, role });
   } catch (error3) {
@@ -87053,7 +87116,7 @@ async function handler25(req, res) {
       medications: patientProfiles.medications,
       allergies: patientProfiles.allergies
     }).from(visits).innerJoin(intakeSessions, eq(visits.intakeSessionId, intakeSessions.id)).innerJoin(user, eq(visits.patientUserId, user.id)).leftJoin(patientProfiles, eq(patientProfiles.userId, visits.patientUserId)).where(and(eq(visits.clinicianUserId, ctx.userId), eq(visits.status, "accepted"))).orderBy(desc(visits.acceptedAt)).limit(10);
-    for (const a of active) audit(req, { action: "brief.view", actorUserId: ctx.userId, actorRole: ctx.isAdmin ? "admin" : "provider", resourceType: "visit", resourceId: a.id, patientUserId: a.patientUserId, meta: { intakeSessionId: a.intakeSessionId } });
+    for (const a of active) if (!shouldThrottle(`brief:${ctx.userId}:${a.id}`, 60 * 60 * 1e3)) audit(req, { action: "brief.view", actorUserId: ctx.userId, actorRole: ctx.isAdmin ? "admin" : "provider", resourceType: "visit", resourceId: a.id, patientUserId: a.patientUserId, meta: { intakeSessionId: a.intakeSessionId } });
     const iso = (d) => d ? d.toISOString() : null;
     res.json({
       online: !!ctx.profile.online,
@@ -87095,7 +87158,7 @@ async function handler26(req, res) {
     const [existing] = await db.select({ id: patientProfiles.id }).from(patientProfiles).where(eq(patientProfiles.userId, userId)).limit(1);
     if (existing) await db.update(patientProfiles).set(profilePatch).where(eq(patientProfiles.userId, userId));
     else await db.insert(patientProfiles).values({ userId, ...profilePatch });
-    const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
+    const base = publicBaseUrl(req);
     const price = stripeConfigured() ? priceCentsFor(acuity) : null;
     const [prior] = await db.select({ id: visits.id, status: visits.status, checkout: visits.stripeCheckoutId, amount: visits.amountCents }).from(visits).where(eq(visits.intakeSessionId, id)).limit(1);
     if (prior) {
@@ -87201,11 +87264,11 @@ async function handler28(req, res) {
     if (!scopeCovers(ctx.profile.maxAcuity, visit.acuity)) {
       return res.status(403).json({ error: "Outside your accepted scope" });
     }
-    const [accepted] = await db.update(visits).set({ status: "accepted", clinicianUserId: ctx.userId, acceptedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, id), eq(visits.status, "queued"))).returning({ id: visits.id });
+    const [accepted] = await db.update(visits).set({ status: "accepted", clinicianUserId: ctx.userId, acceptedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, id), eq(visits.status, "queued"))).returning({ id: visits.id, paymentStatus: visits.paymentStatus, pi: visits.stripePaymentIntent });
     if (!accepted) return res.status(409).json({ error: "Another clinician already accepted this visit" });
-    if (visit.paymentStatus === "authorized" && visit.stripePaymentIntent) {
+    if (accepted.paymentStatus === "authorized" && accepted.pi) {
       try {
-        await capturePayment(visit.stripePaymentIntent);
+        await capturePayment(accepted.pi);
         await db.update(visits).set({ paymentStatus: "captured" }).where(eq(visits.id, id));
       } catch (err) {
         logErr("dispatch.accept.capture_failed", err);
@@ -87237,7 +87300,7 @@ async function handler29(req, res) {
     if (!ctx) return;
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid visit id" });
-    const [released] = await db.update(visits).set({ status: "queued", clinicianUserId: null, acceptedAt: null }).where(and(eq(visits.id, id), eq(visits.status, "accepted"), eq(visits.clinicianUserId, ctx.userId))).returning({ id: visits.id, patientUserId: visits.patientUserId });
+    const [released] = await db.update(visits).set({ status: "queued", clinicianUserId: null, acceptedAt: null, queuedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, id), eq(visits.status, "accepted"), eq(visits.clinicianUserId, ctx.userId))).returning({ id: visits.id, patientUserId: visits.patientUserId });
     if (!released) return res.status(404).json({ error: "No accepted visit to release" });
     audit(req, { action: "visit.release", actorUserId: ctx.userId, actorRole: ctx.isAdmin ? "admin" : "provider", resourceType: "visit", resourceId: id, patientUserId: released.patientUserId });
     res.json({ ok: true });
@@ -87284,17 +87347,10 @@ async function handler31(req, res) {
     if (!userId) return;
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid visit id" });
-    const [v] = await db.update(visits).set({ status: "cancelled" }).where(and(eq(visits.id, id), eq(visits.patientUserId, userId), inArray(visits.status, ["queued", "pending_payment"]))).returning({ id: visits.id, paymentStatus: visits.paymentStatus, pi: visits.stripePaymentIntent });
+    const [v] = await db.update(visits).set({ status: "cancelled" }).where(and(eq(visits.id, id), eq(visits.patientUserId, userId), inArray(visits.status, ["queued", "pending_payment"]))).returning({ id: visits.id, paymentStatus: visits.paymentStatus, pi: visits.stripePaymentIntent, checkout: visits.stripeCheckoutId });
     if (!v) return res.status(409).json({ error: "This visit can no longer be cancelled" });
-    if (v.paymentStatus === "authorized" && v.pi) {
-      try {
-        await releasePayment(v.pi);
-        await db.update(visits).set({ paymentStatus: "released" }).where(eq(visits.id, id));
-      } catch (err) {
-        logErr("dispatch.cancel.release_failed", err);
-      }
-    }
-    audit(req, { action: "visit.cancel", actorUserId: userId, actorRole: "patient", resourceType: "visit", resourceId: id, patientUserId: userId, meta: { hadHold: v.paymentStatus === "authorized" } });
+    const money = await settleCancelledVisit(v);
+    audit(req, { action: "visit.cancel", actorUserId: userId, actorRole: "patient", resourceType: "visit", resourceId: id, patientUserId: userId, meta: { money } });
     res.json({ ok: true });
   } catch (error3) {
     logErr("dispatch.cancel.error", error3);
@@ -87314,18 +87370,11 @@ async function handler33(req, res) {
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
     const cutoff = new Date(Date.now() - HOLD_HOURS * 3600 * 1e3);
-    const stale = await db.update(visits).set({ status: "cancelled" }).where(and(inArray(visits.status, ["queued", "pending_payment"]), lt(visits.queuedAt, cutoff))).returning({ id: visits.id, paymentStatus: visits.paymentStatus, pi: visits.stripePaymentIntent });
+    const stale = await db.update(visits).set({ status: "cancelled" }).where(and(inArray(visits.status, ["queued", "pending_payment"]), lt(visits.queuedAt, cutoff))).returning({ id: visits.id, paymentStatus: visits.paymentStatus, pi: visits.stripePaymentIntent, checkout: visits.stripeCheckoutId });
     let released = 0;
     for (const v of stale) {
-      if (v.paymentStatus === "authorized" && v.pi) {
-        try {
-          await releasePayment(v.pi);
-          await db.update(visits).set({ paymentStatus: "released" }).where(eq(visits.id, v.id));
-          released++;
-        } catch (err) {
-          logErr("dispatch.sweep.release_failed", err);
-        }
-      }
+      const money = await settleCancelledVisit(v);
+      if (money === "released" || money === "refunded") released++;
     }
     let transferred = 0;
     if (connectEnabled()) {
@@ -87340,7 +87389,9 @@ async function handler33(req, res) {
           transferred++;
         } catch (err) {
           logErr("dispatch.sweep.transfer_failed", err);
-          await db.update(visits).set({ payoutStatus: "failed" }).where(eq(visits.id, v.id));
+          if (err instanceof StripeError && !err.transient) {
+            await db.update(visits).set({ payoutStatus: "failed" }).where(eq(visits.id, v.id));
+          }
         }
       }
     }
@@ -87474,7 +87525,7 @@ async function handler36(req, res) {
       accountId = acct.id;
       await db.update(clinicianProfiles).set({ stripeAccountId: accountId }).where(eq(clinicianProfiles.userId, ctx.userId));
     }
-    const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
+    const base = publicBaseUrl(req);
     const link = await createAccountLink(accountId, `${base}/clinician?connect=refresh`, `${base}/clinician?connect=done`);
     res.json({ ok: true, url: link.url });
   } catch (error3) {
@@ -87503,8 +87554,18 @@ async function handler37(req, res) {
     if (event.type === "checkout.session.completed" && Number.isInteger(visitId)) {
       const [v] = await db.update(visits).set({ status: "queued", paymentStatus: "authorized", stripePaymentIntent: String(obj.payment_intent ?? ""), queuedAt: /* @__PURE__ */ new Date() }).where(and(eq(visits.id, visitId), eq(visits.status, "pending_payment"))).returning({ id: visits.id, acuity: visits.acuity, patientState: visits.patientState });
       if (v) {
-        const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
+        const base = publicBaseUrl(req);
         void notifyClinicians(v.acuity, v.patientState, base);
+      } else if (typeof obj.payment_intent === "string") {
+        const [cur] = await db.select({ status: visits.status, paymentStatus: visits.paymentStatus }).from(visits).where(eq(visits.id, visitId)).limit(1);
+        if (cur && cur.status === "cancelled" && cur.paymentStatus !== "released") {
+          try {
+            await releasePayment(obj.payment_intent);
+            await db.update(visits).set({ paymentStatus: "released", stripePaymentIntent: obj.payment_intent }).where(eq(visits.id, visitId));
+          } catch (err) {
+            logErr("stripe.webhook.late_release_failed", err);
+          }
+        }
       }
     } else if (event.type === "account.updated" && typeof obj.id === "string") {
       const enabled = obj.payouts_enabled === true && obj.charges_enabled !== false;
@@ -87566,7 +87627,7 @@ async function handler39(req, res) {
     if (!row) return res.status(404).json({ error: "No open check-in" });
     res.json({ ok: true, ...row });
     if (outcome === "worse") {
-      void notifyClinicianOfEscalation({ intakeSessionId: row.intakeSessionId, patientUserId: userId, base: process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}` });
+      void notifyClinicianOfEscalation({ intakeSessionId: row.intakeSessionId, patientUserId: userId, base: publicBaseUrl(req) });
     }
   } catch (error3) {
     logErr("companion.answer.error", error3);
@@ -87584,7 +87645,7 @@ async function handler40(req, res) {
     const due = await db.update(checkins).set({ status: "sent", sentAt: now2 }).where(and(eq(checkins.status, "scheduled"), lte(checkins.dueAt, now2))).returning({ id: checkins.id, patientUserId: checkins.patientUserId, intakeSessionId: checkins.intakeSessionId });
     let texted = 0;
     if (smsAvailable() && due.length > 0) {
-      const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
+      const base = publicBaseUrl(req);
       for (const c of due) {
         try {
           const [p] = await db.select({ phone: patientProfiles.phone }).from(patientProfiles).where(eq(patientProfiles.userId, c.patientUserId)).limit(1);
@@ -87643,7 +87704,9 @@ async function handler42(req, res) {
     if (!ctx) return;
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid check-in id" });
-    const [row] = await db.update(checkins).set({ acknowledgedBy: ctx.userId, acknowledgedAt: /* @__PURE__ */ new Date() }).where(and(eq(checkins.id, id), eq(checkins.status, "escalated"), isNull2(checkins.acknowledgedAt))).returning({ id: checkins.id, patientUserId: checkins.patientUserId });
+    const visible = await visiblePatientIds(ctx.userId, ctx.isAdmin);
+    if (visible && visible.size === 0) return res.status(404).json({ error: "Nothing to acknowledge" });
+    const [row] = await db.update(checkins).set({ acknowledgedBy: ctx.userId, acknowledgedAt: /* @__PURE__ */ new Date() }).where(and(eq(checkins.id, id), eq(checkins.status, "escalated"), isNull2(checkins.acknowledgedAt), ...visible ? [inArray(checkins.patientUserId, [...visible])] : [])).returning({ id: checkins.id, patientUserId: checkins.patientUserId });
     if (!row) return res.status(404).json({ error: "Nothing to acknowledge" });
     audit(req, { action: "checkin.acknowledge", actorUserId: ctx.userId, actorRole: ctx.isAdmin ? "admin" : "provider", resourceType: "checkin", resourceId: id, patientUserId: row.patientUserId });
     res.json({ ok: true });
@@ -87799,6 +87862,31 @@ app.set("trust proxy", true);
 app.use("/api", (_req, res, next) => {
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("X-Content-Type-Options", "nosniff");
+  next();
+});
+app.use("/api", (req, res, next) => {
+  if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") return next();
+  const origin = req.headers.origin;
+  if (!origin) return next();
+  let originHost;
+  try {
+    originHost = new URL(origin).host;
+  } catch {
+    return res.status(403).json({ error: "Bad origin" });
+  }
+  const host = req.get("host") ?? "";
+  const extra = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const ok2 = originHost === host || originHost === "acuteinsight.ai" || originHost === "www.acuteinsight.ai" || extra.some((o) => {
+    try {
+      return new URL(o).host === originHost;
+    } catch {
+      return false;
+    }
+  });
+  if (!ok2) {
+    console.warn(JSON.stringify({ event: "csrf.rejected", origin: originHost, host, path: req.path }));
+    return res.status(403).json({ error: "Cross-site request rejected" });
+  }
   next();
 });
 app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler37);

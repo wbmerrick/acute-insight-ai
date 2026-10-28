@@ -42,8 +42,9 @@ export const sendSms: SmsSender = async (to, body) => {
       body: new URLSearchParams({ To: to, From: from, Body: body }).toString(),
     });
     if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      console.error(JSON.stringify({ event: 'sms.failed', status: res.status, to: mask(to), detail: text.slice(0, 200) }));
+      const body = (await res.json().catch(() => ({}))) as { code?: number; message?: string };
+      // Twilio's error body repeats the destination number — log only the code and a short message.
+      console.error(JSON.stringify({ event: 'sms.failed', status: res.status, to: mask(to), code: body.code ?? null, message: (body.message ?? '').replace(/\+?\d{7,}/g, '[number]').slice(0, 120) }));
       return false;
     }
     console.log(JSON.stringify({ event: 'sms.sent', to: mask(to) }));

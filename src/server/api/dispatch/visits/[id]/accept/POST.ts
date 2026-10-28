@@ -31,15 +31,18 @@ export default async function handler(req: Request, res: Response) {
       .update(visits)
       .set({ status: 'accepted', clinicianUserId: ctx.userId, acceptedAt: new Date() })
       .where(and(eq(visits.id, id), eq(visits.status, 'queued')))
-      .returning({ id: visits.id });
+      .returning({ id: visits.id, paymentStatus: visits.paymentStatus, pi: visits.stripePaymentIntent });
 
     if (!accepted) return res.status(409).json({ error: 'Another clinician already accepted this visit' });
 
-    // Paid visit: capture the hold now that a clinician has committed. A capture
-    // failure is logged, not fatal — the visit is already accepted and care comes first.
-    if (visit.paymentStatus === 'authorized' && visit.stripePaymentIntent) {
+    // Paid visit: capture the hold now that a clinician has committed. Decided from the
+    // row the UPDATE returned, not the earlier read — the webhook can flip
+    // pending_payment → authorized in between. A visit re-queued after a release is
+    // already captured and is not charged again. A capture failure is logged, not
+    // fatal — the visit is already accepted and care comes first.
+    if (accepted.paymentStatus === 'authorized' && accepted.pi) {
       try {
-        await capturePayment(visit.stripePaymentIntent);
+        await capturePayment(accepted.pi);
         await db.update(visits).set({ paymentStatus: 'captured' }).where(eq(visits.id, id));
       } catch (err) {
         logErr('dispatch.accept.capture_failed', err);

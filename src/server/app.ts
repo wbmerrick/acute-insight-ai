@@ -293,6 +293,35 @@ app.use("/api", (_req, res, next) => {
   next();
 });
 
+// Cross-site request forgery: a state-changing API call from a browser must come
+// from this site. Browsers send Origin on every cross-site POST (and Chrome on
+// same-site too); a mismatch is rejected before any handler runs. Requests with
+// no Origin (Stripe webhooks, cron, curl) pass — they carry no session cookie
+// a forged form could borrow. SameSite=Lax cookies are the second layer.
+app.use("/api", (req, res, next) => {
+  if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") return next();
+  const origin = req.headers.origin;
+  if (!origin) return next();
+  let originHost: string;
+  try {
+    originHost = new URL(origin).host;
+  } catch {
+    return res.status(403).json({ error: "Bad origin" });
+  }
+  const host = req.get("host") ?? "";
+  const extra = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const ok =
+    originHost === host ||
+    originHost === "acuteinsight.ai" ||
+    originHost === "www.acuteinsight.ai" ||
+    extra.some((o) => { try { return new URL(o).host === originHost; } catch { return false; } });
+  if (!ok) {
+    console.warn(JSON.stringify({ event: "csrf.rejected", origin: originHost, host, path: req.path }));
+    return res.status(403).json({ error: "Cross-site request rejected" });
+  }
+  next();
+});
+
 // Stripe signs the raw bytes — this route must see them before express.json() runs.
 app.post("/api/stripe/webhook", express.raw({ type: "*/*" }), stripe__webhook__post);
 

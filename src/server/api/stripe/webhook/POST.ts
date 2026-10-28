@@ -2,8 +2,8 @@ import type { Request, Response } from 'express';
 import { and, eq } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
 import { visits, clinicianProfiles } from '../../../db/schema.js';
-import { verifyWebhook } from '../../../lib/stripe.js';
-import { logErr } from '../../../lib/dispatch.js';
+import { verifyWebhook, releasePayment } from '../../../lib/stripe.js';
+import { logErr, publicBaseUrl } from '../../../lib/dispatch.js';
 import { notifyClinicians } from '../../dispatch/visits/POST.js';
 
 /**
@@ -37,8 +37,20 @@ export default async function handler(req: Request, res: Response) {
         .where(and(eq(visits.id, visitId), eq(visits.status, 'pending_payment')))
         .returning({ id: visits.id, acuity: visits.acuity, patientState: visits.patientState });
       if (v) {
-        const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
+        const base = publicBaseUrl(req);
         void notifyClinicians(v.acuity, v.patientState, base);
+      } else if (typeof obj.payment_intent === 'string') {
+        // The visit was cancelled (or swept) while Checkout was still open and the patient
+        // finished anyway. Don't leave an authorization on their card.
+        const [cur] = await db.select({ status: visits.status, paymentStatus: visits.paymentStatus }).from(visits).where(eq(visits.id, visitId)).limit(1);
+        if (cur && cur.status === 'cancelled' && cur.paymentStatus !== 'released') {
+          try {
+            await releasePayment(obj.payment_intent);
+            await db.update(visits).set({ paymentStatus: 'released', stripePaymentIntent: obj.payment_intent }).where(eq(visits.id, visitId));
+          } catch (err) {
+            logErr('stripe.webhook.late_release_failed', err);
+          }
+        }
       }
     } else if (event.type === 'account.updated' && typeof obj.id === 'string') {
       const enabled = obj.payouts_enabled === true && obj.charges_enabled !== false;

@@ -51,3 +51,14 @@ describe('payouts', () => {
     expect(connectEnabled()).toBe(false);
   });
 });
+
+describe('StripeError', () => {
+  it('classifies 4xx as definitive and 5xx/429/network as transient', async () => {
+    const { StripeError } = await import('./stripe.js');
+    expect(new StripeError('x', 400).transient).toBe(false);
+    expect(new StripeError('x', 402, 'card_declined').transient).toBe(false);
+    expect(new StripeError('x', 429).transient).toBe(true);
+    expect(new StripeError('x', 503).transient).toBe(true);
+    expect(new StripeError('x', 0).transient).toBe(true);
+  });
+});

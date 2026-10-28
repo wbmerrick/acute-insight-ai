@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { and, eq, lte, lt, inArray } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
 import { checkins, patientProfiles, intakeSessions } from '../../../db/schema.js';
-import { logErr } from '../../../lib/dispatch.js';
+import { logErr, publicBaseUrl } from '../../../lib/dispatch.js';
 import { sendSms, toE164, smsAvailable } from '../../../lib/sms.js';
 
 const EXPIRE_AFTER_DAYS = Number(process.env.CHECKIN_EXPIRE_DAYS ?? 7);
@@ -24,7 +24,7 @@ export default async function handler(req: Request, res: Response) {
 
     let texted = 0;
     if (smsAvailable() && due.length > 0) {
-      const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
+      const base = publicBaseUrl(req);
       for (const c of due) {
         try {
           const [p] = await db.select({ phone: patientProfiles.phone }).from(patientProfiles).where(eq(patientProfiles.userId, c.patientUserId)).limit(1);

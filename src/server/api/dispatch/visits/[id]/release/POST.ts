@@ -5,7 +5,12 @@ import { visits } from '../../../../../db/schema.js';
 import { requireClinician, logErr } from '../../../../../lib/dispatch.js';
 import { audit } from '../../../../../lib/audit.js';
 
-/** Put an accepted visit back in the queue (clinician can't take it after all). */
+/**
+ * Put an accepted visit back in the queue (clinician can't take it after all).
+ * The hold clock restarts so the sweep gives the next clinician a full window.
+ * If the card was already captured it stays captured: the next clinician to accept
+ * isn't charged again, and if nobody does, cancel/sweep refunds it.
+ */
 export default async function handler(req: Request, res: Response) {
   try {
     const ctx = await requireClinician(req, res);
@@ -15,7 +20,7 @@ export default async function handler(req: Request, res: Response) {
 
     const [released] = await db
       .update(visits)
-      .set({ status: 'queued', clinicianUserId: null, acceptedAt: null })
+      .set({ status: 'queued', clinicianUserId: null, acceptedAt: null, queuedAt: new Date() })
       .where(and(eq(visits.id, id), eq(visits.status, 'accepted'), eq(visits.clinicianUserId, ctx.userId)))
       .returning({ id: visits.id, patientUserId: visits.patientUserId });
     if (!released) return res.status(404).json({ error: 'No accepted visit to release' });

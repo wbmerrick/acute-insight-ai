@@ -4,6 +4,7 @@ import { db } from '../../../db/client.js';
 import { visits, intakeSessions, user, patientProfiles, clinicianProfiles } from '../../../db/schema.js';
 import { requireClinician, licensesOf, scopeCovers, logErr } from '../../../lib/dispatch.js';
 import { ACUITY_LEVELS } from '../../../../lib/clinical-brief.js';
+import { shouldThrottle } from '../../../lib/sms.js';
 import { audit } from '../../../lib/audit.js';
 
 /**
@@ -84,7 +85,8 @@ export default async function handler(req: Request, res: Response) {
       .orderBy(desc(visits.acceptedAt))
       .limit(10);
 
-    for (const a of active) audit(req, { action: 'brief.view', actorUserId: ctx.userId, actorRole: ctx.isAdmin ? 'admin' : 'provider', resourceType: 'visit', resourceId: a.id, patientUserId: a.patientUserId, meta: { intakeSessionId: a.intakeSessionId } });
+    // One audit row per clinician+visit per hour, not one per 5-second poll.
+    for (const a of active) if (!shouldThrottle(`brief:${ctx.userId}:${a.id}`, 60 * 60 * 1000)) audit(req, { action: 'brief.view', actorUserId: ctx.userId, actorRole: ctx.isAdmin ? 'admin' : 'provider', resourceType: 'visit', resourceId: a.id, patientUserId: a.patientUserId, meta: { intakeSessionId: a.intakeSessionId } });
     const iso = (d: Date | null) => (d ? d.toISOString() : null);
     res.json({
       online: !!ctx.profile.online,

@@ -90,13 +90,14 @@ export function getAuth() {
         const originUrl = new URL(origin);
         const hostname = originUrl.hostname;
 
-        // Trust this project's Vercel deployment URLs
-        if (originUrl.protocol === 'https:' && hostname.endsWith('.vercel.app')) {
+        // The site itself and its www alias
+        if (originUrl.protocol === 'https:' && (hostname === 'acuteinsight.ai' || hostname === 'www.acuteinsight.ai')) {
           return [origin];
         }
 
-        // Trust all airoapp.ai subdomains
-        if (hostname.endsWith('.airoapp.ai') || hostname.endsWith('.test-airoapp.ai')) {
+        // This project's own Vercel preview/production deployments only — not every
+        // *.vercel.app site on the internet (anyone can deploy one).
+        if (originUrl.protocol === 'https:' && hostname.endsWith('.vercel.app') && /^acute-insight(-[a-z0-9-]+)?\.vercel\.app$/.test(hostname)) {
           return [origin];
         }
 

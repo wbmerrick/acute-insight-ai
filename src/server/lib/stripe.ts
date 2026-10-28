@@ -11,6 +11,9 @@
  * Webhooks need STRIPE_WEBHOOK_SECRET. With nothing set, requests queue for free.
  */
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/client.js';
+import { visits } from '../db/schema.js';
 import type { Acuity } from '../../lib/clinical-brief.js';
 
 const API = process.env.STRIPE_API_BASE ?? 'https://api.stripe.com/v1'; // override only for local tests
@@ -58,20 +61,35 @@ function flatten(obj: Record<string, unknown>, prefix = '', out = new URLSearchP
   return out;
 }
 
+/** Stripe answered with an error. 4xx = our request is wrong (don't retry); 5xx/network = transient. */
+export class StripeError extends Error {
+  constructor(message: string, public readonly status: number, public readonly code?: string) {
+    super(message);
+  }
+  get transient(): boolean {
+    return this.status === 0 || this.status >= 500 || this.status === 429;
+  }
+}
+
 async function stripePost<T>(path: string, body: Record<string, unknown>, idempotencyKey?: string): Promise<T> {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error('Stripe not configured');
-  const res = await fetch(`${API}${path}`, {
+  let res: globalThis.Response;
+  try {
+    res = await fetch(`${API}${path}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${key}`,
       'Content-Type': 'application/x-www-form-urlencoded',
       ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
     },
-    body: flatten(body).toString(),
-  });
+      body: flatten(body).toString(),
+    });
+  } catch (err) {
+    throw new StripeError(`Stripe ${path}: ${(err as Error).message}`, 0);
+  }
   const data = (await res.json().catch(() => ({}))) as T & { error?: { message?: string; code?: string } };
-  if (!res.ok) throw new Error(`Stripe ${path}: ${data.error?.message ?? res.status}`);
+  if (!res.ok) throw new StripeError(`Stripe ${path}: ${data.error?.message ?? res.status}`, res.status, data.error?.code);
   return data;
 }
 
@@ -119,8 +137,21 @@ export async function createVisitCheckout(opts: {
       metadata: { visit_id: String(opts.visitId) },
       expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 min to finish checkout
     },
-    `visit-${opts.visitId}-checkout`,
+    // Same key within a minute dedupes double-clicks; a later re-open (after the
+    // first session expired) gets a fresh key — Stripe rejects a reused key with
+    // different params (expires_at moves), which used to make re-opening fail.
+    `visit-${opts.visitId}-checkout-${Math.floor(Date.now() / 60_000)}`,
   );
+}
+
+/** Close an unfinished Checkout so a cancelled request can't be paid afterwards. */
+export async function expireCheckout(sessionId: string): Promise<void> {
+  await stripePost(`/checkout/sessions/${sessionId}/expire`, {});
+}
+
+/** Full refund of a captured payment (visit was charged but never completed). */
+export async function refundPayment(paymentIntent: string): Promise<void> {
+  await stripePost('/refunds', { payment_intent: paymentIntent }, `refund-${paymentIntent}`);
 }
 
 export async function capturePayment(paymentIntent: string): Promise<void> {
@@ -129,6 +160,41 @@ export async function capturePayment(paymentIntent: string): Promise<void> {
 
 export async function releasePayment(paymentIntent: string): Promise<void> {
   await stripePost(`/payment_intents/${paymentIntent}/cancel`, { cancellation_reason: 'abandoned' }, `cancel-${paymentIntent}`);
+}
+
+/**
+ * A visit just became 'cancelled' (patient cancel, hold-window sweep, account
+ * deletion). Put the money back where it was:
+ *   authorized → release the hold · captured → full refund · pending → close the Checkout.
+ * Returns what happened so callers can audit it. Stripe failures are logged, never thrown —
+ * the visit is already cancelled; money reconciliation can retry.
+ */
+export async function settleCancelledVisit(v: {
+  id: number;
+  paymentStatus: string | null;
+  pi: string | null;
+  checkout: string | null;
+}): Promise<'released' | 'refunded' | 'checkout_closed' | 'none' | 'failed'> {
+  try {
+    if (v.paymentStatus === 'authorized' && v.pi) {
+      await releasePayment(v.pi);
+      await db.update(visits).set({ paymentStatus: 'released' }).where(eq(visits.id, v.id));
+      return 'released';
+    }
+    if (v.paymentStatus === 'captured' && v.pi) {
+      await refundPayment(v.pi);
+      await db.update(visits).set({ paymentStatus: 'refunded' }).where(eq(visits.id, v.id));
+      return 'refunded';
+    }
+    if (v.paymentStatus === 'pending' && v.checkout && stripeConfigured()) {
+      await expireCheckout(v.checkout);
+      return 'checkout_closed';
+    }
+    return 'none';
+  } catch (err) {
+    console.error(JSON.stringify({ event: 'stripe.settle_failed', visit: v.id, paymentStatus: v.paymentStatus, error: (err as Error).message }));
+    return 'failed';
+  }
 }
 
 // ─── Webhook signature (Stripe-Signature: t=…,v1=…) ─────────────────────────

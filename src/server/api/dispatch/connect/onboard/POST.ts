@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
 import { db } from '../../../../db/client.js';
 import { clinicianProfiles, user } from '../../../../db/schema.js';
-import { requireClinician, logErr } from '../../../../lib/dispatch.js';
+import { requireClinician, logErr, publicBaseUrl } from '../../../../lib/dispatch.js';
 import { connectEnabled, createConnectAccount, createAccountLink } from '../../../../lib/stripe.js';
 
 /** Start (or resume) Stripe Express onboarding so the clinician can receive transfers. */
@@ -19,7 +19,7 @@ export default async function handler(req: Request, res: Response) {
       accountId = acct.id;
       await db.update(clinicianProfiles).set({ stripeAccountId: accountId }).where(eq(clinicianProfiles.userId, ctx.userId));
     }
-    const base = process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`;
+    const base = publicBaseUrl(req);
     const link = await createAccountLink(accountId, `${base}/clinician?connect=refresh`, `${base}/clinician?connect=done`);
     res.json({ ok: true, url: link.url });
   } catch (error) {

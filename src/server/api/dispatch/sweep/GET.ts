@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { and, eq, lt, inArray } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
 import { visits, clinicianProfiles } from '../../../db/schema.js';
-import { releasePayment, connectEnabled, createTransfer } from '../../../lib/stripe.js';
+import { settleCancelledVisit, connectEnabled, createTransfer, StripeError } from '../../../lib/stripe.js';
 import { logErr } from '../../../lib/dispatch.js';
 
 const HOLD_HOURS = Number(process.env.VISIT_HOLD_HOURS ?? 4);
@@ -21,19 +21,12 @@ export default async function handler(req: Request, res: Response) {
       .update(visits)
       .set({ status: 'cancelled' })
       .where(and(inArray(visits.status, ['queued', 'pending_payment']), lt(visits.queuedAt, cutoff)))
-      .returning({ id: visits.id, paymentStatus: visits.paymentStatus, pi: visits.stripePaymentIntent });
+      .returning({ id: visits.id, paymentStatus: visits.paymentStatus, pi: visits.stripePaymentIntent, checkout: visits.stripeCheckoutId });
 
     let released = 0;
     for (const v of stale) {
-      if (v.paymentStatus === 'authorized' && v.pi) {
-        try {
-          await releasePayment(v.pi);
-          await db.update(visits).set({ paymentStatus: 'released' }).where(eq(visits.id, v.id));
-          released++;
-        } catch (err) {
-          logErr('dispatch.sweep.release_failed', err);
-        }
-      }
+      const money = await settleCancelledVisit(v);
+      if (money === 'released' || money === 'refunded') released++;
     }
     // Payouts: move owed ledger entries to clinicians whose Connect account is ready.
     let transferred = 0;
@@ -53,7 +46,12 @@ export default async function handler(req: Request, res: Response) {
           transferred++;
         } catch (err) {
           logErr('dispatch.sweep.transfer_failed', err);
-          await db.update(visits).set({ payoutStatus: 'failed' }).where(eq(visits.id, v.id));
+          // Only a definitive Stripe rejection is terminal. A timeout or 5xx may mean the
+          // transfer went through — leave it 'owed' and let the idempotency key make the
+          // next sweep's retry safe.
+          if (err instanceof StripeError && !err.transient) {
+            await db.update(visits).set({ payoutStatus: 'failed' }).where(eq(visits.id, v.id));
+          }
         }
       }
     }

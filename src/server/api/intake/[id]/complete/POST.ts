@@ -8,6 +8,7 @@ import { buildTemplateClinicalBrief } from '../../../../lib/intake-fallback.js';
 import { ACUITY_LEVELS } from '../../../../../lib/clinical-brief.js';
 import { scheduleCheckin, intakeCheckinReason, resolveCheckin, notifyClinicianOfEscalation } from '../../../../lib/companion.js';
 import { audit } from '../../../../lib/audit.js';
+import { publicBaseUrl } from '../../../../lib/dispatch.js';
 
 interface QAPair {
   questionId: string;
@@ -102,7 +103,7 @@ export default async function handler(req: Request, res: Response) {
             intakeSessionId: checkin.intakeSessionId,
             patientUserId: session.user.id,
             followupLevel: brief.disposition.level,
-            base: process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}`,
+            base: publicBaseUrl(req),
           });
         }
       } else {

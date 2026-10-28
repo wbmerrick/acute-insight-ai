@@ -22,10 +22,19 @@ export interface AuditInput {
   meta?: Record<string, string | number | boolean | null>;
 }
 
+/**
+ * The caller's IP as seen by the edge we trust. Vercel sets x-real-ip to the
+ * connecting client and appends to x-forwarded-for; a client can prepend
+ * anything it likes to x-forwarded-for, so the FIRST entry is never trusted —
+ * the LAST one was written by the proxy in front of us.
+ */
 export function clientIp(req: Request): string {
+  const real = req.headers['x-real-ip'];
+  if (typeof real === 'string' && real.trim()) return real.trim().slice(0, 64);
   const xf = req.headers['x-forwarded-for'];
-  const first = Array.isArray(xf) ? xf[0] : (xf ?? '').split(',')[0];
-  return (first || req.ip || '').trim().slice(0, 64);
+  const list = (Array.isArray(xf) ? xf.join(',') : xf ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  const last = list[list.length - 1];
+  return (last || req.socket?.remoteAddress || '').slice(0, 64);
 }
 
 /** Strip anything that looks like free text — meta is for ids, counts, enums. */

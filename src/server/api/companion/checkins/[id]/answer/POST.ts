@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '../../../../../db/client.js';
 import { checkins } from '../../../../../db/schema.js';
-import { requirePatient, logErr } from '../../../../../lib/dispatch.js';
+import { requirePatient, logErr, publicBaseUrl } from '../../../../../lib/dispatch.js';
 import { notifyClinicianOfEscalation } from '../../../../../lib/companion.js';
 
 /**
@@ -33,7 +33,7 @@ export default async function handler(req: Request, res: Response) {
     if (!row) return res.status(404).json({ error: 'No open check-in' });
     res.json({ ok: true, ...row });
     if (outcome === 'worse') {
-      void notifyClinicianOfEscalation({ intakeSessionId: row.intakeSessionId, patientUserId: userId, base: process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.hostname}` });
+      void notifyClinicianOfEscalation({ intakeSessionId: row.intakeSessionId, patientUserId: userId, base: publicBaseUrl(req) });
     }
   } catch (error) {
     logErr('companion.answer.error', error);

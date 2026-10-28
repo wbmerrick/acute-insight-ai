@@ -150,7 +150,7 @@ function VisitStatus({ intake, onChanged }: { intake: IntakeSession; onChanged?:
       )}
       {v.status === 'accepted' && pill(`${who} accepted — expect a call`, 'var(--primary)')}
       {v.status === 'completed' && pill(`Visit completed with ${who}`, 'var(--primary)')}
-      {v.status === 'cancelled' && pill('Request cancelled — nothing charged', 'var(--text-dim)')}
+      {v.status === 'cancelled' && pill(v.paymentStatus === 'refunded' || v.paymentStatus === 'captured' ? 'Request cancelled — payment refunded' : 'Request cancelled — nothing charged', 'var(--text-dim)')}
     </div>
   );
 }
