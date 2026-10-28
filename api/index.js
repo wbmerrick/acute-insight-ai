@@ -85085,7 +85085,8 @@ async function handler5(_req, res) {
   res.json({
     status: "ok",
     timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-    message: "Hello World!"
+    commit: (process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GIT_SHA ?? "unknown").slice(0, 7),
+    env: process.env.VERCEL_ENV ?? "local"
   });
 }
 
