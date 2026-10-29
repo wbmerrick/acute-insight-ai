@@ -20952,7 +20952,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler45) {
+    Route.prototype.all = function all(handler47) {
       const callbacks = flatten2.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -20970,7 +20970,7 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler45) {
+      Route.prototype[method] = function(handler47) {
         const callbacks = flatten2.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -21173,17 +21173,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler45) {
+    Router.prototype.use = function use2(handler47) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler45 !== "function") {
-        let arg = handler45;
+      if (typeof handler47 !== "function") {
+        let arg = handler47;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler45;
+          path2 = handler47;
         }
       }
       const callbacks = flatten2.call(slice.call(arguments, offset), Infinity);
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler45 = connection.cancelQuery;
-    if (!handler45) {
+    const handler47 = connection.cancelQuery;
+    if (!handler47) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler45.bind(connection);
+    return handler47.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler45 = connection.killSession;
-    if (!handler45) {
+    const handler47 = connection.killSession;
+    if (!handler47) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler45.bind(connection);
+    return handler47.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -65064,7 +65064,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler45 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler47 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65084,7 +65084,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler45(internalContext).catch(async (e) => {
+    const response = await handler47(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65114,20 +65114,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler45) => {
+  return (path2, options, handler47) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler45);
+    }, handler47);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler45) {
+function createMiddleware(optionsOrHandler, handler47) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler45;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler47;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65155,14 +65155,14 @@ function createMiddleware(optionsOrHandler, handler45) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler45) {
+  function fn(optionsOrHandler, handler47) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler45) throw new Error("Middleware handler is required");
+    if (!handler47) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler45);
+    }, handler47);
   }
   return fn;
 };
@@ -65602,16 +65602,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler45 = route.data;
+    const handler47 = route.data;
     try {
-      const allowedMediaTypes = handler45.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler47.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler45.options.disableBody ? void 0 : await getBody(handler45.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler47.options.disableBody ? void 0 : await getBody(handler47.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65626,7 +65626,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler45(context2);
+      return await handler47(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65683,11 +65683,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler45 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler47 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler45(ctx));
+      return await runWithEndpointContext(ctx, () => handler47(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75826,8 +75826,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler45 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler45(request));
+      const { handler: handler47 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler47(request));
     },
     api,
     options,
@@ -87749,8 +87749,179 @@ async function handler37(req, res) {
   }
 }
 
-// src/server/api/dispatch/connect/onboard/POST.ts
+// src/server/lib/statements.ts
+function parseMonth(month) {
+  const m = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(month);
+  if (!m) return null;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  if (y < 2020 || y > 2100) return null;
+  return {
+    from: new Date(Date.UTC(y, mo - 1, 1)),
+    to: new Date(Date.UTC(y, mo, 1)),
+    label: month
+  };
+}
+function currentMonth(now2 = /* @__PURE__ */ new Date()) {
+  return `${now2.getUTCFullYear()}-${String(now2.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+var usdFromCents = (c) => ((c ?? 0) / 100).toFixed(2);
+function csvCell2(v) {
+  if (v === null || v === void 0) return "";
+  const s = String(v);
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+function toCsv(rows) {
+  return rows.map((r) => r.map(csvCell2).join(",")).join("\r\n") + "\r\n";
+}
+function clinicianStatementRows(visits2) {
+  const rows = [
+    ["completed_at_utc", "visit_id", "acuity", "patient_state", "payout_usd", "payout_status", "stripe_transfer_id"]
+  ];
+  for (const v of visits2) {
+    rows.push([
+      v.completedAt ? v.completedAt.toISOString() : "",
+      v.id,
+      v.acuity,
+      v.state,
+      usdFromCents(v.payoutCents),
+      v.payoutStatus ?? "none",
+      v.stripeTransferId ?? ""
+    ]);
+  }
+  const sum = (st) => visits2.filter((v) => v.payoutStatus === st).reduce((s, v) => s + (v.payoutCents ?? 0), 0);
+  rows.push([]);
+  rows.push(["TOTAL owed (USD)", usdFromCents(sum("owed"))]);
+  rows.push(["TOTAL transferred (USD)", usdFromCents(sum("transferred"))]);
+  if (sum("failed") > 0) rows.push(["TOTAL failed transfers (USD)", usdFromCents(sum("failed"))]);
+  rows.push(["TOTAL completed visits", visits2.length]);
+  return rows;
+}
+function accountingSummary(visits2, month) {
+  const paid = visits2.filter((v) => v.paymentStatus === "captured");
+  const gross = paid.reduce((s, v) => s + (v.amountCents ?? 0), 0);
+  const payoutSum = (st) => visits2.filter((v) => v.payoutStatus === st).reduce((s, v) => s + (v.payoutCents ?? 0), 0);
+  const owed = payoutSum("owed");
+  const transferred = payoutSum("transferred");
+  const failed = payoutSum("failed");
+  const payoutTotal = owed + transferred + failed;
+  const byAcuity = {};
+  for (const v of visits2) {
+    const a = byAcuity[v.acuity] ??= { visits: 0, grossCents: 0, payoutCents: 0 };
+    a.visits++;
+    if (v.paymentStatus === "captured") a.grossCents += v.amountCents ?? 0;
+    if (v.payoutStatus === "owed" || v.payoutStatus === "transferred" || v.payoutStatus === "failed") a.payoutCents += v.payoutCents ?? 0;
+  }
+  const byClin = /* @__PURE__ */ new Map();
+  for (const v of visits2) {
+    const key = v.clinicianUserId ?? "(none)";
+    const c = byClin.get(key) ?? { clinicianUserId: v.clinicianUserId, clinicianName: v.clinicianName, visits: 0, grossCents: 0, owedCents: 0, transferredCents: 0, failedCents: 0 };
+    c.visits++;
+    if (!c.clinicianName && v.clinicianName) c.clinicianName = v.clinicianName;
+    if (v.paymentStatus === "captured") c.grossCents += v.amountCents ?? 0;
+    if (v.payoutStatus === "owed") c.owedCents += v.payoutCents ?? 0;
+    if (v.payoutStatus === "transferred") c.transferredCents += v.payoutCents ?? 0;
+    if (v.payoutStatus === "failed") c.failedCents += v.payoutCents ?? 0;
+    byClin.set(key, c);
+  }
+  return {
+    month,
+    visitsCompleted: visits2.length,
+    paidVisits: paid.length,
+    grossCapturedCents: gross,
+    payoutOwedCents: owed,
+    payoutTransferredCents: transferred,
+    payoutFailedCents: failed,
+    payoutTotalCents: payoutTotal,
+    platformMarginCents: gross - payoutTotal,
+    byAcuity,
+    byClinician: [...byClin.values()].sort((a, b) => b.transferredCents + b.owedCents - (a.transferredCents + a.owedCents)),
+    note: "Completed visits only, by completed_at (UTC). Margin is before Stripe processing fees, which are not tracked here \u2014 see the Stripe dashboard. Cancelled-visit releases/refunds are not revenue and are not shown."
+  };
+}
+function accountingCsvRows(s) {
+  const rows = [
+    ["Acute Insight accounting", s.month === "all" ? "all time" : `${s.month} (UTC)`],
+    [],
+    ["completed_visits", s.visitsCompleted],
+    ["paid_visits_captured", s.paidVisits],
+    ["gross_captured_usd", usdFromCents(s.grossCapturedCents)],
+    ["clinician_payouts_owed_usd", usdFromCents(s.payoutOwedCents)],
+    ["clinician_payouts_transferred_usd", usdFromCents(s.payoutTransferredCents)],
+    ["clinician_payouts_failed_usd", usdFromCents(s.payoutFailedCents)],
+    ["platform_margin_before_fees_usd", usdFromCents(s.platformMarginCents)],
+    [],
+    ["acuity", "visits", "gross_usd", "payout_usd"]
+  ];
+  for (const [acuity, a] of Object.entries(s.byAcuity)) rows.push([acuity, a.visits, usdFromCents(a.grossCents), usdFromCents(a.payoutCents)]);
+  rows.push([]);
+  rows.push(["clinician", "clinician_user_id", "visits", "gross_usd", "owed_usd", "transferred_usd", "failed_usd"]);
+  for (const c of s.byClinician) rows.push([c.clinicianName ?? "", c.clinicianUserId ?? "", c.visits, usdFromCents(c.grossCents), usdFromCents(c.owedCents), usdFromCents(c.transferredCents), usdFromCents(c.failedCents)]);
+  rows.push([]);
+  rows.push(["note", s.note]);
+  return rows;
+}
+
+// src/server/api/dispatch/earnings/statement/GET.ts
 async function handler38(req, res) {
+  try {
+    const ctx = await requireClinician(req, res);
+    if (!ctx) return;
+    if (!payoutsConfigured()) return res.status(409).json({ error: "Payouts are not configured yet" });
+    const monthParam = typeof req.query.month === "string" ? req.query.month : "";
+    const range = monthParam ? parseMonth(monthParam) : null;
+    if (monthParam && !range) return res.status(400).json({ error: "month must be YYYY-MM" });
+    const where = range ? and(eq(visits.clinicianUserId, ctx.userId), eq(visits.status, "completed"), gte(visits.completedAt, range.from), lt(visits.completedAt, range.to)) : and(eq(visits.clinicianUserId, ctx.userId), eq(visits.status, "completed"));
+    const rows = await db.select({ id: visits.id, acuity: visits.acuity, state: visits.patientState, completedAt: visits.completedAt, payoutCents: visits.payoutCents, payoutStatus: visits.payoutStatus, paymentStatus: visits.paymentStatus, stripeTransferId: visits.stripeTransferId }).from(visits).where(where).orderBy(asc(visits.completedAt));
+    audit(req, { action: "earnings.statement", actorUserId: ctx.userId, actorRole: ctx.isAdmin ? "admin" : "provider", resourceType: "clinician", resourceId: ctx.userId, meta: { month: range?.label ?? "all", rows: rows.length } });
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="acute-insight-earnings-${range?.label ?? "all-time"}.csv"`);
+    res.send(toCsv(clinicianStatementRows(rows)));
+  } catch (error3) {
+    logErr("dispatch.earnings.statement.error", error3);
+    res.status(500).json({ error: "Failed to build your statement" });
+  }
+}
+
+// src/server/api/admin/accounting/GET.ts
+async function handler39(req, res) {
+  try {
+    const session2 = await requireAdmin(req, res);
+    if (!session2) return;
+    const monthParam = typeof req.query.month === "string" && req.query.month ? req.query.month : currentMonth();
+    const all = monthParam === "all";
+    const range = all ? null : parseMonth(monthParam);
+    if (!all && !range) return res.status(400).json({ error: 'month must be YYYY-MM or "all"' });
+    const where = range ? and(eq(visits.status, "completed"), gte(visits.completedAt, range.from), lt(visits.completedAt, range.to)) : eq(visits.status, "completed");
+    const rows = await db.select({
+      id: visits.id,
+      acuity: visits.acuity,
+      state: visits.patientState,
+      completedAt: visits.completedAt,
+      amountCents: visits.amountCents,
+      paymentStatus: visits.paymentStatus,
+      payoutCents: visits.payoutCents,
+      payoutStatus: visits.payoutStatus,
+      clinicianUserId: visits.clinicianUserId,
+      clinicianName: clinicianProfiles.displayName
+    }).from(visits).leftJoin(clinicianProfiles, eq(clinicianProfiles.userId, visits.clinicianUserId)).where(where).orderBy(asc(visits.completedAt));
+    const summary = accountingSummary(rows, all ? "all" : range.label);
+    const format = req.query.format === "csv" ? "csv" : "json";
+    audit(req, { action: "admin.accounting.view", actorUserId: session2.userId, actorRole: "admin", resourceType: "accounting", resourceId: summary.month, meta: { format, visits: rows.length } });
+    if (format === "csv") {
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename="acute-insight-accounting-${summary.month}.csv"`);
+      return res.send(toCsv(accountingCsvRows(summary)));
+    }
+    res.json(summary);
+  } catch (error3) {
+    logErr("admin.accounting.error", error3);
+    res.status(500).json({ error: "Failed to compute accounting" });
+  }
+}
+
+// src/server/api/dispatch/connect/onboard/POST.ts
+async function handler40(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87772,7 +87943,7 @@ async function handler38(req, res) {
 }
 
 // src/server/api/stripe/webhook/POST.ts
-async function handler39(req, res) {
+async function handler41(req, res) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) return res.status(503).json({ error: "Webhook not configured" });
   const raw = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
@@ -87818,7 +87989,7 @@ async function handler39(req, res) {
 }
 
 // src/server/api/companion/checkins/GET.ts
-async function handler40(req, res) {
+async function handler42(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87847,7 +88018,7 @@ async function handler40(req, res) {
 }
 
 // src/server/api/companion/checkins/[id]/answer/POST.ts
-async function handler41(req, res) {
+async function handler43(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87874,7 +88045,7 @@ async function handler41(req, res) {
 
 // src/server/api/companion/run/GET.ts
 var EXPIRE_AFTER_DAYS = Number(process.env.CHECKIN_EXPIRE_DAYS ?? 7);
-async function handler42(req, res) {
+async function handler44(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -87908,7 +88079,7 @@ async function handler42(req, res) {
 }
 
 // src/server/api/provider/checkins/GET.ts
-async function handler43(req, res) {
+async function handler45(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87935,7 +88106,7 @@ async function handler43(req, res) {
 }
 
 // src/server/api/provider/checkins/[id]/acknowledge/POST.ts
-async function handler44(req, res) {
+async function handler46(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -88126,7 +88297,7 @@ app.use("/api", (req, res, next) => {
   }
   next();
 });
-app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler39);
+app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler41);
 app.use(import_express.default.json());
 app.use(import_express.default.urlencoded({ extended: true }));
 app.get("/api/auth/:action", handler);
@@ -88174,12 +88345,14 @@ app.get("/api/dispatch/pricing", handler34);
 app.get("/api/dispatch/sweep", handler35);
 app.get("/api/dispatch/metrics", handler36);
 app.get("/api/dispatch/earnings", handler37);
-app.post("/api/dispatch/connect/onboard", handler38);
-app.get("/api/companion/checkins", handler40);
-app.post("/api/companion/checkins/:id/answer", rlAnswer, handler41);
-app.get("/api/companion/run", handler42);
-app.get("/api/provider/checkins", handler43);
-app.post("/api/provider/checkins/:id/acknowledge", handler44);
+app.get("/api/dispatch/earnings/statement", handler38);
+app.get("/api/admin/accounting", handler39);
+app.post("/api/dispatch/connect/onboard", handler40);
+app.get("/api/companion/checkins", handler42);
+app.post("/api/companion/checkins/:id/answer", rlAnswer, handler43);
+app.get("/api/companion/run", handler44);
+app.get("/api/provider/checkins", handler45);
+app.post("/api/provider/checkins/:id/acknowledge", handler46);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;

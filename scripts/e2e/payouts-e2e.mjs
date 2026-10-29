@@ -12,7 +12,11 @@ function client() {
     cap(res); let body; try { body = await res.json(); } catch { body = await res.text(); }
     return { status: res.status, body };
   };
-  return { j };
+  const raw = async (path, opts = {}) => {
+    const res = await fetch(BASE + path, { ...opts, headers: { origin: BASE, referer: BASE + '/', ...(cookie ? { cookie } : {}), ...(opts.headers || {}) } });
+    cap(res); return res;
+  };
+  return { j, raw };
 }
 async function signup(c, name, email) { const r = await c.j('/api/auth/sign-up/email', { method: 'POST', body: JSON.stringify({ name, email, password: 'Testpass123!' }) }); if (r.status !== 200) throw new Error('signup'); }
 const makeProvider = (email) => execSync(`psql "${DB}" -qtAc "update \\"user\\" set role='provider' where lower(email)=lower('${email}')"`);
@@ -67,3 +71,36 @@ r = await dr.j('/api/dispatch/earnings');
 ok('ledger: $25 transferred, $0 owed', r.body.totals.transferredCents === 2500 && r.body.totals.owedCents === 0 && r.body.visits[0].payoutStatus === 'transferred');
 r = await fetch(BASE + '/api/dispatch/sweep', { headers: { authorization: 'Bearer cron_stub' } }).then((x) => x.json());
 ok('second sweep transfers nothing (idempotent)', r.transferred === 0);
+
+// ── statements + accounting (2026-10-29). The e2e database is shared across
+// suites, so platform-level sums assert internal consistency and floors, and
+// exact figures are asserted on THIS clinician's rows only. ──
+const sqlVal = (q) => execSync(`psql "${DB}" -qtAc "${q.replace(/"/g, '\\"')}"`).toString().trim();
+const drId = sqlVal(`select id from \"user\" where lower(email)=lower('${drEmail}')`);
+const month = new Date().toISOString().slice(0, 7);
+
+let stRes = await dr.raw('/api/dispatch/earnings/statement');
+let stText = await stRes.text();
+ok('statement: CSV of my visits with totals', stRes.status === 200 && /text\/csv/.test(stRes.headers.get('content-type') || '') && stText.includes(`,${vid},`) && stText.includes('TOTAL transferred (USD),25.00') && stText.includes('TOTAL completed visits,1'), stRes.status + ' ' + (stRes.headers.get('content-type') || ''));
+stRes = await dr.raw(`/api/dispatch/earnings/statement?month=${month}`);
+ok('statement scoped to the current month still has the visit', (await stRes.text()).includes(`,${vid},`));
+stRes = await dr.raw('/api/dispatch/earnings/statement?month=2020-01');
+ok('statement for an empty month totals zero', /TOTAL completed visits,0/.test(await stRes.text()));
+r = await dr.j('/api/dispatch/earnings/statement?month=nope');
+ok('statement rejects a bad month (400)', r.status === 400);
+
+r = await dr.j('/api/admin/accounting');
+ok('accounting is admin-only (provider gets 403)', r.status === 403, String(r.status));
+const ad = client(); await signup(ad, 'Admin Books', `po_ad_${T}@example.test`);
+execSync(`psql "${DB}" -qtAc "update \\"user\\" set is_admin=true, role='provider' where lower(email)=lower('po_ad_${T}@example.test')"`);
+r = await ad.j(`/api/admin/accounting?month=${month}`);
+const mine = (r.body.byClinician || []).find((c) => c.clinicianUserId === drId);
+ok('accounting: my row shows $39 gross, $25 transferred on 1 visit', r.status === 200 && mine && mine.visits === 1 && mine.grossCents === 3900 && mine.transferredCents === 2500 && mine.owedCents === 0, JSON.stringify(mine));
+ok('accounting: platform sums are internally consistent and cover this visit',
+  r.body.grossCapturedCents >= 3900 && r.body.payoutTransferredCents >= 2500 &&
+  r.body.platformMarginCents === r.body.grossCapturedCents - r.body.payoutTotalCents && /not tracked here/.test(r.body.note));
+stRes = await ad.raw(`/api/admin/accounting?month=${month}&format=csv`);
+const acctCsv = await stRes.text();
+ok('accounting CSV carries summary + my clinician row', stRes.status === 200 && /gross_captured_usd,/.test(acctCsv) && new RegExp(`Dr. Payout,${drId},1,39.00,0.00,25.00,0.00`).test(acctCsv));
+r = await ad.j('/api/admin/accounting?month=2020-13');
+ok('accounting rejects a bad month (400)', r.status === 400);

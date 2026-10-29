@@ -8,7 +8,7 @@ import { ACUITY_LABEL } from '@/lib/clinical-brief';
 import { ProviderNote, acuityMeta } from '@/components/clinical-brief-view';
 import { MfaBanner } from '@/components/mfa-banner';
 import { IdleGuard } from '@/components/idle-guard';
-import { sensitiveFetch } from '@/components/reauth';
+import { sensitiveFetch, downloadSensitive } from '@/components/reauth';
 
 // ─── Types (mirror /api/dispatch) ────────────────────────────────────────────
 
@@ -497,6 +497,89 @@ function OpsPanel() {
 }
 
 
+function StatementDownload() {
+  const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [err, setErr] = useState('');
+  const dl = (m?: string) => {
+    setErr('');
+    downloadSensitive(`/api/dispatch/earnings/statement${m ? `?month=${m}` : ''}`, 'acute-insight-earnings.csv').catch((x) => setErr(x instanceof Error ? x.message : 'Download failed'));
+  };
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs" style={{ color: 'hsl(var(--text-dim))' }}>
+      <span>Statement:</span>
+      <input type="month" value={month} onChange={(x) => setMonth(x.target.value)} className="rounded-md px-2 py-1 text-xs text-foreground outline-none" style={{ background: 'hsl(var(--surface-deeper))', border: '1px solid hsl(var(--border-subtle))' }} aria-label="Statement month" />
+      <button type="button" onClick={() => dl(month)} className="font-medium hover:underline" style={{ color: 'hsl(var(--primary))' }}>Download CSV</button>
+      <button type="button" onClick={() => dl()} className="hover:underline">All time</button>
+      {err && <span role="alert" style={{ color: 'hsl(var(--destructive))' }}>{err}</span>}
+    </div>
+  );
+}
+
+interface Accounting {
+  month: string;
+  visitsCompleted: number;
+  paidVisits: number;
+  grossCapturedCents: number;
+  payoutOwedCents: number;
+  payoutTransferredCents: number;
+  payoutFailedCents: number;
+  platformMarginCents: number;
+  byClinician: { clinicianUserId: string | null; clinicianName: string | null; visits: number; grossCents: number; owedCents: number; transferredCents: number; failedCents: number }[];
+  note: string;
+}
+
+/** Admin: the month's money in one place — gross, payouts, margin, per clinician. */
+function AccountingPanel() {
+  const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [a, setA] = useState<Accounting | null>(null);
+  const [err, setErr] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    api<Accounting>(`/api/admin/accounting?month=${month}`).then((d) => { if (!cancelled) { setA(d); setErr(''); } }).catch((e) => { if (!cancelled) setErr(e instanceof Error ? e.message : 'Failed'); });
+    return () => { cancelled = true; };
+  }, [month]);
+  return (
+    <div className="rounded-2xl p-5 mt-5" style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border-subtle) / 0.4)' }}>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <p className="text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'hsl(var(--text-dimmer))', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Accounting</p>
+          <h2 className="text-lg font-semibold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>Money, by month (UTC)</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <input type="month" value={month} onChange={(x) => setMonth(x.target.value)} className="rounded-md px-2 py-1 text-xs text-foreground outline-none" style={{ background: 'hsl(var(--surface-deeper))', border: '1px solid hsl(var(--border-subtle))' }} aria-label="Accounting month" />
+          <button type="button" onClick={() => { downloadSensitive(`/api/admin/accounting?month=${month}&format=csv`, 'acute-insight-accounting.csv').catch((e) => setErr(e instanceof Error ? e.message : 'Download failed')); }} className="text-xs font-medium hover:underline" style={{ color: 'hsl(var(--primary))' }}>Download CSV</button>
+        </div>
+      </div>
+      {err && <p className="text-xs mt-3" role="alert" style={{ color: 'hsl(var(--destructive))' }}>{err}</p>}
+      {!err && !a && <p className="text-xs mt-3" style={{ color: 'hsl(var(--text-dim))' }}>Loading…</p>}
+      {a && a.paidVisits === 0 && a.payoutTransferredCents + a.payoutOwedCents === 0 && (
+        <p className="text-sm mt-3" style={{ color: 'hsl(var(--text-dim))' }}>No paid visits in {a.month === 'all' ? 'the ledger yet' : a.month}. Numbers appear once payments are on and a visit completes.</p>
+      )}
+      {a && (a.paidVisits > 0 || a.payoutTransferredCents + a.payoutOwedCents > 0) && (
+        <>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+            <Stat label="Gross captured" value={usd(a.grossCapturedCents)} sub={`${a.paidVisits} paid of ${a.visitsCompleted} completed`} />
+            <Stat label="Clinician payouts" value={usd(a.payoutOwedCents + a.payoutTransferredCents + a.payoutFailedCents)} sub={`${usd(a.payoutTransferredCents)} transferred · ${usd(a.payoutOwedCents)} owed`} warn={a.payoutFailedCents > 0} />
+            <Stat label="Platform margin" value={usd(a.platformMarginCents)} sub="before Stripe processing fees" />
+            <Stat label="Failed transfers" value={usd(a.payoutFailedCents)} warn={a.payoutFailedCents > 0} />
+          </div>
+          {a.byClinician.length > 0 && (
+            <div className="mt-4 grid gap-1 text-xs" style={{ color: 'hsl(var(--text-dim))' }}>
+              {a.byClinician.map((c) => (
+                <div key={c.clinicianUserId ?? 'none'} className="flex justify-between gap-3">
+                  <span className="truncate">{c.clinicianName ?? c.clinicianUserId ?? '—'} · {c.visits} visit{c.visits === 1 ? '' : 's'}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)' }}>{usd(c.transferredCents)} paid · {usd(c.owedCents)} owed</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-[11px] mt-3" style={{ color: 'hsl(var(--text-dimmer))' }}>{a.note}</p>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── Earnings (only when payout rates are configured) ────────────────────────
 
 interface Earnings {
@@ -551,6 +634,7 @@ function EarningsPanel() {
       ) : (
         <p className="text-xs mt-2" style={{ color: 'hsl(var(--text-dim))' }}>Your ledger accrues now; payouts switch on once the practice entity is set up.</p>
       )}
+      <StatementDownload />
       {e.visits.length > 0 && (
         <div className="mt-3 grid gap-1 text-xs" style={{ color: 'hsl(var(--text-dim))' }}>
           {e.visits.slice(0, 5).map((v) => (
@@ -708,7 +792,7 @@ function ClinicianContent() {
             </div>
 
             <div>
-              {me.isAdmin && <div className="mb-6"><OpsPanel /></div>}
+              {me.isAdmin && <div className="mb-6"><OpsPanel /><AccountingPanel /></div>}
               {active.length === 0 ? (
                 <div className="rounded-2xl p-10 text-center" style={{ background: 'hsl(var(--card))', border: `1px solid hsl(var(--border-subtle) / 0.4)` }}>
                   <p className="text-base font-semibold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>No active visit</p>
