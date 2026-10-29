@@ -86743,6 +86743,7 @@ async function handler14(req, res) {
 var MAX_MESSAGES = 80;
 var MAX_MESSAGE_LENGTH = 4e3;
 var GUEST_TURNS = 2;
+var betaOpenChat = () => (process.env.BETA_OPEN_CHAT ?? "").toLowerCase() !== "off";
 function patientTurns(messages) {
   let preambles = 0;
   return messages.filter((m) => {
@@ -86767,7 +86768,7 @@ async function handler15(req, res) {
       }
     }
     if (!session2?.user) {
-      if (patientTurns(messages) > GUEST_TURNS) {
+      if (!betaOpenChat() && patientTurns(messages) > GUEST_TURNS) {
         return res.status(401).json({ error: "account_required" });
       }
     } else if (intakeId != null) {

@@ -18,7 +18,16 @@ interface ChatRequest {
 
 const MAX_MESSAGES = 80;
 const MAX_MESSAGE_LENGTH = 4000;
-const GUEST_TURNS = 2; // patient messages allowed before an account is required
+const GUEST_TURNS = 2; // patient messages allowed before an account is required (only when the open beta is switched off)
+
+/**
+ * Open beta (2026-10-29, Will): anyone can chat with Ace continuously, no
+ * account — the account is required only to SUBMIT an intake, so a clinician
+ * can review it. BETA_OPEN_CHAT=off restores the 2-message guest gate. The
+ * hard bounds for guests are unchanged either way: the per-IP chat rate limit
+ * (60/10 min) and MAX_MESSAGES per conversation.
+ */
+const betaOpenChat = () => (process.env.BETA_OPEN_CHAT ?? '').toLowerCase() !== 'off';
 
 /**
  * Count patient turns. The hidden "Visit basics" account preamble is forgiven
@@ -59,10 +68,11 @@ export default async function handler(req: Request, res: Response) {
       }
     }
 
-    // ── Guest gate ──
-    // A signed-out visitor may send a few messages, then must create an account.
+    // ── Guest gate (dormant while the open beta is on) ──
+    // A signed-out visitor chats freely in the beta; with BETA_OPEN_CHAT=off
+    // they may send a few messages, then must create an account.
     if (!session?.user) {
-      if (patientTurns(messages) > GUEST_TURNS) {
+      if (!betaOpenChat() && patientTurns(messages) > GUEST_TURNS) {
         return res.status(401).json({ error: 'account_required' });
       }
     } else if (intakeId != null) {

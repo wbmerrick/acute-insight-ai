@@ -30,6 +30,25 @@ async function completeIntake(c, cc, answers, extra = {}) {
   return { id: st.body.id, status: comp.status, body: comp.body };
 }
 
+// ── Open beta: a signed-out visitor chats with Ace continuously (2026-10-29) ──
+{
+  const chat = async (msgs) => {
+    const res = await fetch(BASE + '/api/intake/chat', { method: 'POST', headers: { 'content-type': 'application/json', origin: BASE }, body: JSON.stringify({ messages: msgs }) });
+    return { status: res.status, text: await res.text() };
+  };
+  const m = [];
+  let last = null;
+  for (let i = 1; i <= 5; i++) {
+    m.push({ role: 'patient', content: `Guest message ${i}: knee has been stiff in the mornings, no swelling, walking fine` });
+    last = await chat(m);
+    m.push({ role: 'ai', content: last.text.slice(0, 200) || 'ok' });
+    if (last.status !== 200) break;
+  }
+  ok('open beta: 5 guest messages all answered (no account gate)', last.status === 200 && last.text.length > 0, `status=${last.status}`);
+  const r = await fetch(BASE + '/api/intake/start', { method: 'POST', headers: { 'content-type': 'application/json', origin: BASE } });
+  ok('open beta: starting/saving an intake still requires an account (401)', r.status === 401, String(r.status));
+}
+
 // ── 1. forged session cookie does not mint a fresh rate-limit bucket ──
 // rlChat is 60/10min per key. Send 61 guest chats with a different forged cookie each time: must 429 by the end.
 let last = 0;

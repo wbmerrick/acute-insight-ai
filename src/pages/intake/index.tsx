@@ -11,12 +11,12 @@ import { detectEmergency, mentionsSelfHarm } from '@/server/lib/intake-fallback'
 /* ────────────────────────────────────────────────────────────────────────────
    Acute Insight intake — conversational chat, modeled on iSpry's "Spry" chat:
    streaming replies, voice (tap-to-talk input + spoken replies), quick-prompt
-   chips, a 2-message guest gate, and control-token cards. Assistant: "Ace".
+   chips, open-beta guest chat (account only at Submit; BETA_OPEN_CHAT=off
+   restores the 2-message guest gate), and control-token cards. Assistant: "Ace".
    Palette is Acute Insight's; everything else mirrors iSpry.
    ──────────────────────────────────────────────────────────────────────────── */
 
 const ASSISTANT = 'Ace';
-const GUEST_TURNS = 2;
 
 const CHIPS = [
   'Sick — need care today',
@@ -243,9 +243,6 @@ function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal, in
   }, []);
   useEffect(scrollDown, [turns, streaming, typing, scrollDown]);
 
-  function guestPatientTurns() {
-    return turnsRef.current.filter((m) => m.role === 'user').length;
-  }
 
   function stopSpeaking() {
     speakGen.current += 1;
@@ -385,11 +382,8 @@ function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal, in
       return;
     }
 
-    // Guest gate.
-    if (!hasAccountRef.current && guestPatientTurns() >= GUEST_TURNS) {
-      onNeedAccount();
-      return;
-    }
+    // Open beta: guests chat freely — the account modal appears at Submit (or
+    // if the server ever answers 401, e.g. with BETA_OPEN_CHAT=off).
 
     if (listenActiveRef.current) stopListening(false);
     stopSpeaking();
@@ -516,12 +510,9 @@ function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal, in
     return () => clearTimeout(t);
   }, [initialMessage, autoStartVoice, ask]);
 
-  const guestLeft = GUEST_TURNS - guestPatientTurns();
   const hint = hasAccount
     ? "Tell Ace what's going on — no need to include your name or birthdate here."
-    : guestLeft <= 0
-      ? 'Create an account to keep going — your first messages stay in this chat.'
-      : `${guestLeft === 1 ? 'One more message' : 'Two messages'} before an account. Leave out your name and birthdate.`;
+    : 'Open beta — chat with Ace freely, no account needed. You\u2019ll create one only when you submit, so a clinician can review. Leave out your name and birthdate.';
 
   const MicIcon = (
     <svg className="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>

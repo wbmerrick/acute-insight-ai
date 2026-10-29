@@ -33,6 +33,7 @@ const SUITES = {
   rights:    {},
   hardening: {},
   reauth:    {},
+  gatedchat: { BETA_OPEN_CHAT: 'off' },
   payments:  { ...stripe, VISIT_HOLD_HOURS: '0' },
   money:     { ...stripe, VISIT_HOLD_HOURS: '0' },
   payouts:   { ...stripe, VISIT_HOLD_HOURS: '0', STRIPE_CONNECT_ENABLED: 'true', CLINICIAN_PAYOUT_URGENT_CENTS: '5500', CLINICIAN_PAYOUT_TELEHEALTH_CENTS: '4000', CLINICIAN_PAYOUT_ROUTINE_CENTS: '2500' },
