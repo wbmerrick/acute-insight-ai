@@ -86224,7 +86224,7 @@ async function generateClinicalBrief(chiefComplaint, responses) {
 // src/server/lib/intake-fallback.ts
 var EMERGENCY_PATTERNS = [
   // cardiac
-  { re: /\bchest (pain|pane|pains|pressure|tightness|tight|heaviness|heavy|discomfort|squeez|hurts?|hurting|aches?|aching)|\b(my )?chest (is |was |has been |keeps |started |been )?(hurting|aching|killing me|sore and tight)/i, label: "chest pain/pressure" },
+  { re: /\bchest (pain|pane|pains|pressure|tightness|tight|heaviness|heavy|discomfort|squeez|hurts?|hurting|aches?|aching)|\b(my )?chest (is |was |has been |keeps |started |been )?(hurting|aching|killing me|sore and tight)|\b(pressure|tightness|tight feeling|heaviness|squeezing|ache|aching|pain) ?[^.]{0,30}\b(in|across|over|through|around)[^.]{0,20}(my |the |his |her )?chest\b/i, label: "chest pain/pressure" },
   { re: /\bcrushing (chest|pain)|\belephant on my chest|\bheart attack\b/i, label: "heart attack" },
   // breathing / airway
   { re: /\bcan'?t (breathe?|breath good|catch my breath|get (a|enough|any) (breath|air))|\bcannot (breathe?|catch my breath)|\bnot breathing|\bstopped breathing|\bgasping\b|\bstruggling to breathe?|\bhard to breathe? (at rest|sitting|lying|laying)/i, label: "cannot breathe" },
@@ -86235,7 +86235,7 @@ var EMERGENCY_PATTERNS = [
   { re: /\b(throat|toung|tounge|tongue|lips?)[^.]{0,15}\b(closing|tight|thick|swelling|swollen|swell)/i, label: "airway swelling" },
   { re: /\banaphyla|\bepipen (used|injected)|\bused my epipen|\bhives[^.]{0,60}(tongue|toung|throat|breath|swell)/i, label: "anaphylaxis" },
   // neuro
-  { re: /\bstroke\b|\bface (is |looks )?(droop|dropp|uneven|lopsided|crooked)|\b(droop|dropp)(ing|y)?[^.]{0,15}(face|mouth|eyelid|side)|\bslurr(ed|ing)|\btalking funny|\bspeech (is )?(funny|off|strange|garbled)|\bcan'?t (speak|talk|get (my )?words|talk right)|\bsudden(ly)? (weak|numb)|\b(weakness|numbness) (on|in|of) (one|my (right|left)) (side|arm|leg)|\bone side of (my|his|her) (body|face)|\bcan'?t (move|lift|hold) (my )?(arm|leg|cup)/i, label: "stroke signs" },
+  { re: /\bstroke\b|\bface (is |looks )?(droop|dropp|uneven|lopsided|crooked)|\b(droop|dropp)(ing|y)?[^.]{0,15}(face|mouth|eyelid|side)|\bslurr(ed|ing)|\btalking funny|\bspeech (is )?(funny|off|strange|garbled)|\bcan'?t (speak|talk|get (my )?words|talk right)|\bsudden(ly)? (weak|numb)|\b(weakness|numbness) (on|in|of) (one|my (right|left)) (side|arm|leg)|\bone side of (my|his|her) (body|face)|\bcan'?t (move|lift|hold) (my )?(arm|leg|cup)|\b(arm|leg|hand|foot|face|side)[^.]{0,24}\b(went|got|turned|is|was) (numb|weak|limp|dead)\b|\bwent numb (all of a sudden|suddenly|out of nowhere)|\b(can'?t|could ?no?'?t|could not|cannot) (hold|grip|lift)[^.]{0,24}(cup|glass|mug|phone|fork|spoon|pen)|\bwords (came out|come out|were|are|got|getting|went) (all )?(garbled|jumbled|mixed up|wrong|backwards)/i, label: "stroke signs" },
   { re: /\bseizure|\bconvuls|\bfitting\b|\bwors[te] ?(head ?ache?|headach)|\bthunderclap|\b(headache|headach)[^.]{0,40}(stiff neck|neck (is )?stiff)|\bstiff neck[^.]{0,40}headach/i, label: "seizure / thunderclap headache" },
   { re: /\bunconscious|\bunresponsive|\bnot waking up|\bwon'?t wake up|\bpass(ed|t) out|\bblacked out|\bfainted|\blost consciousness|\bcollapsed\b/i, label: "loss of consciousness" },
   { re: /\bparaly[sz]|\bcan'?t feel my (legs|arms|body)|\bcan'?t move my (legs|arms)/i, label: "paralysis" },
@@ -86246,6 +86246,8 @@ var EMERGENCY_PATTERNS = [
   { re: /\boverdos|\btook (a whole|the whole|all (of )?my|too many|way too many|a bottle of|a handful of|a bunch of)|\bswallowed (bleach|poison|pills)|\bpoison(ed|ing)\b/i, label: "overdose / poisoning" },
   // "took 30 of my Tylenol" — a count of 10+ (or a number word) of a medication, excluding units/time words
   { re: /\btook (\d{2,}|twenty|thirty|forty|fifty|sixty|dozens of)\s+(of (my|the|them|his|her)\s+)?(\d+ ?mg\s+)?(?!(minutes?|mins?|hours?|days?|weeks?|months?|years?|seconds?|steps|mg|ml|units?|breaths?|pounds?|lbs?|miles?|photos?|pictures?)\b)[a-z]+/i, label: "overdose stated as a count" },
+  // minimisation: "took a few extra of my sleeping pills, maybe 12 or so"
+  { re: /\btook (a few|a couple( of)?|some|several|\d+) extra[^.]{0,40}(sleeping pills?|pain ?(pills?|killers?|meds?|medication)|oxy\w*|hydroco\w*|percocet|vicodin|xanax|benzo\w*|valium|klonopin|ativan|ambien|tylenol|acetaminophen|insulin)|\b(maybe|about|around|like) (1[0-9]|[2-9]\d)( pills| tablets| of them)\b/i, label: "excess medication dose" },
   { re: /\b(insulin|my (long|short|fast)[- ]acting)[^.]{0,80}(twice|double|two doses|two shots)[^.]{0,100}(shaky|sweaty|sweating|confus|dizzy|faint)|\bdouble dose of insulin|\btook (my )?insulin twice/i, label: "insulin double dose" },
   // self-harm — never suppressed
   { re: /\bsu[ic]{1,2}id|\bkill(ing)? my ?self|\bend (my|it all|my life)|\btake my (own )?life|\bdon'?t want to (be here|be alive|live|wake up)|\bbetter off (dead|without me)|\bhurt(ing)? my ?self|\bharm(ing)? my ?self|\bself.?harm|\bplan to (die|kill)|\bending my life/i, neverSuppress: true, label: "self-harm" },
@@ -86258,6 +86260,20 @@ var EMERGENCY_PATTERNS = [
   { re: /\bpregnan[^.]{0,120}(seeing spots|spots in my vision|blurry vision|vision change|severe headache|bad headache|worst headache|swollen (hands|face)|face (is )?swollen)|\b(seeing spots|severe headache|bad headache)[^.]{0,120}pregnan/i, label: "pregnancy: preeclampsia signs" },
   { re: /\bsoak(ed|ing|s) (a |through |\d+ |one |two )?pads?|\bbleeding (heavily|a lot|through)[^.]{0,30}pad/i, label: "heavy vaginal bleeding" },
   { re: /\b(pregnan|positive (pregnancy )?test|missed (my )?period)[^.]{0,140}(shoulder|faint|dizzy|lightheaded|light headed)|\bshoulder tip pain/i, label: "ectopic pregnancy pattern" },
+  // Arabic — emergencies only, like Spanish. Hamza-tolerant ([أا]); negation: "لا يوجد", "ليس/ما عندي", "بدون".
+  { re: /[أا]لم[^.]{0,14}(في |)الصدر|وجع[^.]{0,14}الصدر|صدري يؤلمني|ذبحة صدرية|[أا]زمة قلبية|نوبة قلبية/, label: "ar: chest pain" },
+  { re: /لا [أا]ستطيع التنفس|ما [أا]قدر [أا]تنفس|ضيق شديد في التنفس|[أا]ختناق|اختناق/, label: "ar: cannot breathe" },
+  { re: /جلطة|سكتة دماغية|وجه[^.]{0,12}مائل|لا يستطيع الكلام|لا [أا]ستطيع الكلام|كلامه غير واضح/, label: "ar: stroke signs" },
+  { re: /فقد الوعي|[أا]غمي عليه|لا يستيقظ|تشنجات|نوبة صرع/, label: "ar: seizure / LOC" },
+  { re: /[أا]ريد [أا]ن [أا]موت|انتحار|[أا]قتل نفسي|[أا][ؤو]ذي نفسي|لا [أا]ريد [أا]ن [أا]عيش/, neverSuppress: true, label: "ar: self-harm" },
+  { re: /نزيف شديد|يتقي[أا] دم|[أا]تقي[أا] دم|جرعة زائدة|تورم (اللسان|الحلق|الشفتين)/, label: "ar: bleeding / overdose / airway" },
+  // Vietnamese — emergencies only; diacritic and ascii (no-diacritic typing) variants. Negation: "không", "chưa".
+  { re: /đau (thắt |tức |)ngực|tức ngực|\b(dau|tuc) nguc\b/i, label: "vi: chest pain" },
+  { re: /không thở được|khó thở|nghẹt thở|thở không nổi|\bkhong tho duoc\b|\bkho tho\b/i, label: "vi: cannot breathe" },
+  { re: /đột quỵ|tai biến|méo miệng|miệng bị méo|nói ngọng đột ngột|không nói được|\bdot quy\b|\bmeo mieng\b/i, label: "vi: stroke signs" },
+  { re: /bất tỉnh|ngất xỉu|co giật|không tỉnh dậy|gọi không dậy|\b(bat tinh|ngat xiu|co giat)\b/i, label: "vi: seizure / LOC" },
+  { re: /tự tử|tự sát|muốn chết|không muốn sống|kết thúc cuộc đời|làm hại bản thân|\b(tu tu|tu sat|muon chet)\b/i, neverSuppress: true, label: "vi: self-harm" },
+  { re: /nôn ra máu|ói ra máu|uống quá liều|chảy máu (nhiều|không ngừng|không cầm)|\b(non|oi) ra mau\b|\buong qua lieu\b/i, label: "vi: bleeding / overdose" },
   // Spanish — emergencies only; the AI path handles nuance. Negation: "sin", "no".
   { re: /\bdolor (fuerte |muy fuerte |intenso |)?(en el |de |del )?pecho|\bopresi[óo]n en el pecho|\binfarto|\bataque (al |de )coraz[óo]n/i, label: "es: chest pain" },
   { re: /\bno puedo respirar|\bme cuesta respirar|\bdificultad para respirar|\bfalta de aire|\bno me entra (el )?aire/i, label: "es: cannot breathe" },
@@ -86271,10 +86287,10 @@ var EMERGENCY_PATTERNS = [
   { re: /\bfell[^.]{0,120}(leg|hip)[^.]{0,80}(shorter|turned out|rotated)|\b(leg|foot) (looks|is|seems) (shorter|turned out|rotated)|\bhip[^.]{0,40}(fracture|broke)/i, label: "hip fracture pattern" }
 ];
 var EMERGENCY_KEYWORDS = EMERGENCY_PATTERNS.map((p) => p.label);
-var FAMILY_HX_CTX = /\b(dad|mom|father|mother|parent|grandparent|grand(father|mother|pa|ma)|brother|sister|sibling|uncle|aunt|cousin|relative)('?s)?\s+(had|has had|have had|got|died of|died from|has|have|with)\s+(a\s+|an\s+)?$/;
+var FAMILY_HX_CTX = /\b(dad|mom|father|mother|parent|grandparent|grand(father|mother|pa|ma)|brother|sister|sibling|uncle|aunt|cousin|relative|husband|wife|spouse)('?s)?[^.]{0,24}\b(had|has had|have had|got|died of|died from|suffered|has|have|with)\s+((his|her|their)\s+)?((first|second|third|another)\s+)?(a\s+|an\s+|the\s+)?$/;
 var CURRENT_AFTER = /^[^.]{0,50}\b(right now|currently|today|just now|at the moment|this morning|an hour ago|minutes ago|since (this|last|an hour|yesterday)|is having|and (is|can'?t|cannot|won'?t))/;
 var HISTORY_CTX = /\b(family history of|fhx(\s+of)?|hx\s+of|history of|previous|prior|past)\s+(a\s+|an\s+)?$/;
-var NEGATION_CTX = /\b(no|not|without|denies?|deny|negative for|never had|never have|never|sin|nunca)\s+(a\s+|an\s+|any\s+|the\s+)?$/;
+var NEGATION_CTX = /\b(no|not|without|denies?|deny|negative for|never had|never have|never|don'?t|sin|nunca)\s+((have|had|has|having|get|gotten|got|been having|experienced?|felt|feel|noticed?)\s+)?(a\s+|an\s+|any\s+|the\s+)?$|(لا يوجد|ليس (عندي|لدي)|ما عندي|بدون)\s*$|\b(không|chưa|khong)\s+$/;
 var SELF_HARM_DENIAL_CTX = /\b((am|i'?m|is|are|was)\s+not|no|not having|without|denies?|deny)\s+(any\s+|current\s+|active\s+)?((thoughts?|ideas?|ideation|plans?|intention|urges?|feelings?)\s+(of|to|about)\s+|)$/;
 var LONG_AGO_AFTER = /^[^.]{0,30}\b((\d+|two|three|four|five|six|seven|eight|nine|ten|several|many|few|couple of) (years?|months?|weeks?) ago|in (19|20)\d\d|years ago|when i was)/;
 function detectEmergency(text2) {
@@ -86296,8 +86312,7 @@ function detectEmergency(text2) {
   return false;
 }
 function mentionsSelfHarm(text2) {
-  const p = EMERGENCY_PATTERNS.find((x) => x.neverSuppress);
-  return !!p && p.re.test(text2);
+  return EMERGENCY_PATTERNS.some((p) => p.neverSuppress && p.re.test(text2));
 }
 function extractCoveredTopics(messages) {
   const covered = /* @__PURE__ */ new Set();
@@ -86453,6 +86468,14 @@ function buildTemplateClinicalBrief(chiefComplaint, responses) {
   if (looksSpanish) {
     safetyNet = `${safetyNet} Si es una emergencia, llame al 911 ahora. Ace funciona mejor en ingl\xE9s por ahora; un m\xE9dico revisar\xE1 lo que escribi\xF3.`;
     flags.push("Spanish-language intake \u2014 automated screen is limited; clinician to review the original text");
+  }
+  if (/[\u0600-\u06FF]/.test(blob)) {
+    safetyNet = `${safetyNet} \u0625\u0630\u0627 \u0643\u0627\u0646\u062A \u0647\u0630\u0647 \u062D\u0627\u0644\u0629 \u0637\u0627\u0631\u0626\u0629\u060C \u0627\u062A\u0635\u0644 \u0628\u0627\u0644\u0631\u0642\u0645 911 \u0627\u0644\u0622\u0646. \u064A\u0639\u0645\u0644 Ace \u0628\u0627\u0644\u0644\u063A\u0629 \u0627\u0644\u0625\u0646\u062C\u0644\u064A\u0632\u064A\u0629 \u0628\u0634\u0643\u0644 \u0623\u0641\u0636\u0644 \u062D\u0627\u0644\u064A\u064B\u0627\u061B \u0633\u064A\u0631\u0627\u062C\u0639 \u0627\u0644\u0637\u0628\u064A\u0628 \u0645\u0627 \u0643\u062A\u0628\u062A\u0647.`;
+    flags.push("Arabic-language intake \u2014 automated screen is limited; clinician to review the original text");
+  }
+  if (/[ĂăĐđƠơƯư\u1EA0-\u1EF9]/.test(blob)) {
+    safetyNet = `${safetyNet} N\u1EBFu \u0111\xE2y l\xE0 tr\u01B0\u1EDDng h\u1EE3p kh\u1EA9n c\u1EA5p, h\xE3y g\u1ECDi 911 ngay. Hi\u1EC7n t\u1EA1i Ace ho\u1EA1t \u0111\u1ED9ng t\u1ED1t nh\u1EA5t b\u1EB1ng ti\u1EBFng Anh; b\xE1c s\u0129 s\u1EBD xem l\u1EA1i nh\u1EEFng g\xEC b\u1EA1n \u0111\xE3 vi\u1EBFt.`;
+    flags.push("Vietnamese-language intake \u2014 automated screen is limited; clinician to review the original text");
   }
   return {
     summary,
