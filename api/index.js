@@ -86043,8 +86043,7 @@ async function callAnthropic(opts) {
     model: opts.model,
     system: opts.system,
     messages: opts.messages,
-    max_tokens: opts.maxTokens,
-    temperature: opts.temperature ?? 0.4
+    max_tokens: opts.maxTokens
   });
   let lastError = null;
   const headers = anthropicHeaders(apiKey);
@@ -86126,7 +86125,6 @@ async function streamIntakeReply(messages, onDelta) {
         system: INTAKE_SYSTEM_PROMPT,
         messages: anthropicMessages,
         max_tokens: 400,
-        temperature: 0.5,
         stream: true
       }),
       signal: controller.signal
@@ -86211,8 +86209,11 @@ async function generateClinicalBrief(chiefComplaint, responses) {
         content: transcriptBlock(chiefComplaint, responses)
       }
     ],
-    maxTokens: 1600,
-    temperature: 0.2
+    // Sonnet 5.5 writes fuller differentials than 1600 tokens allowed — a
+    // truncated reply fails the JSON parse and wastes the call (found live
+    // 2026-10-29). Headroom is cheap; the parse below still fails closed to
+    // the deterministic floor if the model ever overruns this too.
+    maxTokens: 3e3
   });
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error("Clinical brief: no JSON in model output");

@@ -19,8 +19,12 @@ import { ACUITY_LEVELS, type Acuity } from '../src/lib/clinical-brief.js';
 
 const rank = (a: string) => ACUITY_LEVELS.indexOf(a as Acuity);
 const args = process.argv.slice(2);
-const only = (args[args.indexOf('--only') + 1] ?? '').split(',').filter(Boolean);
-const out = args.includes('--out') ? args[args.indexOf('--out') + 1] : 'ai-brief-validation.md';
+// indexOf returns -1 when a flag is absent; -1 + 1 = 0 silently grabbed args[0]
+// and filtered the set to nothing (found 2026-10-29 when --out was passed alone).
+const onlyIdx = args.indexOf('--only');
+const only = onlyIdx >= 0 ? (args[onlyIdx + 1] ?? '').split(',').filter(Boolean) : [];
+const outIdx = args.indexOf('--out');
+const out = outIdx >= 0 ? (args[outIdx + 1] ?? 'ai-brief-validation.md') : 'ai-brief-validation.md';
 
 if (!aiAvailable()) {
   console.error('ANTHROPIC_API_KEY is not set — nothing to validate. Set it (and ANTHROPIC_WORKSPACE_ID if org-scoped) and re-run.');

@@ -70,7 +70,6 @@ interface CallOptions {
   system: string;
   messages: AnthropicMessage[];
   maxTokens: number;
-  temperature?: number;
   timeoutMs?: number;
 }
 
@@ -89,12 +88,14 @@ async function callAnthropic(opts: CallOptions): Promise<string> {
   const apiKey = getApiKey();
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
+  // `temperature` is deprecated on the 5.5-generation models and the API
+  // rejects it with a 400 ("deprecated for this model") — found live on
+  // 2026-10-29 when the real key went in. Never send it.
   const body = JSON.stringify({
     model: opts.model,
     system: opts.system,
     messages: opts.messages,
     max_tokens: opts.maxTokens,
-    temperature: opts.temperature ?? 0.4,
   });
 
   let lastError: Error | null = null;
@@ -203,7 +204,6 @@ export async function intakeChatReply(messages: ChatTurn[]): Promise<IntakeChatR
     system: INTAKE_SYSTEM_PROMPT,
     messages: anthropicMessages,
     maxTokens: 400,
-    temperature: 0.5,
   });
 
   const done = raw.includes(COMPLETE_TOKEN);
@@ -248,7 +248,6 @@ export async function streamIntakeReply(
         system: INTAKE_SYSTEM_PROMPT,
         messages: anthropicMessages,
         max_tokens: 400,
-        temperature: 0.5,
         stream: true,
       }),
       signal: controller.signal,
@@ -354,7 +353,6 @@ export async function generateProviderBrief(
       },
     ],
     maxTokens: 700,
-    temperature: 0.2,
   });
 
   // Robust JSON extraction (model may occasionally wrap output)
@@ -412,8 +410,11 @@ export async function generateClinicalBrief(
         content: transcriptBlock(chiefComplaint, responses),
       },
     ],
-    maxTokens: 1600,
-    temperature: 0.2,
+    // Sonnet 5.5 writes fuller differentials than 1600 tokens allowed — a
+    // truncated reply fails the JSON parse and wastes the call (found live
+    // 2026-10-29). Headroom is cheap; the parse below still fails closed to
+    // the deterministic floor if the model ever overruns this too.
+    maxTokens: 3000,
   });
 
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
