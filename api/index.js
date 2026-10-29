@@ -86211,9 +86211,10 @@ async function generateClinicalBrief(chiefComplaint, responses) {
     ],
     // Sonnet 5.5 writes fuller differentials than 1600 tokens allowed — a
     // truncated reply fails the JSON parse and wastes the call (found live
-    // 2026-10-29). Headroom is cheap; the parse below still fails closed to
-    // the deterministic floor if the model ever overruns this too.
-    maxTokens: 3e3
+    // 2026-10-29). 3000 still truncated the two richest cases in the 141-run
+    // (a long-transcript TIA and a Vietnamese SI). Headroom is cheap; the
+    // parse below still fails closed to the deterministic floor regardless.
+    maxTokens: 4096
   });
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error("Clinical brief: no JSON in model output");
