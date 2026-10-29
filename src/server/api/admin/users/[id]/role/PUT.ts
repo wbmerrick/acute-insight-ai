@@ -4,11 +4,15 @@ import { user, clinicianProfiles } from '../../../../../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { requireAdmin } from '../../../../../lib/dispatch.js';
 import { audit } from '../../../../../lib/audit.js';
+import { requireRecentAuth } from '../../../../../lib/reauth.js';
 
 export default async function handler(req: Request, res: Response) {
   try {
     const session = await requireAdmin(req, res);
     if (!session) return;
+
+    // Sensitive: requires a fresh password confirmation (step-up re-auth).
+    if (!(await requireRecentAuth(req, res))) return;
 
     const targetId = req.params.id;
     const { role } = req.body as { role: string };

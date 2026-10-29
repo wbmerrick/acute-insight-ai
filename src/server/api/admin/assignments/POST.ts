@@ -4,12 +4,16 @@ import { db } from '../../../db/client.js';
 import { patientAssignments, user } from '../../../db/schema.js';
 import { requireAdmin } from '../../../lib/dispatch.js';
 import { audit } from '../../../lib/audit.js';
+import { requireRecentAuth } from '../../../lib/reauth.js';
 
 /** Body: { providerId, patientId, remove?: boolean } */
 export default async function handler(req: Request, res: Response) {
   try {
     const session = await requireAdmin(req, res);
     if (!session) return;
+
+    // Sensitive: requires a fresh password confirmation (step-up re-auth).
+    if (!(await requireRecentAuth(req, res))) return;
 
     const { providerId, patientId, remove } = (req.body ?? {}) as { providerId?: string; patientId?: string; remove?: boolean };
     if (!providerId || !patientId) return res.status(400).json({ error: 'providerId and patientId required' });

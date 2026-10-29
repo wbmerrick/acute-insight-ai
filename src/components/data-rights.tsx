@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { signOut } from '@/lib/auth/auth-client';
+import { sensitiveFetch, downloadSensitive } from '@/components/reauth';
 
 /** Your data, your account: download everything, or delete it. */
 export function DataRights({ email, deleteMode = 'delete' }: { email: string; deleteMode?: 'delete' | 'deidentify' }) {
@@ -9,11 +10,13 @@ export function DataRights({ email, deleteMode = 'delete' }: { email: string; de
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const [exporting, setExporting] = useState(false);
+  const [exportErr, setExportErr] = useState('');
 
   async function del() {
     setBusy(true); setErr('');
     try {
-      const r = await fetch('/api/patient/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirmEmail: confirm }) });
+      const r = await sensitiveFetch('/api/patient/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirmEmail: confirm }) });
       const d = (await r.json().catch(() => ({}))) as { error?: string };
       if (!r.ok) { setErr(d.error || 'Could not delete your account'); return; }
       await signOut().catch(() => {});
@@ -28,14 +31,26 @@ export function DataRights({ email, deleteMode = 'delete' }: { email: string; de
       <h3 className="text-base font-semibold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>Your data</h3>
       <p className="text-sm mt-1 mb-4" style={{ color: 'hsl(var(--text-dim))' }}>Everything we hold about you is yours. Download it any time, or delete your account and all of it.</p>
       <div className="flex flex-wrap gap-3 items-center">
-        <a href="/api/patient/export" download className="text-sm font-semibold px-4 py-2 rounded-lg" style={{ background: 'hsl(var(--primary) / 0.12)', color: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary) / 0.35)', fontFamily: 'var(--font-heading)' }}>
-          Download my data
-        </a>
+        <button
+          type="button"
+          disabled={exporting}
+          onClick={() => {
+            setExporting(true); setExportErr('');
+            downloadSensitive('/api/patient/export', 'acute-insight-my-data.json')
+              .catch((e) => setExportErr(e instanceof Error ? e.message : 'Download failed'))
+              .finally(() => setExporting(false));
+          }}
+          className="text-sm font-semibold px-4 py-2 rounded-lg disabled:opacity-50"
+          style={{ background: 'hsl(var(--primary) / 0.12)', color: 'hsl(var(--primary))', border: '1px solid hsl(var(--primary) / 0.35)', fontFamily: 'var(--font-heading)' }}
+        >
+          {exporting ? 'Preparing…' : 'Download my data'}
+        </button>
         <Link to="/account/security" className="text-sm px-4 py-2 rounded-lg" style={{ color: 'hsl(var(--text-dim))', border: '1px solid hsl(var(--border-subtle) / 0.5)' }}>Two-step verification</Link>
         {!open && (
           <button type="button" onClick={() => setOpen(true)} className="text-sm ml-auto hover:underline" style={{ color: 'hsl(var(--destructive))' }}>Delete my account</button>
         )}
       </div>
+      {exportErr && <p className="text-xs mt-2" role="alert" style={{ color: 'hsl(var(--destructive))' }}>{exportErr}</p>}
       {open && (
         <div className="mt-5 pt-5 grid gap-3" style={{ borderTop: '1px solid hsl(var(--destructive) / 0.3)' }}>
           <p className="text-sm text-foreground">

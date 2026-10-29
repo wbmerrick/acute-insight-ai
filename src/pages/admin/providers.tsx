@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useSession } from '@/lib/auth/auth-client';
 import { admin_providers } from 'virtual:content';
 import { IdleGuard } from '@/components/idle-guard';
+import { sensitiveFetch, downloadSensitive } from '@/components/reauth';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -357,7 +358,7 @@ function AssignmentsPanel() {
 
   async function change(remove: boolean, pId = providerId, ptId = patientId) {
     setErr('');
-    const r = await fetch('/api/admin/assignments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ providerId: pId, patientId: ptId, remove }) });
+    const r = await sensitiveFetch('/api/admin/assignments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ providerId: pId, patientId: ptId, remove }) });
     if (!r.ok) { const d = (await r.json().catch(() => ({}))) as { error?: string }; setErr(d.error || 'Failed'); return; }
     await load();
   }
@@ -426,6 +427,7 @@ function AuditPanel() {
   const [rows, setRows] = useState<AuditRow[] | null>(null);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('');
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -454,9 +456,21 @@ function AuditPanel() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by action or id…" className="rounded-lg px-3 py-1.5 text-sm text-foreground outline-none" style={{ background: 'hsl(var(--surface-deeper))', border: '1px solid hsl(var(--border-subtle))', minWidth: 220 }} />
-          <a href="/api/admin/audit/export" download className="rounded-lg px-3 py-1.5 text-sm font-medium" style={{ background: 'hsl(var(--surface-deeper))', border: '1px solid hsl(var(--border-subtle))', color: 'hsl(var(--foreground))' }} title="Every event, oldest first, as CSV — keep a copy off the platform">
-            Export all (CSV)
-          </a>
+          <button
+            type="button"
+            disabled={exporting}
+            onClick={() => {
+              setExporting(true);
+              downloadSensitive('/api/admin/audit/export', 'acute-insight-audit.csv')
+                .catch((e) => setError(e instanceof Error ? e.message : 'Export failed'))
+                .finally(() => setExporting(false));
+            }}
+            className="rounded-lg px-3 py-1.5 text-sm font-medium disabled:opacity-50"
+            style={{ background: 'hsl(var(--surface-deeper))', border: '1px solid hsl(var(--border-subtle))', color: 'hsl(var(--foreground))' }}
+            title="Every event, oldest first, as CSV — keep a copy off the platform"
+          >
+            {exporting ? 'Exporting…' : 'Export all (CSV)'}
+          </button>
         </div>
       </div>
       {error && <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--destructive))' }}>{error}</p>}
@@ -571,7 +585,7 @@ export default function AdminProvidersPage() {
     const { user: target, action } = pendingAction;
     const newRole = action === 'promote' ? 'provider' : 'patient';
     try {
-      const res = await fetch(`/api/admin/users/${target.id}/role`, {
+      const res = await sensitiveFetch(`/api/admin/users/${target.id}/role`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: newRole }),

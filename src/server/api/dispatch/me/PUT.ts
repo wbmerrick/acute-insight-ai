@@ -3,7 +3,8 @@ import { eq } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
 import { clinicianProfiles, clinicianOnlineLog } from '../../../db/schema.js';
 import { and, isNull } from 'drizzle-orm';
-import { requireClinician, isUsState, SCOPE_OPTIONS, logErr } from '../../../lib/dispatch.js';
+import { requireClinician, isUsState, SCOPE_OPTIONS, licensesOf, logErr } from '../../../lib/dispatch.js';
+import { requireRecentAuth } from '../../../lib/reauth.js';
 import type { Acuity } from '../../../../lib/clinical-brief.js';
 import { toE164 } from '../../../lib/sms.js';
 import { audit } from '../../../lib/audit.js';
@@ -47,6 +48,16 @@ export default async function handler(req: Request, res: Response) {
       patch.online = body.online;
       patch.lastSeenAt = new Date();
     }
+
+    // Licensure, scope and credential decide which patients this clinician can
+    // see — changing them is sensitive and needs a fresh password confirmation.
+    // Going online/offline and contact details stay friction-free.
+    const sameSet = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join(',') === [...b].sort().join(',');
+    const changesLicensure =
+      (patch.stateLicenses !== undefined && !sameSet(patch.stateLicenses as string[], licensesOf(ctx.profile))) ||
+      (patch.maxAcuity !== undefined && patch.maxAcuity !== (ctx.profile.maxAcuity ?? 'urgent')) ||
+      (patch.credential !== undefined && patch.credential !== (ctx.profile.credential ?? null));
+    if (changesLicensure && !(await requireRecentAuth(req, res))) return;
 
     const [updated] = await db
       .update(clinicianProfiles)

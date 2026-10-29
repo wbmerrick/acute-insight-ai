@@ -3,6 +3,7 @@ import { type ReactElement } from 'react';
 import { ScrollRestoration, useLocation } from 'react-router';
 
 import HomepageSameAsJsonLd from '@/components/HomepageSameAsJsonLd';
+import { ReauthHost } from '@/components/reauth';
 import Footer from '@/layouts/parts/Footer';
 import Header from '@/layouts/parts/Header';
 import Website from '@/layouts/Website';
@@ -39,6 +40,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
       {!standalone && <Header />}
       {children}
       {!standalone && <Footer />}
+      {/* Password prompt for sensitive actions (step-up re-auth) — renders nothing until asked. */}
+      <ReauthHost />
     </Website>
   );
 }

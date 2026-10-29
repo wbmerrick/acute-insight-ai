@@ -4,6 +4,7 @@ import { db } from '../../../../db/client.js';
 import { auditEvents } from '../../../../db/schema.js';
 import { requireAdmin } from '../../../../lib/dispatch.js';
 import { audit } from '../../../../lib/audit.js';
+import { requireRecentAuth } from '../../../../lib/reauth.js';
 
 /**
  * Admin: export the audit trail as CSV for off-platform retention (HIPAA asks for
@@ -30,6 +31,9 @@ export default async function handler(req: Request, res: Response) {
   try {
     const session = await requireAdmin(req, res);
     if (!session) return;
+
+    // Sensitive: requires a fresh password confirmation (step-up re-auth).
+    if (!(await requireRecentAuth(req, res))) return;
 
     const { from, to } = req.query as Record<string, string | undefined>;
     const fromD = parseDay(from);

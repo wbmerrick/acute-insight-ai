@@ -38,6 +38,7 @@ export const session = pgTable('session', {
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
   lastActiveAt: timestamp('last_active_at'), // server-side idle logoff (src/server/lib/session.ts)
+  lastReauthAt: timestamp('last_reauth_at'), // step-up password confirmation for sensitive actions (src/server/lib/reauth.ts)
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at')
     .defaultNow()

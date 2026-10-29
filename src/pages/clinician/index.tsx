@@ -8,6 +8,7 @@ import { ACUITY_LABEL } from '@/lib/clinical-brief';
 import { ProviderNote, acuityMeta } from '@/components/clinical-brief-view';
 import { MfaBanner } from '@/components/mfa-banner';
 import { IdleGuard } from '@/components/idle-guard';
+import { sensitiveFetch } from '@/components/reauth';
 
 // ─── Types (mirror /api/dispatch) ────────────────────────────────────────────
 
@@ -72,7 +73,9 @@ function waitLabel(iso: string | null, now: number) {
 }
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) } });
+  // sensitiveFetch handles the step-up password prompt when a licensure change
+  // answers 403 reauth_required; every other call passes straight through.
+  const res = await sensitiveFetch(url, { ...init, headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) } });
   const data = (await res.json().catch(() => ({}))) as T & { error?: string };
   if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
   return data;

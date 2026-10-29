@@ -4,6 +4,7 @@ import { db } from '../../../db/client.js';
 import { user, visits, session as sessionTable, account as accountTable, twoFactor, patientProfiles } from '../../../db/schema.js';
 import { requirePatient, logErr } from '../../../lib/dispatch.js';
 import { audit } from '../../../lib/audit.js';
+import { requireRecentAuth } from '../../../lib/reauth.js';
 import { settleCancelledVisit } from '../../../lib/stripe.js';
 
 /**
@@ -29,6 +30,9 @@ export default async function handler(req: Request, res: Response) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
+
+    // Sensitive: requires a fresh password confirmation (step-up re-auth).
+    if (!(await requireRecentAuth(req, res))) return;
     const [u] = await db.select({ email: user.email, role: user.role, isAdmin: user.isAdmin }).from(user).where(eq(user.id, userId)).limit(1);
     if (!u) return res.status(404).json({ error: 'Account not found' });
     const { confirmEmail } = (req.body ?? {}) as { confirmEmail?: string };

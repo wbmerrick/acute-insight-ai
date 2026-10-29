@@ -4,12 +4,16 @@ import { db } from '../../../db/client.js';
 import { user, patientProfiles, intakeSessions, visits, checkins, clinicianProfiles } from '../../../db/schema.js';
 import { requirePatient, logErr } from '../../../lib/dispatch.js';
 import { audit } from '../../../lib/audit.js';
+import { requireRecentAuth } from '../../../lib/reauth.js';
 
 /** Right of access: everything we hold about this patient, as a JSON download. */
 export default async function handler(req: Request, res: Response) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
+
+    // Sensitive: requires a fresh password confirmation (step-up re-auth).
+    if (!(await requireRecentAuth(req, res))) return;
 
     const [u] = await db.select({ id: user.id, name: user.name, email: user.email, emailVerified: user.emailVerified, createdAt: user.createdAt }).from(user).where(eq(user.id, userId)).limit(1);
     const [profile] = await db.select().from(patientProfiles).where(eq(patientProfiles.userId, userId)).limit(1);

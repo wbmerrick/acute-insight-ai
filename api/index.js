@@ -20952,7 +20952,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler44) {
+    Route.prototype.all = function all(handler45) {
       const callbacks = flatten2.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -20970,7 +20970,7 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler44) {
+      Route.prototype[method] = function(handler45) {
         const callbacks = flatten2.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -21173,17 +21173,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler44) {
+    Router.prototype.use = function use2(handler45) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler44 !== "function") {
-        let arg = handler44;
+      if (typeof handler45 !== "function") {
+        let arg = handler45;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler44;
+          path2 = handler45;
         }
       }
       const callbacks = flatten2.call(slice.call(arguments, offset), Infinity);
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler44 = connection.cancelQuery;
-    if (!handler44) {
+    const handler45 = connection.cancelQuery;
+    if (!handler45) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler44.bind(connection);
+    return handler45.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler44 = connection.killSession;
-    if (!handler44) {
+    const handler45 = connection.killSession;
+    if (!handler45) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler44.bind(connection);
+    return handler45.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -65064,7 +65064,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler44 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler45 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65084,7 +65084,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler44(internalContext).catch(async (e) => {
+    const response = await handler45(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65114,20 +65114,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler44) => {
+  return (path2, options, handler45) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler44);
+    }, handler45);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler44) {
+function createMiddleware(optionsOrHandler, handler45) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler44;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler45;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65155,14 +65155,14 @@ function createMiddleware(optionsOrHandler, handler44) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler44) {
+  function fn(optionsOrHandler, handler45) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler44) throw new Error("Middleware handler is required");
+    if (!handler45) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler44);
+    }, handler45);
   }
   return fn;
 };
@@ -65602,16 +65602,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler44 = route.data;
+    const handler45 = route.data;
     try {
-      const allowedMediaTypes = handler44.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler45.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler44.options.disableBody ? void 0 : await getBody(handler44.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler45.options.disableBody ? void 0 : await getBody(handler45.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65626,7 +65626,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler44(context2);
+      return await handler45(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65683,11 +65683,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler44 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler45 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler44(ctx));
+      return await runWithEndpointContext(ctx, () => handler45(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75826,8 +75826,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler44 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler44(request));
+      const { handler: handler45 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler45(request));
     },
     api,
     options,
@@ -84678,6 +84678,8 @@ var session = pgTable("session", {
   userId: varchar("user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
   lastActiveAt: timestamp("last_active_at"),
   // server-side idle logoff (src/server/lib/session.ts)
+  lastReauthAt: timestamp("last_reauth_at"),
+  // step-up password confirmation for sensitive actions (src/server/lib/reauth.ts)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => /* @__PURE__ */ new Date())
 }, (t) => [
@@ -85240,16 +85242,6 @@ async function handler4(req, res) {
   await authHandler(req, res);
 }
 
-// src/server/api/health/GET.ts
-async function handler5(_req, res) {
-  res.json({
-    status: "ok",
-    timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-    commit: (process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GIT_SHA ?? "unknown").slice(0, 7),
-    env: process.env.VERCEL_ENV ?? "local"
-  });
-}
-
 // src/server/lib/session.ts
 var IDLE_MS = { clinical: 15 * 6e4, patient: 30 * 6e4 };
 var TOUCH_EVERY_MS = 6e4;
@@ -85276,98 +85268,41 @@ async function touchSession(sessionId, limitMs, now2 = /* @__PURE__ */ new Date(
   return true;
 }
 
-// src/server/api/patient/intakes/GET.ts
-async function handler6(req, res) {
-  try {
-    const session2 = await requireSession(req, res, "patient");
-    if (!session2) return;
-    const rows = await db.select({
-      intake: intakeSessions,
-      visitId: visits.id,
-      visitStatus: visits.status,
-      visitState: visits.patientState,
-      visitAcceptedAt: visits.acceptedAt,
-      visitCompletedAt: visits.completedAt,
-      visitPaymentStatus: visits.paymentStatus,
-      visitAmountCents: visits.amountCents,
-      clinicianName: clinicianProfiles.displayName,
-      clinicianCredential: clinicianProfiles.credential
-    }).from(intakeSessions).leftJoin(visits, eq(visits.intakeSessionId, intakeSessions.id)).leftJoin(clinicianProfiles, eq(clinicianProfiles.userId, visits.clinicianUserId)).where(eq(intakeSessions.userId, session2.userId)).orderBy(desc(intakeSessions.createdAt));
-    res.json(
-      rows.map((r) => ({
-        ...r.intake,
-        visit: r.visitId ? {
-          id: r.visitId,
-          status: r.visitStatus,
-          state: r.visitState,
-          acceptedAt: r.visitAcceptedAt ? r.visitAcceptedAt.toISOString() : null,
-          completedAt: r.visitCompletedAt ? r.visitCompletedAt.toISOString() : null,
-          paymentStatus: r.visitPaymentStatus,
-          amountCents: r.visitAmountCents,
-          clinicianName: r.clinicianName,
-          clinicianCredential: r.clinicianCredential
-        } : null
-      }))
-    );
-  } catch (error3) {
-    console.error(JSON.stringify({ event: "api.error", route: "patient/intakes/GET.ts", error: error3 instanceof Error ? error3.message : String(error3) }));
-    res.status(500).json({ error: "Failed to fetch intakes" });
-  }
+// src/server/lib/reauth.ts
+var DEFAULT_WINDOW_MIN = 10;
+function reauthWindowMs(env3 = process.env) {
+  if ((env3.REQUIRE_REAUTH ?? "").toLowerCase() === "off") return null;
+  const raw = Number(env3.REAUTH_WINDOW_MINUTES ?? DEFAULT_WINDOW_MIN);
+  const minutes = Number.isFinite(raw) && raw > 0 ? Math.min(raw, 12 * 60) : DEFAULT_WINDOW_MIN;
+  return Math.max(1, minutes) * 6e4;
 }
-
-// src/server/api/patient/profile/GET.ts
-async function handler7(req, res) {
-  try {
-    const session2 = await requireSession(req, res, "patient");
-    if (!session2) return;
-    const [profile] = await db.select().from(patientProfiles).where(eq(patientProfiles.userId, session2.userId)).limit(1);
-    const [userData] = await db.select({ name: user.name, email: user.email, createdAt: user.createdAt }).from(user).where(eq(user.id, session2.userId)).limit(1);
-    res.json({ profile: profile ?? null, user: userData ?? null, deleteMode: process.env.ACCOUNT_DELETE_MODE === "deidentify" ? "deidentify" : "delete" });
-  } catch (error3) {
-    console.error(JSON.stringify({ event: "api.error", route: "patient/profile/GET.ts", error: error3 instanceof Error ? error3.message : String(error3) }));
-    res.status(500).json({ error: "Failed to fetch profile" });
-  }
+function isRecentAuth(lastReauthAt, createdAt, windowMs, now2 = /* @__PURE__ */ new Date()) {
+  const basis = [lastReauthAt, createdAt].filter((d) => d instanceof Date).reduce((a, b) => a && a > b ? a : b, null);
+  if (!basis) return false;
+  return now2.getTime() - basis.getTime() <= windowMs;
 }
-
-// src/server/api/patient/profile/PUT.ts
-async function handler8(req, res) {
-  try {
-    const session2 = await requireSession(req, res, "patient");
-    if (!session2) return;
-    const b = req.body ?? {};
-    const str2 = (v, max) => v == null || v === "" ? null : typeof v === "string" && v.trim().length <= max ? v.trim() : void 0;
-    const list = (v) => v == null ? null : Array.isArray(v) && v.length <= 50 && v.every((x) => typeof x === "string" && x.length <= 200) ? v.map((x) => x.trim()).filter(Boolean) : void 0;
-    const dateOfBirth = str2(b.dateOfBirth, 16);
-    const gender = str2(b.gender, 32);
-    const phone = str2(b.phone, 32);
-    const conditions = list(b.conditions);
-    const medications = list(b.medications);
-    const allergies = list(b.allergies);
-    if ([dateOfBirth, gender, phone, conditions, medications, allergies].some((v) => v === void 0)) {
-      return res.status(400).json({ error: "Profile fields must be short text; conditions, medications and allergies must be lists of short text" });
-    }
-    if (dateOfBirth && !/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) return res.status(400).json({ error: "Date of birth must be YYYY-MM-DD" });
-    const state = typeof b.state === "string" && /^[A-Za-z]{2}$/.test(b.state) ? b.state.toUpperCase() : void 0;
-    const [existing] = await db.select({ id: patientProfiles.id }).from(patientProfiles).where(eq(patientProfiles.userId, session2.userId)).limit(1);
-    if (existing) {
-      await db.update(patientProfiles).set({ dateOfBirth, gender, phone, conditions, medications, allergies, ...state ? { state } : {} }).where(eq(patientProfiles.userId, session2.userId));
-    } else {
-      await db.insert(patientProfiles).values({
-        userId: session2.userId,
-        dateOfBirth,
-        gender,
-        phone,
-        conditions,
-        medications,
-        allergies,
-        state: state ?? null
-      });
-    }
-    res.json({ ok: true });
-  } catch (error3) {
-    console.error(JSON.stringify({ event: "api.error", route: "patient/profile/PUT.ts", error: error3 instanceof Error ? error3.message : String(error3) }));
-    res.status(500).json({ error: "Failed to update profile" });
+async function requireRecentAuth(req, res) {
+  const windowMs = reauthWindowMs();
+  if (windowMs === null) return true;
+  const s = await getAuth().api.getSession({ headers: new Headers(req.headers) }).catch(() => null);
+  if (!s?.session?.id) {
+    res.status(401).json({ error: "Unauthorized" });
+    return false;
   }
+  const [row] = await db.select({ lastReauthAt: session.lastReauthAt, createdAt: session.createdAt }).from(session).where(eq(session.id, s.session.id)).limit(1);
+  if (row && isRecentAuth(row.lastReauthAt, row.createdAt, windowMs)) return true;
+  res.status(403).json({ error: "Please confirm your password to continue", code: "reauth_required" });
+  return false;
+}
+async function verifyAccountPassword(userId, password) {
+  const [acct] = await db.select({ password: account.password }).from(account).where(and(eq(account.userId, userId), eq(account.providerId, "credential"))).limit(1);
+  if (!acct?.password) return "no_password";
+  const ctx = await getAuth().$context;
+  const ok2 = await ctx.password.verify({ hash: acct.password, password });
+  return ok2 ? "ok" : "bad";
+}
+async function markReauthed(sessionId, now2 = /* @__PURE__ */ new Date()) {
+  await db.update(session).set({ lastReauthAt: now2 }).where(eq(session.id, sessionId));
 }
 
 // src/lib/clinical-brief.ts
@@ -85578,11 +85513,145 @@ function audit(req, input) {
   db.insert(auditEvents).values(row).catch((err) => console.error(JSON.stringify({ event: "audit.write_failed", action: row.action, error: err instanceof Error ? err.message : String(err) })));
 }
 
-// src/server/api/patient/export/GET.ts
+// src/server/api/auth/reauth/POST.ts
+async function handler5(req, res) {
+  try {
+    const session2 = await requireSession(req, res, "patient");
+    if (!session2) return;
+    const { password } = req.body ?? {};
+    if (typeof password !== "string" || !password) {
+      return res.status(400).json({ error: "Password required" });
+    }
+    const [u] = await db.select({ role: user.role, isAdmin: user.isAdmin }).from(user).where(eq(user.id, session2.userId)).limit(1);
+    const role = u?.isAdmin ? "admin" : u?.role === "provider" ? "provider" : "patient";
+    const result = await verifyAccountPassword(session2.userId, password.slice(0, 256));
+    if (result === "no_password") {
+      audit(req, { action: "auth.reauth", actorUserId: session2.userId, actorRole: role, resourceType: "session", meta: { ok: false, reason: "no_password" } });
+      return res.status(400).json({ error: "This account has no password on file, so it cannot confirm one" });
+    }
+    if (result === "bad") {
+      audit(req, { action: "auth.reauth", actorUserId: session2.userId, actorRole: role, resourceType: "session", meta: { ok: false } });
+      return res.status(401).json({ error: "Incorrect password" });
+    }
+    await markReauthed(session2.sessionId);
+    audit(req, { action: "auth.reauth", actorUserId: session2.userId, actorRole: role, resourceType: "session", meta: { ok: true } });
+    res.json({ ok: true });
+  } catch (error3) {
+    logErr("auth.reauth.error", error3);
+    res.status(500).json({ error: "Could not confirm your password" });
+  }
+}
+
+// src/server/api/health/GET.ts
+async function handler6(_req, res) {
+  res.json({
+    status: "ok",
+    timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+    commit: (process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.GIT_SHA ?? "unknown").slice(0, 7),
+    env: process.env.VERCEL_ENV ?? "local"
+  });
+}
+
+// src/server/api/patient/intakes/GET.ts
+async function handler7(req, res) {
+  try {
+    const session2 = await requireSession(req, res, "patient");
+    if (!session2) return;
+    const rows = await db.select({
+      intake: intakeSessions,
+      visitId: visits.id,
+      visitStatus: visits.status,
+      visitState: visits.patientState,
+      visitAcceptedAt: visits.acceptedAt,
+      visitCompletedAt: visits.completedAt,
+      visitPaymentStatus: visits.paymentStatus,
+      visitAmountCents: visits.amountCents,
+      clinicianName: clinicianProfiles.displayName,
+      clinicianCredential: clinicianProfiles.credential
+    }).from(intakeSessions).leftJoin(visits, eq(visits.intakeSessionId, intakeSessions.id)).leftJoin(clinicianProfiles, eq(clinicianProfiles.userId, visits.clinicianUserId)).where(eq(intakeSessions.userId, session2.userId)).orderBy(desc(intakeSessions.createdAt));
+    res.json(
+      rows.map((r) => ({
+        ...r.intake,
+        visit: r.visitId ? {
+          id: r.visitId,
+          status: r.visitStatus,
+          state: r.visitState,
+          acceptedAt: r.visitAcceptedAt ? r.visitAcceptedAt.toISOString() : null,
+          completedAt: r.visitCompletedAt ? r.visitCompletedAt.toISOString() : null,
+          paymentStatus: r.visitPaymentStatus,
+          amountCents: r.visitAmountCents,
+          clinicianName: r.clinicianName,
+          clinicianCredential: r.clinicianCredential
+        } : null
+      }))
+    );
+  } catch (error3) {
+    console.error(JSON.stringify({ event: "api.error", route: "patient/intakes/GET.ts", error: error3 instanceof Error ? error3.message : String(error3) }));
+    res.status(500).json({ error: "Failed to fetch intakes" });
+  }
+}
+
+// src/server/api/patient/profile/GET.ts
+async function handler8(req, res) {
+  try {
+    const session2 = await requireSession(req, res, "patient");
+    if (!session2) return;
+    const [profile] = await db.select().from(patientProfiles).where(eq(patientProfiles.userId, session2.userId)).limit(1);
+    const [userData] = await db.select({ name: user.name, email: user.email, createdAt: user.createdAt }).from(user).where(eq(user.id, session2.userId)).limit(1);
+    res.json({ profile: profile ?? null, user: userData ?? null, deleteMode: process.env.ACCOUNT_DELETE_MODE === "deidentify" ? "deidentify" : "delete" });
+  } catch (error3) {
+    console.error(JSON.stringify({ event: "api.error", route: "patient/profile/GET.ts", error: error3 instanceof Error ? error3.message : String(error3) }));
+    res.status(500).json({ error: "Failed to fetch profile" });
+  }
+}
+
+// src/server/api/patient/profile/PUT.ts
 async function handler9(req, res) {
+  try {
+    const session2 = await requireSession(req, res, "patient");
+    if (!session2) return;
+    const b = req.body ?? {};
+    const str2 = (v, max) => v == null || v === "" ? null : typeof v === "string" && v.trim().length <= max ? v.trim() : void 0;
+    const list = (v) => v == null ? null : Array.isArray(v) && v.length <= 50 && v.every((x) => typeof x === "string" && x.length <= 200) ? v.map((x) => x.trim()).filter(Boolean) : void 0;
+    const dateOfBirth = str2(b.dateOfBirth, 16);
+    const gender = str2(b.gender, 32);
+    const phone = str2(b.phone, 32);
+    const conditions = list(b.conditions);
+    const medications = list(b.medications);
+    const allergies = list(b.allergies);
+    if ([dateOfBirth, gender, phone, conditions, medications, allergies].some((v) => v === void 0)) {
+      return res.status(400).json({ error: "Profile fields must be short text; conditions, medications and allergies must be lists of short text" });
+    }
+    if (dateOfBirth && !/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) return res.status(400).json({ error: "Date of birth must be YYYY-MM-DD" });
+    const state = typeof b.state === "string" && /^[A-Za-z]{2}$/.test(b.state) ? b.state.toUpperCase() : void 0;
+    const [existing] = await db.select({ id: patientProfiles.id }).from(patientProfiles).where(eq(patientProfiles.userId, session2.userId)).limit(1);
+    if (existing) {
+      await db.update(patientProfiles).set({ dateOfBirth, gender, phone, conditions, medications, allergies, ...state ? { state } : {} }).where(eq(patientProfiles.userId, session2.userId));
+    } else {
+      await db.insert(patientProfiles).values({
+        userId: session2.userId,
+        dateOfBirth,
+        gender,
+        phone,
+        conditions,
+        medications,
+        allergies,
+        state: state ?? null
+      });
+    }
+    res.json({ ok: true });
+  } catch (error3) {
+    console.error(JSON.stringify({ event: "api.error", route: "patient/profile/PUT.ts", error: error3 instanceof Error ? error3.message : String(error3) }));
+    res.status(500).json({ error: "Failed to update profile" });
+  }
+}
+
+// src/server/api/patient/export/GET.ts
+async function handler10(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
+    if (!await requireRecentAuth(req, res)) return;
     const [u] = await db.select({ id: user.id, name: user.name, email: user.email, emailVerified: user.emailVerified, createdAt: user.createdAt }).from(user).where(eq(user.id, userId)).limit(1);
     const [profile] = await db.select().from(patientProfiles).where(eq(patientProfiles.userId, userId)).limit(1);
     const intakes = await db.select().from(intakeSessions).where(eq(intakeSessions.userId, userId)).orderBy(desc(intakeSessions.createdAt));
@@ -85794,10 +85863,11 @@ async function createTransfer(accountId, amountCents, visitId) {
 }
 
 // src/server/api/patient/delete/POST.ts
-async function handler10(req, res) {
+async function handler11(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
+    if (!await requireRecentAuth(req, res)) return;
     const [u] = await db.select({ email: user.email, role: user.role, isAdmin: user.isAdmin }).from(user).where(eq(user.id, userId)).limit(1);
     if (!u) return res.status(404).json({ error: "Account not found" });
     const { confirmEmail } = req.body ?? {};
@@ -85856,7 +85926,7 @@ async function visiblePatientIds(providerUserId, isAdmin) {
 }
 
 // src/server/api/provider/intakes/GET.ts
-async function handler11(req, res) {
+async function handler12(req, res) {
   try {
     const session2 = await requireSession(req, res, "clinical");
     if (!session2) return;
@@ -85906,7 +85976,7 @@ async function handler11(req, res) {
 }
 
 // src/server/api/intake/start/POST.ts
-async function handler12(req, res) {
+async function handler13(req, res) {
   try {
     const session2 = await requireSession(req, res, "patient");
     if (!session2) return;
@@ -86546,7 +86616,7 @@ async function notifyClinicianOfEscalation(opts) {
 }
 
 // src/server/api/intake/[id]/complete/POST.ts
-async function handler13(req, res) {
+async function handler14(req, res) {
   try {
     const session2 = await requireSession(req, res, "patient");
     if (!session2) return;
@@ -86652,7 +86722,7 @@ function patientTurns(messages) {
     return true;
   }).length;
 }
-async function handler14(req, res) {
+async function handler15(req, res) {
   try {
     const session2 = await getAuth().api.getSession({ headers: new Headers(req.headers) }).catch(() => null);
     const { messages, intakeId } = req.body;
@@ -86730,7 +86800,7 @@ async function handler14(req, res) {
 }
 
 // src/server/api/admin/users/GET.ts
-async function handler15(req, res) {
+async function handler16(req, res) {
   try {
     const session2 = await requireAdmin(req, res);
     if (!session2) return;
@@ -86755,10 +86825,11 @@ async function handler15(req, res) {
 }
 
 // src/server/api/admin/users/[id]/role/PUT.ts
-async function handler16(req, res) {
+async function handler17(req, res) {
   try {
     const session2 = await requireAdmin(req, res);
     if (!session2) return;
+    if (!await requireRecentAuth(req, res)) return;
     const targetId = req.params.id;
     const { role } = req.body;
     if (!targetId) return res.status(400).json({ error: "User ID required" });
@@ -86784,7 +86855,7 @@ async function handler16(req, res) {
 var MAX = { name: 160, email: 255, organization: 200, message: 2e3 };
 var submissionsThisInstance = 0;
 var INSTANCE_CAP = 200;
-async function handler17(req, res) {
+async function handler18(req, res) {
   try {
     const { name, email: email3, organization, message: message2, website } = req.body ?? {};
     if (typeof website === "string" && website.trim() !== "") {
@@ -86882,7 +86953,7 @@ async function synthesizeGatewaySpeech(text2, model, opts) {
   const buf = await bufferFromAudioField(j?.audio || j?.data?.audio || "");
   return { buf, contentType: opts.outputFormat === "wav" ? "audio/wav" : "audio/mpeg" };
 }
-async function handler18(req, res) {
+async function handler19(req, res) {
   try {
     if (process.env.SERVER_TTS === "off") return res.status(502).json({ error: "tts_unavailable", reason: "server_tts_off" });
     const text2 = sanitize2(req.body?.text);
@@ -86932,7 +87003,7 @@ async function handler18(req, res) {
 }
 
 // src/server/api/admin/access-requests/GET.ts
-async function handler19(req, res) {
+async function handler20(req, res) {
   try {
     const session2 = await requireAdmin(req, res);
     if (!session2) return;
@@ -86955,7 +87026,7 @@ async function handler19(req, res) {
 }
 
 // src/server/api/admin/audit/GET.ts
-async function handler20(req, res) {
+async function handler21(req, res) {
   try {
     const session2 = await requireAdmin(req, res);
     if (!session2) return;
@@ -86986,10 +87057,11 @@ function parseDay(s, endOfDay = false) {
   const d = /* @__PURE__ */ new Date(`${s}T${endOfDay ? "23:59:59.999" : "00:00:00.000"}Z`);
   return Number.isNaN(d.getTime()) ? null : d;
 }
-async function handler21(req, res) {
+async function handler22(req, res) {
   try {
     const session2 = await requireAdmin(req, res);
     if (!session2) return;
+    if (!await requireRecentAuth(req, res)) return;
     const { from, to } = req.query;
     const fromD = parseDay(from);
     const toD = parseDay(to, true);
@@ -87025,7 +87097,7 @@ async function handler21(req, res) {
 }
 
 // src/server/api/admin/assignments/GET.ts
-async function handler22(req, res) {
+async function handler23(req, res) {
   try {
     const session2 = await requireAdmin(req, res);
     if (!session2) return;
@@ -87040,10 +87112,11 @@ async function handler22(req, res) {
 }
 
 // src/server/api/admin/assignments/POST.ts
-async function handler23(req, res) {
+async function handler24(req, res) {
   try {
     const session2 = await requireAdmin(req, res);
     if (!session2) return;
+    if (!await requireRecentAuth(req, res)) return;
     const { providerId, patientId, remove } = req.body ?? {};
     if (!providerId || !patientId) return res.status(400).json({ error: "providerId and patientId required" });
     const [prov] = await db.select({ role: user.role, isAdmin: user.isAdmin }).from(user).where(eq(user.id, providerId)).limit(1);
@@ -87106,7 +87179,7 @@ function rateLimit(opts) {
 var byIp = (req) => `ip:${clientIp(req)}`;
 
 // src/server/api/dispatch/me/GET.ts
-async function handler24(req, res) {
+async function handler25(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87129,7 +87202,7 @@ async function handler24(req, res) {
 
 // src/server/api/dispatch/me/PUT.ts
 var CREDENTIALS = /* @__PURE__ */ new Set(["MD", "DO", "NP", "PA"]);
-async function handler25(req, res) {
+async function handler26(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87163,6 +87236,9 @@ async function handler25(req, res) {
       patch.online = body.online;
       patch.lastSeenAt = /* @__PURE__ */ new Date();
     }
+    const sameSet = (a, b) => a.length === b.length && [...a].sort().join(",") === [...b].sort().join(",");
+    const changesLicensure = patch.stateLicenses !== void 0 && !sameSet(patch.stateLicenses, licensesOf(ctx.profile)) || patch.maxAcuity !== void 0 && patch.maxAcuity !== (ctx.profile.maxAcuity ?? "urgent") || patch.credential !== void 0 && patch.credential !== (ctx.profile.credential ?? null);
+    if (changesLicensure && !await requireRecentAuth(req, res)) return;
     const [updated] = await db.update(clinicianProfiles).set(patch).where(eq(clinicianProfiles.userId, ctx.userId)).returning();
     if (typeof patch.online === "boolean" && patch.online !== !!ctx.profile.online) {
       const now2 = /* @__PURE__ */ new Date();
@@ -87189,7 +87265,7 @@ async function handler25(req, res) {
 }
 
 // src/server/api/dispatch/queue/GET.ts
-async function handler26(req, res) {
+async function handler27(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87254,7 +87330,7 @@ async function handler26(req, res) {
 
 // src/server/api/dispatch/visits/POST.ts
 var CLINICIAN_TEXT_WINDOW_MS = 10 * 60 * 1e3;
-async function handler27(req, res) {
+async function handler28(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87328,7 +87404,7 @@ async function notifyClinicians(acuity, state, base) {
 }
 
 // src/server/api/dispatch/visits/[id]/GET.ts
-async function handler28(req, res) {
+async function handler29(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87367,7 +87443,7 @@ async function handler28(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/accept/POST.ts
-async function handler29(req, res) {
+async function handler30(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87412,7 +87488,7 @@ async function handler29(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/release/POST.ts
-async function handler30(req, res) {
+async function handler31(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87429,7 +87505,7 @@ async function handler30(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/complete/POST.ts
-async function handler31(req, res) {
+async function handler32(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87459,7 +87535,7 @@ async function handler31(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/cancel/POST.ts
-async function handler32(req, res) {
+async function handler33(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87477,13 +87553,13 @@ async function handler32(req, res) {
 }
 
 // src/server/api/dispatch/pricing/GET.ts
-function handler33(_req, res) {
+function handler34(_req, res) {
   res.json(pricing());
 }
 
 // src/server/api/dispatch/sweep/GET.ts
 var HOLD_HOURS = Number(process.env.VISIT_HOLD_HOURS ?? 4);
-async function handler34(req, res) {
+async function handler35(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -87546,7 +87622,7 @@ function rate(n, d) {
 }
 
 // src/server/api/dispatch/metrics/GET.ts
-async function handler35(req, res) {
+async function handler36(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87609,7 +87685,7 @@ async function handler35(req, res) {
 }
 
 // src/server/api/dispatch/earnings/GET.ts
-async function handler36(req, res) {
+async function handler37(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87631,7 +87707,7 @@ async function handler36(req, res) {
 }
 
 // src/server/api/dispatch/connect/onboard/POST.ts
-async function handler37(req, res) {
+async function handler38(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87653,7 +87729,7 @@ async function handler37(req, res) {
 }
 
 // src/server/api/stripe/webhook/POST.ts
-async function handler38(req, res) {
+async function handler39(req, res) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) return res.status(503).json({ error: "Webhook not configured" });
   const raw = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
@@ -87699,7 +87775,7 @@ async function handler38(req, res) {
 }
 
 // src/server/api/companion/checkins/GET.ts
-async function handler39(req, res) {
+async function handler40(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87728,7 +87804,7 @@ async function handler39(req, res) {
 }
 
 // src/server/api/companion/checkins/[id]/answer/POST.ts
-async function handler40(req, res) {
+async function handler41(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87755,7 +87831,7 @@ async function handler40(req, res) {
 
 // src/server/api/companion/run/GET.ts
 var EXPIRE_AFTER_DAYS = Number(process.env.CHECKIN_EXPIRE_DAYS ?? 7);
-async function handler41(req, res) {
+async function handler42(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -87789,7 +87865,7 @@ async function handler41(req, res) {
 }
 
 // src/server/api/provider/checkins/GET.ts
-async function handler42(req, res) {
+async function handler43(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87816,7 +87892,7 @@ async function handler42(req, res) {
 }
 
 // src/server/api/provider/checkins/[id]/acknowledge/POST.ts
-async function handler43(req, res) {
+async function handler44(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -88007,7 +88083,7 @@ app.use("/api", (req, res, next) => {
   }
   next();
 });
-app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler38);
+app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler39);
 app.use(import_express.default.json());
 app.use(import_express.default.urlencoded({ extended: true }));
 app.get("/api/auth/:action", handler);
@@ -88019,47 +88095,48 @@ var rlRequest = rateLimit({ name: "visit-request", limit: 5, windowMs: 60 * MIN2
 var rlIntake = rateLimit({ name: "intake", limit: 30, windowMs: 60 * MIN2 });
 var rlAnswer = rateLimit({ name: "checkin-answer", limit: 20, windowMs: 60 * MIN2 });
 var rlAccess = rateLimit({ name: "access-request", limit: 5, windowMs: 60 * MIN2, key: byIp });
+app.post("/api/auth/reauth", rlAuth, handler5);
 app.post("/api/auth/:action", rlAuth, handler2);
 app.get("/api/auth/:action/:detail", handler3);
 app.post("/api/auth/:action/:detail", rlAuth, handler4);
-app.get("/api/health", handler5);
-app.get("/api/patient/intakes", handler6);
-app.get("/api/patient/profile", handler7);
-app.put("/api/patient/profile", handler8);
-app.get("/api/patient/export", handler9);
-app.post("/api/patient/delete", handler10);
-app.get("/api/provider/intakes", handler11);
-app.post("/api/intake/start", rlIntake, handler12);
-app.post("/api/intake/:id/complete", rlIntake, handler13);
-app.post("/api/intake/chat", rlChat, handler14);
-app.get("/api/admin/users", handler15);
-app.put("/api/admin/users/:id/role", handler16);
-app.post("/api/access-request", rlAccess, handler17);
-app.post("/api/speak", rlSpeak, handler18);
-app.get("/api/admin/access-requests", handler19);
-app.get("/api/admin/audit/export", handler21);
-app.get("/api/admin/audit", handler20);
-app.get("/api/admin/assignments", handler22);
-app.post("/api/admin/assignments", handler23);
-app.get("/api/dispatch/me", handler24);
-app.put("/api/dispatch/me", handler25);
-app.get("/api/dispatch/queue", handler26);
-app.post("/api/dispatch/visits", rlRequest, handler27);
-app.get("/api/dispatch/visits/:id", handler28);
-app.post("/api/dispatch/visits/:id/accept", handler29);
-app.post("/api/dispatch/visits/:id/release", handler30);
-app.post("/api/dispatch/visits/:id/complete", handler31);
-app.post("/api/dispatch/visits/:id/cancel", handler32);
-app.get("/api/dispatch/pricing", handler33);
-app.get("/api/dispatch/sweep", handler34);
-app.get("/api/dispatch/metrics", handler35);
-app.get("/api/dispatch/earnings", handler36);
-app.post("/api/dispatch/connect/onboard", handler37);
-app.get("/api/companion/checkins", handler39);
-app.post("/api/companion/checkins/:id/answer", rlAnswer, handler40);
-app.get("/api/companion/run", handler41);
-app.get("/api/provider/checkins", handler42);
-app.post("/api/provider/checkins/:id/acknowledge", handler43);
+app.get("/api/health", handler6);
+app.get("/api/patient/intakes", handler7);
+app.get("/api/patient/profile", handler8);
+app.put("/api/patient/profile", handler9);
+app.get("/api/patient/export", handler10);
+app.post("/api/patient/delete", handler11);
+app.get("/api/provider/intakes", handler12);
+app.post("/api/intake/start", rlIntake, handler13);
+app.post("/api/intake/:id/complete", rlIntake, handler14);
+app.post("/api/intake/chat", rlChat, handler15);
+app.get("/api/admin/users", handler16);
+app.put("/api/admin/users/:id/role", handler17);
+app.post("/api/access-request", rlAccess, handler18);
+app.post("/api/speak", rlSpeak, handler19);
+app.get("/api/admin/access-requests", handler20);
+app.get("/api/admin/audit/export", handler22);
+app.get("/api/admin/audit", handler21);
+app.get("/api/admin/assignments", handler23);
+app.post("/api/admin/assignments", handler24);
+app.get("/api/dispatch/me", handler25);
+app.put("/api/dispatch/me", handler26);
+app.get("/api/dispatch/queue", handler27);
+app.post("/api/dispatch/visits", rlRequest, handler28);
+app.get("/api/dispatch/visits/:id", handler29);
+app.post("/api/dispatch/visits/:id/accept", handler30);
+app.post("/api/dispatch/visits/:id/release", handler31);
+app.post("/api/dispatch/visits/:id/complete", handler32);
+app.post("/api/dispatch/visits/:id/cancel", handler33);
+app.get("/api/dispatch/pricing", handler34);
+app.get("/api/dispatch/sweep", handler35);
+app.get("/api/dispatch/metrics", handler36);
+app.get("/api/dispatch/earnings", handler37);
+app.post("/api/dispatch/connect/onboard", handler38);
+app.get("/api/companion/checkins", handler40);
+app.post("/api/companion/checkins/:id/answer", rlAnswer, handler41);
+app.get("/api/companion/run", handler42);
+app.get("/api/provider/checkins", handler43);
+app.post("/api/provider/checkins/:id/acknowledge", handler44);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;

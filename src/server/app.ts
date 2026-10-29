@@ -5,6 +5,7 @@ import auth__action__get from "./api/auth/[action]/GET";
 import auth__action__post from "./api/auth/[action]/POST";
 import auth__action__detail__get from "./api/auth/[action]/[detail]/GET";
 import auth__action__detail__post from "./api/auth/[action]/[detail]/POST";
+import auth__reauth__post from "./api/auth/reauth/POST";
 import health__get from "./api/health/GET";
 import patient__intakes__get from "./api/patient/intakes/GET";
 import patient__profile__get from "./api/patient/profile/GET";
@@ -341,6 +342,9 @@ const rlIntake = rateLimit({ name: "intake", limit: 30, windowMs: 60 * MIN }); /
 const rlAnswer = rateLimit({ name: "checkin-answer", limit: 20, windowMs: 60 * MIN });
 const rlAccess = rateLimit({ name: "access-request", limit: 5, windowMs: 60 * MIN, key: byIp });
 
+// Step-up password confirmation ("sudo mode") — registered before the
+// better-auth catch-all so this path is ours; same brute-force limit as sign-in.
+app.post("/api/auth/reauth", rlAuth, auth__reauth__post);
 app.post("/api/auth/:action", rlAuth, auth__action__post);
 app.get("/api/auth/:action/:detail", auth__action__detail__get);
 app.post("/api/auth/:action/:detail", rlAuth, auth__action__detail__post);
