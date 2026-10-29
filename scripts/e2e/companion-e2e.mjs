@@ -1,7 +1,7 @@
 import { execSync } from 'child_process';
 import { writeFileSync } from 'fs';
 const BASE = 'http://127.0.0.1:5173';
-const DB = 'postgres://acute:localdev@127.0.0.1:5432/acute_insight';
+const DB = process.env.DATABASE_URL ?? 'postgres://acute:localdev@127.0.0.1:5432/acute_insight';
 const T = Date.now();
 const ok = (label, cond, extra = '') => console.log(`${cond ? 'PASS' : 'FAIL'}  ${label}${extra ? '  — ' + extra : ''}`);
 const sql = (q) => execSync(`psql "${DB}" -qtAc "${q.replace(/"/g, '\\"')}"`).toString().trim();

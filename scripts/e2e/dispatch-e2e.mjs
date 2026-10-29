@@ -1,7 +1,7 @@
 import { writeFileSync } from 'fs';
 import { execSync } from 'child_process';
 const BASE = 'http://127.0.0.1:5173';
-const DB = 'postgres://acute:localdev@127.0.0.1:5432/acute_insight';
+const DB = process.env.DATABASE_URL ?? 'postgres://acute:localdev@127.0.0.1:5432/acute_insight';
 const T = Date.now();
 
 function client() {

@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-const BASE = 'http://127.0.0.1:5173'; const DB = 'postgres://acute:localdev@127.0.0.1:5432/acute_insight'; const T = Date.now();
+const BASE = 'http://127.0.0.1:5173'; const DB = process.env.DATABASE_URL ?? 'postgres://acute:localdev@127.0.0.1:5432/acute_insight'; const T = Date.now();
 const ok = (l, c, x = '') => console.log(`${c ? 'PASS' : 'FAIL'}  ${l}${x ? '  — ' + x : ''}`);
 function client() { let cookie = ''; const cap = (res) => { const sc = res.headers.getSetCookie ? res.headers.getSetCookie() : []; for (const c of sc) { const kv = c.split(';')[0]; const [k] = kv.split('='); const parts = cookie ? cookie.split('; ').filter((p) => !p.startsWith(k + '=')) : []; if (!/=;?$/.test(kv)) parts.push(kv); cookie = parts.join('; '); } }; const j = async (path, opts = {}) => { const res = await fetch(BASE + path, { ...opts, headers: { 'content-type': 'application/json', origin: BASE, referer: BASE + '/', ...(cookie ? { cookie } : {}), ...(opts.headers || {}) } }); cap(res); let body; try { body = await res.json(); } catch { body = null; } return { status: res.status, body }; }; return { j, clear: () => { cookie = ''; } }; }
 const sql = (q) => execSync(`psql "${DB}" -qtAc "${q.replace(/"/g, '\\"')}"`).toString().trim();

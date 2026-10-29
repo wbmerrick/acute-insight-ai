@@ -23,7 +23,7 @@ ok('user not yet verified', r.body?.user && (r.body.user.emailVerified === false
 const vr = await fetch(vurl.replace(/&amp;/g, '&'), { redirect: 'manual' });
 ok('verify link accepted (redirect)', vr.status >= 300 && vr.status < 400, String(vr.status) + ' → ' + (vr.headers.get('location') || '').slice(0, 60));
 const { execSync } = await import('child_process');
-const ev = execSync(`psql "postgres://acute:localdev@127.0.0.1:5432/acute_insight" -qtAc "select email_verified from \\"user\\" where lower(email)=lower('${email}')"`).toString().trim();
+const ev = execSync(`psql "${process.env.DATABASE_URL ?? 'postgres://acute:localdev@127.0.0.1:5432/acute_insight'}" -qtAc "select email_verified from \\"user\\" where lower(email)=lower('${email}')"`).toString().trim();
 ok('email_verified = true in DB', ev === 't', ev);
 
 // password reset

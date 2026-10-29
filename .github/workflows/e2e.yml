@@ -1,0 +1,42 @@
+name: E2E
+
+# The end-to-end suites (dispatch, payments, money, payouts, companion, rights,
+# deid, scope, MFA, email) against a throwaway Postgres and local Stripe/Resend
+# stand-ins. No real money, no real mail, no real keys. Runs on every push and PR.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: acute
+          POSTGRES_PASSWORD: localdev
+          POSTGRES_DB: acute_insight
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U acute -d acute_insight"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgres://acute:localdev@127.0.0.1:5432/acute_insight
+      DB_SSL: disable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: sudo apt-get install -y -q postgresql-client >/dev/null
+      - name: Apply schema, role and RLS
+        run: |
+          npx drizzle-kit push --force
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/roles-and-rls.sql
+      - run: npm run e2e
