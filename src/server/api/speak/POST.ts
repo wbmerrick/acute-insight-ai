@@ -6,6 +6,11 @@ import type { Request, Response } from 'express';
  * (works with AI_GATEWAY_API_KEY or VERCEL_OIDC_TOKEN, both available on Vercel).
  * Stateless — text is never stored. On any failure the client falls back to the
  * browser's built-in speech synthesis, so voice always works even with no key.
+ *
+ * PHI note: Ace's replies repeat what the patient just said, and the gateway hands
+ * them to a third-party speech vendor. SERVER_TTS=off answers 502 so every client
+ * uses the browser's on-device voice instead — nothing leaves the device. Set it
+ * before real patients unless a BAA covers the speech vendor.
  */
 
 const GATEWAY_SPEECH = 'https://ai-gateway.vercel.sh/v4/ai/speech-model';
@@ -94,6 +99,7 @@ async function synthesizeGatewaySpeech(
 
 export default async function handler(req: Request, res: Response) {
   try {
+    if (process.env.SERVER_TTS === 'off') return res.status(502).json({ error: 'tts_unavailable', reason: 'server_tts_off' });
     const text = sanitize((req.body as { text?: unknown })?.text);
     if (!text) return res.status(400).json({ error: 'empty' });
 

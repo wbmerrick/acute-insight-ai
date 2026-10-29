@@ -86330,7 +86330,7 @@ function buildTemplateSummary(chiefComplaint, responses) {
     } else if (qa.questionId === "notes" && ans.trim()) {
       summaryParts.push(`Additional notes: ${ans}.`);
     } else if (qa.questionId.startsWith("chat_turn_")) {
-      summaryParts.push(`${ans}.`);
+      if (ans.trim().replace(/[.!?]+$/, "").toLowerCase() !== chiefComplaint.trim().replace(/[.!?]+$/, "").toLowerCase()) summaryParts.push(`${ans.trim().replace(/[.!?]+$/, "")}.`);
     }
   }
   const summary = summaryParts.length > 0 ? `Patient presents with chief complaint: ${chiefComplaint}. ${summaryParts.join(" ")}` : `Patient presents with chief complaint: ${chiefComplaint}.`;
@@ -86884,6 +86884,7 @@ async function synthesizeGatewaySpeech(text2, model, opts) {
 }
 async function handler18(req, res) {
   try {
+    if (process.env.SERVER_TTS === "off") return res.status(502).json({ error: "tts_unavailable", reason: "server_tts_off" });
     const text2 = sanitize2(req.body?.text);
     if (!text2) return res.status(400).json({ error: "empty" });
     const attempts = [

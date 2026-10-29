@@ -321,7 +321,9 @@ function PortalContent() {
   }, [hasLiveVisit]);
 
   const completedIntakes = intakes.filter((i) => i.status === 'complete');
-  const firstName = user?.name?.split(' ')[0] ?? 'Patient';
+  const firstName = user?.name?.trim().split(' ')[0] || '';
+  // A visit in flight is the most important thing on the page — it goes first.
+  const liveVisitIntake = intakes.find((i) => i.visit && (i.visit.status === 'accepted' || i.visit.status === 'queued' || i.visit.status === 'pending_payment')) ?? null;
 
   async function handleSignOut() {
     await signOut();
@@ -423,7 +425,7 @@ function PortalContent() {
             className="text-3xl font-bold text-foreground mb-1"
             style={{ fontFamily: 'var(--font-heading)' }}
           >
-            {portal.welcomeHeading}, {firstName}
+            {portal.welcomeHeading}{firstName ? `, ${firstName}` : ''}
           </h1>
           <p className="text-muted-foreground text-sm" style={{ fontFamily: 'var(--font-sans)' }}>
             {portal.welcomeSubheading}
@@ -548,6 +550,26 @@ function PortalContent() {
                 {checkinDone === 'better' && (
                   <div className="rounded-2xl p-4 mb-6 text-sm" style={{ background: 'hsl(var(--primary) / 0.08)', border: '1px solid hsl(var(--primary) / 0.3)', color: 'hsl(var(--foreground))' }}>
                     Glad you're better. Logged on your timeline — your provider can see it.
+                  </div>
+                )}
+
+                {/* Live visit — a clinician is on the way, or you're in the queue */}
+                {liveVisitIntake && (
+                  <div className="rounded-2xl p-6 mb-6" style={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--warning) / 0.45)', boxShadow: '0 0 36px hsl(var(--warning) / 0.06)' }}>
+                    <p className="text-[11px] uppercase tracking-widest mb-2" style={{ fontFamily: 'var(--font-mono)', color: 'hsl(var(--warning))' }}>
+                      {liveVisitIntake.visit!.status === 'accepted' ? 'Your clinician' : 'Your request'}
+                    </p>
+                    <h3 className="text-base font-bold text-foreground mb-1" style={{ fontFamily: 'var(--font-heading)' }}>
+                      {liveVisitIntake.visit!.status === 'accepted'
+                        ? `${liveVisitIntake.visit!.clinicianName ?? 'A clinician'}${liveVisitIntake.visit!.clinicianCredential ? `, ${liveVisitIntake.visit!.clinicianCredential}` : ''} accepted your visit — expect a call`
+                        : liveVisitIntake.visit!.status === 'queued'
+                          ? `Waiting for a clinician in ${liveVisitIntake.visit!.state}`
+                          : 'Your request is waiting for payment'}
+                    </h3>
+                    <p className="text-sm mb-3" style={{ color: 'hsl(var(--text-dim))' }}>
+                      For “{(liveVisitIntake.chiefComplaint || 'your intake').slice(0, 120)}”. Keep your phone nearby.
+                    </p>
+                    <VisitStatus intake={liveVisitIntake} onChanged={() => void reloadIntakes()} />
                   </div>
                 )}
 

@@ -269,8 +269,9 @@ export function buildTemplateSummary(
     } else if (qa.questionId === 'notes' && ans.trim()) {
       summaryParts.push(`Additional notes: ${ans}.`);
     } else if (qa.questionId.startsWith('chat_turn_')) {
-      // Free-text chat transcript pairs — include the answer content directly
-      summaryParts.push(`${ans}.`);
+      // Free-text chat transcript pairs — include the answer content directly.
+      // The first chat message IS the chief complaint; don't say it twice.
+      if (ans.trim().replace(/[.!?]+$/, '').toLowerCase() !== chiefComplaint.trim().replace(/[.!?]+$/, '').toLowerCase()) summaryParts.push(`${ans.trim().replace(/[.!?]+$/, '')}.`);
     }
   }
 

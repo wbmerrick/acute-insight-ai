@@ -281,7 +281,7 @@ function QueueCard({ item, now, busy, onAccept }: { item: QueueItem; now: number
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98 }}
-      className="rounded-2xl p-4"
+      className="rounded-2xl p-4 min-w-0 overflow-hidden"
       style={{ background: 'hsl(var(--card))', border: `1px solid ${m.h} / 0.35)`, boxShadow: item.acuity === 'urgent' ? `0 0 0 1px hsl(${m.h} / 0.15)` : 'none' }}
     >
       <div className="flex items-start justify-between gap-3">
@@ -665,8 +665,8 @@ function ClinicianContent() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: 'hsl(var(--primary))' }} />
           </div>
         ) : (
-          <div className="grid lg:grid-cols-[380px_1fr] gap-6 items-start">
-            <div className="grid gap-5">
+          <div className="grid lg:grid-cols-[380px_minmax(0,1fr)] gap-6 items-start">
+            <div className="grid gap-5 min-w-0">
               <AvailabilityPanel me={me} onChange={(m) => { setMe(m); void refresh(); }} />
               <EarningsPanel />
 

@@ -6,6 +6,7 @@ import { CHAT_CSS } from './chat.css';
 import type { Disposition } from '@/lib/clinical-brief';
 import { DispositionCard } from '@/components/clinical-brief-view';
 import { RequestClinician } from '@/components/request-clinician';
+import { detectEmergency, mentionsSelfHarm } from '@/server/lib/intake-fallback';
 
 /* ────────────────────────────────────────────────────────────────────────────
    Acute Insight intake — conversational chat, modeled on iSpry's "Spry" chat:
@@ -25,15 +26,12 @@ const CHIPS = [
   'Something feels off',
 ];
 
-// Client-side emergency pre-screen (mirrors iSpry) so a dangerous message shows
-// the 911 card instantly, before any network round-trip.
-const MEDICAL_EMERGENCY_RE =
-  /chest (pain|pane|pressure|tight|hurts|hurting|aching)|chest (is|has been) (hurting|aching)|crushing chest|heart attack|can'?t breathe|cannot breathe|cannot catch my breath|(not able|unable) to (breathe|catch my breath)|trouble breathing|difficulty breathing|hard (to breathe|time breathing)|short(ness)? of breath|stroke|face droop|slurred speech|overdose|poison|unconscious|passed out|fainted|fainting|seizure|severe bleeding|coughing up blood|anaphyla|throat (is )?(closing|swelling)|airway/i;
-const CRISIS_RE =
-  /suicid|kill myself|end my life|ending it all|self[- ]?harm|want to die|hurt myself|cut myself|homicid|kill (him|her|them|someone|people)/i;
-
-function isCrisis(t: string) { return CRISIS_RE.test(t); }
-function isEmergency(t: string) { return MEDICAL_EMERGENCY_RE.test(t) || CRISIS_RE.test(t); }
+// Client-side emergency pre-screen so a dangerous message shows the 911 card
+// instantly, before any network round-trip. It is the SAME detector the server
+// runs (attribution- and negation-aware), imported rather than mirrored — a
+// parallel regex here once sent "no cough, no trouble breathing" to the 911 card.
+function isCrisis(t: string) { return mentionsSelfHarm(t); }
+function isEmergency(t: string) { return detectEmergency(t); }
 
 function esc(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
