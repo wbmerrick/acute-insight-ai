@@ -20952,7 +20952,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler43) {
+    Route.prototype.all = function all(handler44) {
       const callbacks = flatten2.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -20970,7 +20970,7 @@ var require_route = __commonJS({
       return this;
     };
     methods2.forEach(function(method) {
-      Route.prototype[method] = function(handler43) {
+      Route.prototype[method] = function(handler44) {
         const callbacks = flatten2.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -21173,17 +21173,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use2(handler43) {
+    Router.prototype.use = function use2(handler44) {
       let offset = 0;
       let path2 = "/";
-      if (typeof handler43 !== "function") {
-        let arg = handler43;
+      if (typeof handler44 !== "function") {
+        let arg = handler44;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path2 = handler43;
+          path2 = handler44;
         }
       }
       const callbacks = flatten2.call(slice.call(arguments, offset), Infinity);
@@ -34639,20 +34639,20 @@ function getInflightQueryAbortHandler(abortStrategy = "ignore query", connection
     return;
   }
   if (abortStrategy === "cancel query") {
-    const handler43 = connection.cancelQuery;
-    if (!handler43) {
+    const handler44 = connection.cancelQuery;
+    if (!handler44) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.killSession ? "kill session" : void 0);
     }
-    return handler43.bind(connection);
+    return handler44.bind(connection);
   }
   if (abortStrategy === "kill session") {
-    const handler43 = connection.killSession;
-    if (!handler43) {
+    const handler44 = connection.killSession;
+    if (!handler44) {
       beforeThrow();
       throwUnsupportedInflightQueryAbortStrategyError(abortStrategy, connection.cancelQuery ? "cancel query" : void 0);
     }
-    return handler43.bind(connection);
+    return handler44.bind(connection);
   }
   beforeThrow();
   throw new Error(`Unexpected \`inflightQueryAbortStrategy\`: "${abortStrategy}"`);
@@ -65064,7 +65064,7 @@ init_error();
 function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler43 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler44 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   if ((options.method === "GET" || options.method === "HEAD") && options.body) throw new BetterCallError("Body is not allowed with GET or HEAD methods");
   if (path2 && /\/{2,}/.test(path2)) throw new BetterCallError("Path cannot contain consecutive slashes");
   const internalHandler = async (...inputCtx) => {
@@ -65084,7 +65084,7 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
         code: "VALIDATION_ERROR"
       });
     }
-    const response = await handler43(internalContext).catch(async (e) => {
+    const response = await handler44(internalContext).catch(async (e) => {
       if (isAPIError(e)) {
         const onAPIError = options.onAPIError;
         if (onAPIError) await onAPIError(e);
@@ -65114,20 +65114,20 @@ function createEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   return internalHandler;
 }
 createEndpoint.create = (opts) => {
-  return (path2, options, handler43) => {
+  return (path2, options, handler44) => {
     return createEndpoint(path2, {
       ...options,
       use: [...options?.use || [], ...opts?.use || []]
-    }, handler43);
+    }, handler44);
   };
 };
 
 // node_modules/better-auth/node_modules/better-call/dist/middleware.mjs
 init_error();
-function createMiddleware(optionsOrHandler, handler43) {
+function createMiddleware(optionsOrHandler, handler44) {
   const internalHandler = async (inputCtx) => {
     const context2 = inputCtx;
-    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler43;
+    const _handler = typeof optionsOrHandler === "function" ? optionsOrHandler : handler44;
     const internalContext = await createInternalContext(context2, {
       options: typeof optionsOrHandler === "function" ? {} : optionsOrHandler,
       path: "/"
@@ -65155,14 +65155,14 @@ function createMiddleware(optionsOrHandler, handler43) {
   return internalHandler;
 }
 createMiddleware.create = (opts) => {
-  function fn(optionsOrHandler, handler43) {
+  function fn(optionsOrHandler, handler44) {
     if (typeof optionsOrHandler === "function") return createMiddleware({ use: opts?.use }, optionsOrHandler);
-    if (!handler43) throw new Error("Middleware handler is required");
+    if (!handler44) throw new Error("Middleware handler is required");
     return createMiddleware({
       ...optionsOrHandler,
       method: "*",
       use: [...opts?.use || [], ...optionsOrHandler.use || []]
-    }, handler43);
+    }, handler44);
   }
   return fn;
 };
@@ -65602,16 +65602,16 @@ var createRouter$1 = (endpoints, config3) => {
       else query[key] = [query[key], value];
       else query[key] = value;
     });
-    const handler43 = route.data;
+    const handler44 = route.data;
     try {
-      const allowedMediaTypes = handler43.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
+      const allowedMediaTypes = handler44.options.metadata?.allowedMediaTypes || config3?.allowedMediaTypes;
       const context2 = {
         path: path2,
         method: request.method,
         headers: request.headers,
         params: route.params ? JSON.parse(JSON.stringify(route.params)) : {},
         request,
-        body: handler43.options.disableBody ? void 0 : await getBody(handler43.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
+        body: handler44.options.disableBody ? void 0 : await getBody(handler44.options.cloneRequest ? request.clone() : request, allowedMediaTypes),
         query,
         _flag: "router",
         asResponse: true,
@@ -65626,7 +65626,7 @@ var createRouter$1 = (endpoints, config3) => {
         });
         if (res instanceof Response) return res;
       }
-      return await handler43(context2);
+      return await handler44(context2);
     } catch (error3) {
       if (config3?.onError) try {
         const errorResponse = await config3.onError(error3, request);
@@ -65683,11 +65683,11 @@ var use = [optionsMiddleware];
 function createAuthEndpoint(pathOrOptions, handlerOrOptions, handlerOrNever) {
   const path2 = typeof pathOrOptions === "string" ? pathOrOptions : void 0;
   const options = typeof handlerOrOptions === "object" ? handlerOrOptions : pathOrOptions;
-  const handler43 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
+  const handler44 = typeof handlerOrOptions === "function" ? handlerOrOptions : handlerOrNever;
   const wrapped = async (ctx) => {
     const runtimeCtx = ctx;
     try {
-      return await runWithEndpointContext(ctx, () => handler43(ctx));
+      return await runWithEndpointContext(ctx, () => handler44(ctx));
     } catch (e) {
       attachResponseHeadersToAPIError(runtimeCtx.responseHeaders, e);
       throw e;
@@ -75826,8 +75826,8 @@ var createBetterAuth = (options, initFn) => {
         handlerCtx.trustedOrigins = await getTrustedOrigins(ctx.options, request);
         handlerCtx.trustedProviders = await getTrustedProviders(ctx.options, request);
       }
-      const { handler: handler43 } = router(handlerCtx, options);
-      return runWithAdapter(handlerCtx.adapter, () => handler43(request));
+      const { handler: handler44 } = router(handlerCtx, options);
+      return runWithAdapter(handlerCtx.adapter, () => handler44(request));
     },
     api,
     options,
@@ -86905,8 +86905,61 @@ async function handler20(req, res) {
   }
 }
 
-// src/server/api/admin/assignments/GET.ts
+// src/server/api/admin/audit/export/GET.ts
+var PAGE = 1e3;
+var COLS = ["id", "created_at", "action", "actor_user_id", "actor_role", "resource_type", "resource_id", "patient_user_id", "ip", "user_agent", "meta"];
+function csvCell(v) {
+  if (v === null || v === void 0) return "";
+  const s = typeof v === "object" ? JSON.stringify(v) : String(v);
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+function parseDay(s, endOfDay = false) {
+  if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const d = /* @__PURE__ */ new Date(`${s}T${endOfDay ? "23:59:59.999" : "00:00:00.000"}Z`);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
 async function handler21(req, res) {
+  try {
+    const session2 = await getAuth().api.getSession({ headers: new Headers(req.headers) });
+    if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
+    const [me] = await db.select({ isAdmin: user.isAdmin }).from(user).where(eq(user.id, session2.user.id)).limit(1);
+    if (!me?.isAdmin) return res.status(403).json({ error: "Admin only" });
+    const { from, to } = req.query;
+    const fromD = parseDay(from);
+    const toD = parseDay(to, true);
+    if (from && !fromD || to && !toD) return res.status(400).json({ error: "Dates must be YYYY-MM-DD" });
+    const stamp = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="acute-insight-audit-${from ?? "start"}-to-${to ?? stamp}.csv"`);
+    res.write(COLS.join(",") + "\n");
+    let after = 0;
+    let total = 0;
+    for (; ; ) {
+      const conds = [gt(auditEvents.id, after)];
+      if (fromD) conds.push(gte(auditEvents.createdAt, fromD));
+      if (toD) conds.push(lte(auditEvents.createdAt, toD));
+      const rows = await db.select().from(auditEvents).where(and(...conds)).orderBy(asc(auditEvents.id)).limit(PAGE);
+      if (!rows.length) break;
+      for (const r of rows) {
+        res.write(
+          [r.id, r.createdAt?.toISOString() ?? "", r.action, r.actorUserId, r.actorRole, r.resourceType, r.resourceId, r.patientUserId, r.ip, r.userAgent, r.meta].map(csvCell).join(",") + "\n"
+        );
+      }
+      total += rows.length;
+      after = rows[rows.length - 1].id;
+      if (rows.length < PAGE) break;
+    }
+    res.end();
+    audit(req, { action: "admin.audit.export", actorUserId: session2.user.id, actorRole: "admin", resourceType: "audit_events", meta: { rows: total, from: from ?? null, to: to ?? null } });
+  } catch (error3) {
+    console.error(JSON.stringify({ event: "admin.audit.export.error", error: error3 instanceof Error ? error3.message : String(error3) }));
+    if (!res.headersSent) res.status(500).json({ error: "Export failed" });
+    else res.end();
+  }
+}
+
+// src/server/api/admin/assignments/GET.ts
+async function handler22(req, res) {
   try {
     const session2 = await getAuth().api.getSession({ headers: new Headers(req.headers) });
     if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
@@ -86923,7 +86976,7 @@ async function handler21(req, res) {
 }
 
 // src/server/api/admin/assignments/POST.ts
-async function handler22(req, res) {
+async function handler23(req, res) {
   try {
     const session2 = await getAuth().api.getSession({ headers: new Headers(req.headers) });
     if (!session2?.user) return res.status(401).json({ error: "Unauthorized" });
@@ -86988,7 +87041,7 @@ function rateLimit(opts) {
 var byIp = (req) => `ip:${clientIp(req)}`;
 
 // src/server/api/dispatch/me/GET.ts
-async function handler23(req, res) {
+async function handler24(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87011,7 +87064,7 @@ async function handler23(req, res) {
 
 // src/server/api/dispatch/me/PUT.ts
 var CREDENTIALS = /* @__PURE__ */ new Set(["MD", "DO", "NP", "PA"]);
-async function handler24(req, res) {
+async function handler25(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87071,7 +87124,7 @@ async function handler24(req, res) {
 }
 
 // src/server/api/dispatch/queue/GET.ts
-async function handler25(req, res) {
+async function handler26(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87136,7 +87189,7 @@ async function handler25(req, res) {
 
 // src/server/api/dispatch/visits/POST.ts
 var CLINICIAN_TEXT_WINDOW_MS = 10 * 60 * 1e3;
-async function handler26(req, res) {
+async function handler27(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87210,7 +87263,7 @@ async function notifyClinicians(acuity, state, base) {
 }
 
 // src/server/api/dispatch/visits/[id]/GET.ts
-async function handler27(req, res) {
+async function handler28(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87249,7 +87302,7 @@ async function handler27(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/accept/POST.ts
-async function handler28(req, res) {
+async function handler29(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87294,7 +87347,7 @@ async function handler28(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/release/POST.ts
-async function handler29(req, res) {
+async function handler30(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87311,7 +87364,7 @@ async function handler29(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/complete/POST.ts
-async function handler30(req, res) {
+async function handler31(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87341,7 +87394,7 @@ async function handler30(req, res) {
 }
 
 // src/server/api/dispatch/visits/[id]/cancel/POST.ts
-async function handler31(req, res) {
+async function handler32(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87359,13 +87412,13 @@ async function handler31(req, res) {
 }
 
 // src/server/api/dispatch/pricing/GET.ts
-function handler32(_req, res) {
+function handler33(_req, res) {
   res.json(pricing());
 }
 
 // src/server/api/dispatch/sweep/GET.ts
 var HOLD_HOURS = Number(process.env.VISIT_HOLD_HOURS ?? 4);
-async function handler33(req, res) {
+async function handler34(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -87428,7 +87481,7 @@ function rate(n, d) {
 }
 
 // src/server/api/dispatch/metrics/GET.ts
-async function handler34(req, res) {
+async function handler35(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87491,7 +87544,7 @@ async function handler34(req, res) {
 }
 
 // src/server/api/dispatch/earnings/GET.ts
-async function handler35(req, res) {
+async function handler36(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87513,7 +87566,7 @@ async function handler35(req, res) {
 }
 
 // src/server/api/dispatch/connect/onboard/POST.ts
-async function handler36(req, res) {
+async function handler37(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87535,7 +87588,7 @@ async function handler36(req, res) {
 }
 
 // src/server/api/stripe/webhook/POST.ts
-async function handler37(req, res) {
+async function handler38(req, res) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) return res.status(503).json({ error: "Webhook not configured" });
   const raw = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? {});
@@ -87581,7 +87634,7 @@ async function handler37(req, res) {
 }
 
 // src/server/api/companion/checkins/GET.ts
-async function handler38(req, res) {
+async function handler39(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87610,7 +87663,7 @@ async function handler38(req, res) {
 }
 
 // src/server/api/companion/checkins/[id]/answer/POST.ts
-async function handler39(req, res) {
+async function handler40(req, res) {
   try {
     const userId = await requirePatient(req, res);
     if (!userId) return;
@@ -87637,7 +87690,7 @@ async function handler39(req, res) {
 
 // src/server/api/companion/run/GET.ts
 var EXPIRE_AFTER_DAYS = Number(process.env.CHECKIN_EXPIRE_DAYS ?? 7);
-async function handler40(req, res) {
+async function handler41(req, res) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.authorization !== `Bearer ${secret}`) return res.status(401).json({ error: "Unauthorized" });
   try {
@@ -87671,7 +87724,7 @@ async function handler40(req, res) {
 }
 
 // src/server/api/provider/checkins/GET.ts
-async function handler41(req, res) {
+async function handler42(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87698,7 +87751,7 @@ async function handler41(req, res) {
 }
 
 // src/server/api/provider/checkins/[id]/acknowledge/POST.ts
-async function handler42(req, res) {
+async function handler43(req, res) {
   try {
     const ctx = await requireClinician(req, res);
     if (!ctx) return;
@@ -87889,7 +87942,7 @@ app.use("/api", (req, res, next) => {
   }
   next();
 });
-app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler37);
+app.post("/api/stripe/webhook", import_express.default.raw({ type: "*/*" }), handler38);
 app.use(import_express.default.json());
 app.use(import_express.default.urlencoded({ extended: true }));
 app.get("/api/auth/:action", handler);
@@ -87918,28 +87971,29 @@ app.put("/api/admin/users/:id/role", handler16);
 app.post("/api/access-request", rlAccess, handler17);
 app.post("/api/speak", rlSpeak, handler18);
 app.get("/api/admin/access-requests", handler19);
+app.get("/api/admin/audit/export", handler21);
 app.get("/api/admin/audit", handler20);
-app.get("/api/admin/assignments", handler21);
-app.post("/api/admin/assignments", handler22);
-app.get("/api/dispatch/me", handler23);
-app.put("/api/dispatch/me", handler24);
-app.get("/api/dispatch/queue", handler25);
-app.post("/api/dispatch/visits", rlRequest, handler26);
-app.get("/api/dispatch/visits/:id", handler27);
-app.post("/api/dispatch/visits/:id/accept", handler28);
-app.post("/api/dispatch/visits/:id/release", handler29);
-app.post("/api/dispatch/visits/:id/complete", handler30);
-app.post("/api/dispatch/visits/:id/cancel", handler31);
-app.get("/api/dispatch/pricing", handler32);
-app.get("/api/dispatch/sweep", handler33);
-app.get("/api/dispatch/metrics", handler34);
-app.get("/api/dispatch/earnings", handler35);
-app.post("/api/dispatch/connect/onboard", handler36);
-app.get("/api/companion/checkins", handler38);
-app.post("/api/companion/checkins/:id/answer", rlAnswer, handler39);
-app.get("/api/companion/run", handler40);
-app.get("/api/provider/checkins", handler41);
-app.post("/api/provider/checkins/:id/acknowledge", handler42);
+app.get("/api/admin/assignments", handler22);
+app.post("/api/admin/assignments", handler23);
+app.get("/api/dispatch/me", handler24);
+app.put("/api/dispatch/me", handler25);
+app.get("/api/dispatch/queue", handler26);
+app.post("/api/dispatch/visits", rlRequest, handler27);
+app.get("/api/dispatch/visits/:id", handler28);
+app.post("/api/dispatch/visits/:id/accept", handler29);
+app.post("/api/dispatch/visits/:id/release", handler30);
+app.post("/api/dispatch/visits/:id/complete", handler31);
+app.post("/api/dispatch/visits/:id/cancel", handler32);
+app.get("/api/dispatch/pricing", handler33);
+app.get("/api/dispatch/sweep", handler34);
+app.get("/api/dispatch/metrics", handler35);
+app.get("/api/dispatch/earnings", handler36);
+app.post("/api/dispatch/connect/onboard", handler37);
+app.get("/api/companion/checkins", handler39);
+app.post("/api/companion/checkins/:id/answer", rlAnswer, handler40);
+app.get("/api/companion/run", handler41);
+app.get("/api/provider/checkins", handler42);
+app.post("/api/provider/checkins/:id/acknowledge", handler43);
 app.use("/api", apiErrorHandler);
 function baseUrl(req) {
   return `${req.protocol}://${req.hostname}`;

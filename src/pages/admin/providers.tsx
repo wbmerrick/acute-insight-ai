@@ -452,7 +452,12 @@ function AuditPanel() {
           <h2 className="text-lg font-bold text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>Audit trail</h2>
           <p className="text-xs mt-0.5" style={{ color: 'hsl(var(--text-dim))' }}>Who touched which record. Append-only; ids and actions, never clinical text. Last 100.</p>
         </div>
-        <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by action or id…" className="rounded-lg px-3 py-1.5 text-sm text-foreground outline-none" style={{ background: 'hsl(var(--surface-deeper))', border: '1px solid hsl(var(--border-subtle))', minWidth: 220 }} />
+        <div className="flex items-center gap-2 flex-wrap">
+          <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by action or id…" className="rounded-lg px-3 py-1.5 text-sm text-foreground outline-none" style={{ background: 'hsl(var(--surface-deeper))', border: '1px solid hsl(var(--border-subtle))', minWidth: 220 }} />
+          <a href="/api/admin/audit/export" download className="rounded-lg px-3 py-1.5 text-sm font-medium" style={{ background: 'hsl(var(--surface-deeper))', border: '1px solid hsl(var(--border-subtle))', color: 'hsl(var(--foreground))' }} title="Every event, oldest first, as CSV — keep a copy off the platform">
+            Export all (CSV)
+          </a>
+        </div>
       </div>
       {error && <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--destructive))' }}>{error}</p>}
       {!error && rows === null && <p className="px-6 py-5 text-sm" style={{ color: 'hsl(var(--text-dim))' }}>Loading…</p>}
