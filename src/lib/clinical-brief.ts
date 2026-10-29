@@ -45,6 +45,8 @@ export interface ClinicalBrief {
   note: SoapNote;
   differential: DifferentialItem[];
   workup: WorkupItem[];
+  /** Who authored this brief: the model, or the deterministic fallback. Absent on briefs stored before 2026-10-29. */
+  source?: 'model' | 'fallback';
 }
 
 export const ACUITY_LABEL: Record<Acuity, string> = {
@@ -57,6 +59,23 @@ export const ACUITY_LABEL: Record<Acuity, string> = {
 
 // The five dispositions, highest-acuity first — used to validate model output.
 export const ACUITY_LEVELS: Acuity[] = ['emergency', 'urgent', 'telehealth', 'routine', 'selfcare'];
+
+/**
+ * The safety-floor rule, as one testable function: the deterministic brief's
+ * disposition is a FLOOR. The AI brief replaces the template (note, differential,
+ * workup, summary) and may RAISE the disposition, never lower it; flags from both
+ * are kept. Lower index in ACUITY_LEVELS = higher acuity.
+ */
+export function applyAcuityFloor(floorBrief: ClinicalBrief, aiBrief: ClinicalBrief): ClinicalBrief {
+  const aiHigherOrEqual =
+    ACUITY_LEVELS.indexOf(aiBrief.disposition.level) <= ACUITY_LEVELS.indexOf(floorBrief.disposition.level);
+  return {
+    ...aiBrief,
+    flags: [...new Set([...floorBrief.flags, ...aiBrief.flags])],
+    disposition: aiHigherOrEqual ? aiBrief.disposition : floorBrief.disposition,
+    source: 'model',
+  };
+}
 const LIKELIHOODS: Likelihood[] = ['higher', 'possible', 'consider'];
 
 function str(v: unknown, max = 600): string {
@@ -122,5 +141,6 @@ export function coerceClinicalBrief(raw: unknown): ClinicalBrief | null {
         .slice(0, 10)
     : [];
 
-  return { summary, flags: strArray(o.flags, 8, 160), disposition, note, differential, workup };
+  const source = o.source === 'model' || o.source === 'fallback' ? o.source : undefined;
+  return { summary, flags: strArray(o.flags, 8, 160), disposition, note, differential, workup, ...(source ? { source } : {}) };
 }

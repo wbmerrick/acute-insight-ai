@@ -423,6 +423,7 @@ interface Metrics {
   visitLength: { medianMin: number | null; n: number };
   supply: { onlineNow: number; onlineHours: number; visitsPerOnlineHour: number | null };
   revenue: { capturedCents: number };
+  briefs: { completedIntakes: number; model: number; fallback: number; unmarked: number; fallbackRate: number | null };
   companion: { sent: number; answered: number; escalated: number; responseRate: number | null };
 }
 
@@ -479,6 +480,12 @@ function OpsPanel() {
             <Stat label="Captured" value={m.revenue.capturedCents ? `$${(m.revenue.capturedCents / 100).toLocaleString()}` : '$0'} sub={m.revenue.capturedCents ? 'paid visits' : 'payments not yet enabled or no paid visits'} />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <Stat
+              label="AI fallback rate"
+              value={m.briefs?.fallbackRate === null || m.briefs === undefined ? '—' : fmtPct(m.briefs.fallbackRate)}
+              sub={m.briefs ? `${m.briefs.fallback} fallback · ${m.briefs.model} model of ${m.briefs.completedIntakes} intakes${m.briefs.unmarked ? ` · ${m.briefs.unmarked} unmarked` : ''}` : undefined}
+              warn={(m.briefs?.fallbackRate ?? 0) > 0 && (m.briefs?.model ?? 0) > 0}
+            />
             <Stat label="Ace check-ins answered" value={fmtPct(m.companion.responseRate)} sub={`${m.companion.answered} of ${m.companion.sent} sent`} />
             <Stat label="Escalated after care" value={String(m.companion.escalated)} warn={m.companion.escalated > 0} />
             <Stat label="Online now" value={String(m.supply.onlineNow)} sub={Object.entries(m.visits.byState).map(([k, v]) => `${k} ${v}`).join(' · ') || undefined} />

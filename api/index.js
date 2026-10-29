@@ -85314,6 +85314,15 @@ var ACUITY_LABEL = {
   selfcare: "Self-care"
 };
 var ACUITY_LEVELS = ["emergency", "urgent", "telehealth", "routine", "selfcare"];
+function applyAcuityFloor(floorBrief, aiBrief) {
+  const aiHigherOrEqual = ACUITY_LEVELS.indexOf(aiBrief.disposition.level) <= ACUITY_LEVELS.indexOf(floorBrief.disposition.level);
+  return {
+    ...aiBrief,
+    flags: [.../* @__PURE__ */ new Set([...floorBrief.flags, ...aiBrief.flags])],
+    disposition: aiHigherOrEqual ? aiBrief.disposition : floorBrief.disposition,
+    source: "model"
+  };
+}
 var LIKELIHOODS = ["higher", "possible", "consider"];
 function str(v, max = 600) {
   return typeof v === "string" ? v.trim().slice(0, max) : "";
@@ -85356,7 +85365,8 @@ function coerceClinicalBrief(raw) {
     if (!item) return null;
     return { item, rationale: str(it.rationale, 400) };
   }).filter((x) => x !== null).slice(0, 10) : [];
-  return { summary, flags: strArray(o.flags, 8, 160), disposition, note, differential, workup };
+  const source = o.source === "model" || o.source === "fallback" ? o.source : void 0;
+  return { summary, flags: strArray(o.flags, 8, 160), disposition, note, differential, workup, ...source ? { source } : {} };
 }
 
 // src/server/lib/dispatch.ts
@@ -86447,6 +86457,7 @@ function buildTemplateClinicalBrief(chiefComplaint, responses) {
   return {
     summary,
     flags,
+    source: "fallback",
     disposition: { level, label, timeframe, rationale, safetyNet },
     note: {
       plan: ["Clinician to review the reported history and determine the plan at the visit."],
@@ -86637,16 +86648,10 @@ async function handler14(req, res) {
     if (!existing) return res.status(404).json({ error: "Intake session not found" });
     if (existing.status === "complete") return res.status(409).json({ error: "This intake is already complete. Start a new one for anything new." });
     let brief = buildTemplateClinicalBrief(chiefComplaint, responses);
-    const floor = brief.disposition;
     if (aiAvailable()) {
       try {
         const ai = await generateClinicalBrief(chiefComplaint, responses);
-        const aiHigherOrEqual = ACUITY_LEVELS.indexOf(ai.disposition.level) <= ACUITY_LEVELS.indexOf(floor.level);
-        brief = {
-          ...ai,
-          flags: [.../* @__PURE__ */ new Set([...brief.flags, ...ai.flags])],
-          disposition: aiHigherOrEqual ? ai.disposition : floor
-        };
+        brief = applyAcuityFloor(brief, ai);
       } catch (err) {
         console.error(
           JSON.stringify({
@@ -87642,6 +87647,14 @@ async function handler36(req, res) {
     const sessions = await db.select({ start: clinicianOnlineLog.wentOnlineAt, end: clinicianOnlineLog.wentOfflineAt }).from(clinicianOnlineLog).where(or(isNull2(clinicianOnlineLog.wentOfflineAt), gte(clinicianOnlineLog.wentOfflineAt, from)));
     const hours = onlineHours(sessions, from, to);
     const onlineCount = (await db.select({ id: clinicianProfiles.id }).from(clinicianProfiles).where(eq(clinicianProfiles.online, true))).length;
+    const briefRows = await db.select({ brief: intakeSessions.aiBrief }).from(intakeSessions).where(and(eq(intakeSessions.status, "complete"), gte(intakeSessions.createdAt, from)));
+    let briefModel = 0, briefFallback = 0, briefUnmarked = 0;
+    for (const r of briefRows) {
+      const src = r.brief?.source;
+      if (src === "model") briefModel++;
+      else if (src === "fallback") briefFallback++;
+      else briefUnmarked++;
+    }
     const cs = await db.select({ status: checkins.status, outcome: checkins.outcome, sentAt: checkins.sentAt }).from(checkins).where(gte(checkins.createdAt, from));
     const sent = cs.filter((c) => c.sentAt).length;
     const answered = cs.filter((c) => c.status === "answered" || c.status === "escalated").length;
@@ -87676,6 +87689,13 @@ async function handler36(req, res) {
         visitsPerOnlineHour: hours > 0 ? Math.round(completed.length / hours * 100) / 100 : null
       },
       revenue: { capturedCents },
+      briefs: {
+        completedIntakes: briefRows.length,
+        model: briefModel,
+        fallback: briefFallback,
+        unmarked: briefUnmarked,
+        fallbackRate: rate(briefFallback, briefModel + briefFallback)
+      },
       companion: { sent, answered, escalated, responseRate: rate(answered, sent) }
     });
   } catch (error3) {

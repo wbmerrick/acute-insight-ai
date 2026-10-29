@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
-import { gte, eq, or, isNull } from 'drizzle-orm';
+import { and, gte, eq, or, isNull } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
-import { visits, clinicianOnlineLog, checkins, clinicianProfiles } from '../../../db/schema.js';
+import { visits, clinicianOnlineLog, checkins, clinicianProfiles, intakeSessions } from '../../../db/schema.js';
 import { requireClinician, logErr } from '../../../lib/dispatch.js';
 import { median, percentile, onlineHours, rate } from '../../../lib/metrics.js';
 
@@ -41,6 +41,21 @@ export default async function handler(req: Request, res: Response) {
 
     const onlineCount = (await db.select({ id: clinicianProfiles.id }).from(clinicianProfiles).where(eq(clinicianProfiles.online, true))).length;
 
+    // AI brief source on completed intakes in the window: how often the scripted
+    // fallback served instead of the model. Pilot metric "AI fallback rate" —
+    // rate over marked briefs only; briefs stored before the marker count as unmarked.
+    const briefRows = await db
+      .select({ brief: intakeSessions.aiBrief })
+      .from(intakeSessions)
+      .where(and(eq(intakeSessions.status, 'complete'), gte(intakeSessions.createdAt, from)));
+    let briefModel = 0, briefFallback = 0, briefUnmarked = 0;
+    for (const r of briefRows) {
+      const src = (r.brief as { source?: unknown } | null)?.source;
+      if (src === 'model') briefModel++;
+      else if (src === 'fallback') briefFallback++;
+      else briefUnmarked++;
+    }
+
     const cs = await db.select({ status: checkins.status, outcome: checkins.outcome, sentAt: checkins.sentAt }).from(checkins).where(gte(checkins.createdAt, from));
     const sent = cs.filter((c) => c.sentAt).length;
     const answered = cs.filter((c) => c.status === 'answered' || c.status === 'escalated').length;
@@ -77,6 +92,13 @@ export default async function handler(req: Request, res: Response) {
         visitsPerOnlineHour: hours > 0 ? Math.round((completed.length / hours) * 100) / 100 : null,
       },
       revenue: { capturedCents },
+      briefs: {
+        completedIntakes: briefRows.length,
+        model: briefModel,
+        fallback: briefFallback,
+        unmarked: briefUnmarked,
+        fallbackRate: rate(briefFallback, briefModel + briefFallback),
+      },
       companion: { sent, answered, escalated, responseRate: rate(answered, sent) },
     });
   } catch (error) {

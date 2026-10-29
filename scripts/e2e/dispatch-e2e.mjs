@@ -125,6 +125,14 @@ const mine = intakes.body.find((i) => i.id === intakeId);
 ok('portal intake stamped with provider name', mine?.providerName === 'Dr. Alpha', mine?.providerName);
 ok('portal intake carries visit (completed by Dr. Alpha, DO)', mine?.visit?.status === 'completed' && mine.visit.clinicianName === 'Dr. Alpha' && mine.visit.clinicianCredential === 'DO', JSON.stringify(mine?.visit));
 
+// brief source + fallback-rate metric: every test intake is served by the
+// deterministic fallback (no AI key), and Operations must say so honestly.
+ok('stored brief is marked source=fallback', execSync(`psql "${DB}" -qtAc "select ai_brief->>'source' from intake_sessions where id=${intakeId}"`).toString().trim() === 'fallback');
+{
+  const m = await A.j('/api/dispatch/metrics?days=1');
+  ok('metrics report the AI fallback rate', m.status === 200 && m.body.briefs && m.body.briefs.fallback >= 1 && m.body.briefs.model === 0 && m.body.briefs.fallbackRate === 1, JSON.stringify(m.body.briefs));
+}
+
 // leave a fresh queued TN visit + A online for screenshots
 const st3 = await pt.j('/api/intake/start', { method: 'POST' });
 await pt.j(`/api/intake/${st3.body.id}/complete`, { method: 'POST', body: JSON.stringify({ chiefComplaint: 'Sore throat and fever x3 days', responses: [

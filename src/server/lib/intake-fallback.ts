@@ -347,6 +347,7 @@ export function buildTemplateClinicalBrief(
   return {
     summary,
     flags,
+    source: 'fallback',
     disposition: { level, label, timeframe, rationale, safetyNet },
     note: {
       plan: ['Clinician to review the reported history and determine the plan at the visit.'],

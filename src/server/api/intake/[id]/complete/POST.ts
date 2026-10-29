@@ -5,7 +5,7 @@ import { eq, and } from 'drizzle-orm';
 import { requireSession } from '../../../../lib/session.js';
 import { aiAvailable, generateClinicalBrief } from '../../../../lib/ai.js';
 import { buildTemplateClinicalBrief } from '../../../../lib/intake-fallback.js';
-import { ACUITY_LEVELS } from '../../../../../lib/clinical-brief.js';
+import { applyAcuityFloor } from '../../../../../lib/clinical-brief.js';
 import { scheduleCheckin, intakeCheckinReason, resolveCheckin, notifyClinicianOfEscalation } from '../../../../lib/companion.js';
 import { audit } from '../../../../lib/audit.js';
 import { publicBaseUrl } from '../../../../lib/dispatch.js';
@@ -55,19 +55,14 @@ export default async function handler(req: Request, res: Response) {
     // Deterministic brief always runs — a safety floor with a triage disposition
     // and flags. The LLM augments it into a full co-pilot brief when available,
     // but can never downgrade the disposition below the deterministic acuity.
-    let brief = buildTemplateClinicalBrief(chiefComplaint, responses);
-    const floor = brief.disposition;
+    let brief = buildTemplateClinicalBrief(chiefComplaint, responses); // source: 'fallback'
 
     if (aiAvailable()) {
       try {
         const ai = await generateClinicalBrief(chiefComplaint, responses);
-        const aiHigherOrEqual =
-          ACUITY_LEVELS.indexOf(ai.disposition.level) <= ACUITY_LEVELS.indexOf(floor.level);
-        brief = {
-          ...ai,
-          flags: [...new Set([...brief.flags, ...ai.flags])],
-          disposition: aiHigherOrEqual ? ai.disposition : floor,
-        };
+        // One rule, one function, unit-tested: the AI may raise acuity, never lower it;
+        // deterministic flags are always kept. Marks the brief source: 'model'.
+        brief = applyAcuityFloor(brief, ai);
       } catch (err) {
         console.error(
           JSON.stringify({
