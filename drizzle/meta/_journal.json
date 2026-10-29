@@ -29,6 +29,13 @@
       "when": 1793256471652,
       "tag": "0003_session_last_reauth",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793269799586,
+      "tag": "0004_beta_chat_stats",
+      "breakpoints": true
     }
   ]
 }

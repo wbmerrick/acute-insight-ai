@@ -45,6 +45,10 @@ async function completeIntake(c, cc, answers, extra = {}) {
     if (last.status !== 200) break;
   }
   ok('open beta: 5 guest messages all answered (no account gate)', last.status === 200 && last.text.length > 0, `status=${last.status}`);
+  await new Promise((r) => setTimeout(r, 400)); // the counter is fire-and-forget
+  const stats = execSync(`psql "${DB}" -qtAc "select coalesce(sum(messages),0) || '|' || coalesce(sum(conversations),0) from beta_chat_stats where day = (now() at time zone 'utc')::date"`).toString().trim();
+  const [msgs, convos] = stats.split('|').map(Number);
+  ok('open beta: aggregate counter recorded the guest messages (no identifiers stored)', msgs >= 5 && convos >= 1, stats);
   const r = await fetch(BASE + '/api/intake/start', { method: 'POST', headers: { 'content-type': 'application/json', origin: BASE } });
   ok('open beta: starting/saving an intake still requires an account (401)', r.status === 401, String(r.status));
 }

@@ -423,6 +423,7 @@ interface Metrics {
   visitLength: { medianMin: number | null; n: number };
   supply: { onlineNow: number; onlineHours: number; visitsPerOnlineHour: number | null };
   revenue: { capturedCents: number };
+  beta: { guestMessages: number; guestConversations: number; todayMessages: number; todayConversations: number };
   briefs: { completedIntakes: number; model: number; fallback: number; unmarked: number; fallbackRate: number | null };
   companion: { sent: number; answered: number; escalated: number; responseRate: number | null };
 }
@@ -480,6 +481,11 @@ function OpsPanel() {
             <Stat label="Captured" value={m.revenue.capturedCents ? `$${(m.revenue.capturedCents / 100).toLocaleString()}` : '$0'} sub={m.revenue.capturedCents ? 'paid visits' : 'payments not yet enabled or no paid visits'} />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <Stat
+              label="Open beta: guest chats"
+              value={m.beta ? String(m.beta.guestConversations) : '—'}
+              sub={m.beta ? `${m.beta.guestMessages} messages · today ${m.beta.todayConversations} chats / ${m.beta.todayMessages} msgs` : undefined}
+            />
             <Stat
               label="AI fallback rate"
               value={m.briefs?.fallbackRate === null || m.briefs === undefined ? '—' : fmtPct(m.briefs.fallbackRate)}

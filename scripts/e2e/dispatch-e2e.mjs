@@ -131,6 +131,7 @@ ok('stored brief is marked source=fallback', execSync(`psql "${DB}" -qtAc "selec
 {
   const m = await A.j('/api/dispatch/metrics?days=1');
   ok('metrics report the AI fallback rate', m.status === 200 && m.body.briefs && m.body.briefs.fallback >= 1 && m.body.briefs.model === 0 && m.body.briefs.fallbackRate === 1, JSON.stringify(m.body.briefs));
+  ok('metrics carry the open-beta pulse (counts only)', m.body.beta && typeof m.body.beta.guestMessages === 'number' && typeof m.body.beta.guestConversations === 'number', JSON.stringify(m.body.beta));
 }
 
 // leave a fresh queued TN visit + A online for screenshots

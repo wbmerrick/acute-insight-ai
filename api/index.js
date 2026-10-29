@@ -84643,6 +84643,7 @@ __export(schema_exports, {
   accessRequests: () => accessRequests,
   account: () => account,
   auditEvents: () => auditEvents,
+  betaChatStats: () => betaChatStats,
   checkins: () => checkins,
   clinicianOnlineLog: () => clinicianOnlineLog,
   clinicianProfiles: () => clinicianProfiles,
@@ -84859,6 +84860,11 @@ var clinicianOnlineLog = pgTable("clinician_online_log", {
 }, (t) => [
   index("clinician_online_log_user_idx").on(t.userId, t.wentOfflineAt)
 ]);
+var betaChatStats = pgTable("beta_chat_stats", {
+  day: date3("day").primaryKey(),
+  messages: integer2("messages").notNull().default(0),
+  conversations: integer2("conversations").notNull().default(0)
+});
 var auditEvents = pgTable("audit_events", {
   id: serial("id").primaryKey(),
   actorUserId: varchar("actor_user_id", { length: 36 }),
@@ -86740,6 +86746,22 @@ async function handler14(req, res) {
   }
 }
 
+// src/server/lib/beta-stats.ts
+function utcDay(now2 = /* @__PURE__ */ new Date()) {
+  return now2.toISOString().slice(0, 10);
+}
+function recordGuestChat(firstTurn, now2 = /* @__PURE__ */ new Date()) {
+  void db.insert(betaChatStats).values({ day: utcDay(now2), messages: 1, conversations: firstTurn ? 1 : 0 }).onConflictDoUpdate({
+    target: betaChatStats.day,
+    set: {
+      messages: sql2`${betaChatStats.messages} + 1`,
+      conversations: sql2`${betaChatStats.conversations} + ${firstTurn ? 1 : 0}`
+    }
+  }).catch((err) => {
+    console.error(JSON.stringify({ event: "beta.stats.error", error: err instanceof Error ? err.message : String(err) }));
+  });
+}
+
 // src/server/api/intake/chat/POST.ts
 var MAX_MESSAGES = 80;
 var MAX_MESSAGE_LENGTH = 4e3;
@@ -86769,9 +86791,11 @@ async function handler15(req, res) {
       }
     }
     if (!session2?.user) {
-      if (!betaOpenChat() && patientTurns(messages) > GUEST_TURNS) {
+      const turns = patientTurns(messages);
+      if (!betaOpenChat() && turns > GUEST_TURNS) {
         return res.status(401).json({ error: "account_required" });
       }
+      recordGuestChat(turns === 1);
     } else if (intakeId != null) {
       const id = Number(intakeId);
       if (!Number.isInteger(id)) return res.status(400).json({ error: "Invalid intake ID" });
@@ -87681,6 +87705,9 @@ async function handler36(req, res) {
       else if (src === "fallback") briefFallback++;
       else briefUnmarked++;
     }
+    const betaRows = await db.select({ day: betaChatStats.day, messages: betaChatStats.messages, conversations: betaChatStats.conversations }).from(betaChatStats).where(gte(betaChatStats.day, from.toISOString().slice(0, 10)));
+    const today = to.toISOString().slice(0, 10);
+    const betaSum = (f, onlyToday = false) => betaRows.filter((r) => !onlyToday || r.day === today).reduce((s, r) => s + r[f], 0);
     const cs = await db.select({ status: checkins.status, outcome: checkins.outcome, sentAt: checkins.sentAt }).from(checkins).where(gte(checkins.createdAt, from));
     const sent = cs.filter((c) => c.sentAt).length;
     const answered = cs.filter((c) => c.status === "answered" || c.status === "escalated").length;
@@ -87715,6 +87742,12 @@ async function handler36(req, res) {
         visitsPerOnlineHour: hours > 0 ? Math.round(completed.length / hours * 100) / 100 : null
       },
       revenue: { capturedCents },
+      beta: {
+        guestMessages: betaSum("messages"),
+        guestConversations: betaSum("conversations"),
+        todayMessages: betaSum("messages", true),
+        todayConversations: betaSum("conversations", true)
+      },
       briefs: {
         completedIntakes: briefRows.length,
         model: briefModel,

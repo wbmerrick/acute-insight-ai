@@ -9,6 +9,7 @@ import {
   jsonb,
   index,
   unique,
+  date,
 } from 'drizzle-orm/pg-core';
 
 // ─── BetterAuth tables ───────────────────────────────────────────────────────
@@ -261,6 +262,15 @@ export const clinicianOnlineLog = pgTable('clinician_online_log', {
 
 // ─── Audit log — append-only record of who touched what ──────────────────────
 // Ids and action names only. Never request bodies, never clinical text.
+// Open-beta usage, aggregate only: how many signed-out visitors talked to Ace.
+// Counts per UTC day — no IPs, no user agents, no text, nothing identifying
+// (the checklist's own analytics rule: first-party, cookieless, server-side).
+export const betaChatStats = pgTable('beta_chat_stats', {
+  day: date('day').primaryKey(),
+  messages: integer('messages').notNull().default(0),
+  conversations: integer('conversations').notNull().default(0),
+});
+
 export const auditEvents = pgTable('audit_events', {
   id: serial('id').primaryKey(),
   actorUserId: varchar('actor_user_id', { length: 36 }),

@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { and, gte, eq, or, isNull } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
-import { visits, clinicianOnlineLog, checkins, clinicianProfiles, intakeSessions } from '../../../db/schema.js';
+import { visits, clinicianOnlineLog, checkins, clinicianProfiles, intakeSessions, betaChatStats } from '../../../db/schema.js';
 import { requireClinician, logErr } from '../../../lib/dispatch.js';
 import { median, percentile, onlineHours, rate } from '../../../lib/metrics.js';
 
@@ -56,6 +56,15 @@ export default async function handler(req: Request, res: Response) {
       else briefUnmarked++;
     }
 
+    // Open-beta pulse: aggregate guest-chat counters (no identifiers) in the window.
+    const betaRows = await db
+      .select({ day: betaChatStats.day, messages: betaChatStats.messages, conversations: betaChatStats.conversations })
+      .from(betaChatStats)
+      .where(gte(betaChatStats.day, from.toISOString().slice(0, 10)));
+    const today = to.toISOString().slice(0, 10);
+    const betaSum = (f: 'messages' | 'conversations', onlyToday = false) =>
+      betaRows.filter((r) => !onlyToday || r.day === today).reduce((s, r) => s + r[f], 0);
+
     const cs = await db.select({ status: checkins.status, outcome: checkins.outcome, sentAt: checkins.sentAt }).from(checkins).where(gte(checkins.createdAt, from));
     const sent = cs.filter((c) => c.sentAt).length;
     const answered = cs.filter((c) => c.status === 'answered' || c.status === 'escalated').length;
@@ -92,6 +101,12 @@ export default async function handler(req: Request, res: Response) {
         visitsPerOnlineHour: hours > 0 ? Math.round((completed.length / hours) * 100) / 100 : null,
       },
       revenue: { capturedCents },
+      beta: {
+        guestMessages: betaSum('messages'),
+        guestConversations: betaSum('conversations'),
+        todayMessages: betaSum('messages', true),
+        todayConversations: betaSum('conversations', true),
+      },
       briefs: {
         completedIntakes: briefRows.length,
         model: briefModel,

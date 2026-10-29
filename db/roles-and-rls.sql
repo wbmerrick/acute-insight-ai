@@ -32,7 +32,7 @@ BEGIN
   FOREACH t IN ARRAY ARRAY[
     'user','session','account','verification','two_factor',
     'intake_sessions','access_requests','patient_profiles','clinician_profiles',
-    'visits','checkins','clinician_online_log','audit_events','patient_assignments'
+    'visits','checkins','clinician_online_log','audit_events','patient_assignments','beta_chat_stats'
   ] LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename=t AND policyname='app_all_'||t) THEN

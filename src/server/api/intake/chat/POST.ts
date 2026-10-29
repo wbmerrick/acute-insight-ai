@@ -3,6 +3,7 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
 import { intakeSessions } from '../../../db/schema.js';
 import { getAuth } from '../../../../lib/auth/auth.js';
+import { recordGuestChat } from '../../../lib/beta-stats.js';
 import { aiAvailable, streamIntakeReply, type ChatTurn } from '../../../lib/ai.js';
 import {
   detectEmergency,
@@ -72,9 +73,13 @@ export default async function handler(req: Request, res: Response) {
     // A signed-out visitor chats freely in the beta; with BETA_OPEN_CHAT=off
     // they may send a few messages, then must create an account.
     if (!session?.user) {
-      if (!betaOpenChat() && patientTurns(messages) > GUEST_TURNS) {
+      const turns = patientTurns(messages);
+      if (!betaOpenChat() && turns > GUEST_TURNS) {
         return res.status(401).json({ error: 'account_required' });
       }
+      // Open-beta pulse: count the message (and a started conversation on the
+      // first patient turn). Aggregate only — no identifiers. Fire-and-forget.
+      recordGuestChat(turns === 1);
     } else if (intakeId != null) {
       // Signed in with a session id: it must belong to them.
       const id = Number(intakeId);
