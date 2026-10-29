@@ -19,3 +19,18 @@ describe('email templates', () => {
     expect(emailAvailable()).toBe(false);
   });
 });
+
+describe('templates never render a sign-up name as markup', () => {
+  it('escapes HTML in the greeting', async () => {
+    const { verifyEmailTemplate, resetPasswordTemplate } = await import('./email.js');
+    const evil = '<a href="https://evil.example">Click to keep your account</a>';
+    for (const t of [verifyEmailTemplate(evil, 'https://acuteinsight.ai/v'), resetPasswordTemplate(evil, 'https://acuteinsight.ai/r')]) {
+      expect(t.html).not.toContain('<a href="https://evil');
+      expect(t.html).not.toContain('Hi &lt;a'); // link-shaped names are dropped, not shown escaped
+    }
+  });
+  it('keeps an ordinary name', async () => {
+    const { verifyEmailTemplate } = await import('./email.js');
+    expect(verifyEmailTemplate("Will O'Brien", 'https://x').html).toContain('Hi Will O&#39;Brien');
+  });
+});

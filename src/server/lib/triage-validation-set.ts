@@ -12,7 +12,7 @@ import type { Acuity } from '../../lib/clinical-brief.js';
 
 export interface ValidationCase {
   id: string;
-  group: 'emergency' | 'urgent' | 'telehealth' | 'routine' | 'selfcare' | 'trap' | 'peds' | 'ob' | 'psych' | 'geriatric' | 'messy' | 'spanish' | 'voice' | 'special';
+  group: 'emergency' | 'urgent' | 'telehealth' | 'routine' | 'selfcare' | 'trap' | 'peds' | 'ob' | 'psych' | 'geriatric' | 'messy' | 'spanish' | 'voice' | 'special' | 'review4';
   chiefComplaint: string;
   answers: string[];
   expected: Acuity;           // minimum acceptable
@@ -160,4 +160,16 @@ export const VALIDATION_SET: ValidationCase[] = [
   { id: 'SP08', group: 'special', chiefComplaint: 'Took too much', answers: ['I took 30 of my 500 mg Tylenol about an hour ago'], expected: 'emergency', note: 'overdose stated as a count, not the word' },
   { id: 'SP09', group: 'special', chiefComplaint: 'Medication', answers: ['I take 2 of my 500 mg Tylenol twice a day for my knee'], expected: 'routine', mustNotExceed: 'routine', note: 'normal dosing must not trip the overdose pattern' },
   { id: 'SP10', group: 'special', chiefComplaint: 'Insulin', answers: ['I accidentally took my long acting insulin twice tonight and now I feel shaky and sweaty'], expected: 'emergency', note: 'insulin double dose with hypoglycemia symptoms' },
+
+  // Round 4 — plain-English dyspnea / chest phrasings the review found slipping the floor
+  { id: 'R4-01', group: 'review4', chiefComplaint: 'breathing', answers: ["I'm not able to breathe properly since this morning"], expected: 'emergency', note: '"not able to" — negation stripper used to eat it' },
+  { id: 'R4-02', group: 'review4', chiefComplaint: 'breathing', answers: ['I cannot catch my breath walking to the bathroom'], expected: 'emergency' },
+  { id: 'R4-03', group: 'review4', chiefComplaint: 'breathing', answers: ['I am unable to breathe right'], expected: 'emergency' },
+  { id: 'R4-04', group: 'review4', chiefComplaint: 'breathing', answers: ["I'm having a hard time breathing"], expected: 'emergency', note: 'at rest unqualified → emergency' },
+  { id: 'R4-05', group: 'review4', chiefComplaint: 'chest', answers: ['my chest has been hurting for an hour'], expected: 'emergency' },
+  { id: 'R4-06', group: 'review4', chiefComplaint: 'chest', answers: ['my chest is aching and it goes into my jaw'], expected: 'emergency' },
+  { id: 'R4-07', group: 'review4', chiefComplaint: 'breathing', answers: ['having trouble breathing since last night, worse lying down'], expected: 'emergency' },
+  { id: 'R4-08', group: 'review4', chiefComplaint: 'breathing', answers: ['I get a little winded going up two flights of stairs, fine at rest, no chest pain'], expected: 'routine', mustNotExceed: 'urgent', note: 'exertional only — must not over-fire' },
+  { id: 'R4-09', group: 'review4', chiefComplaint: 'cold', answers: ['stuffy nose, I can breathe fine, no chest pain, no fever'], expected: 'routine', mustNotExceed: 'routine', note: '"can breathe fine" must not trip' },
+  { id: 'R4-10', group: 'review4', chiefComplaint: 'anxiety', answers: ['when I get anxious I feel like I am not able to breathe for a minute, it passes, happened last month'], expected: 'urgent', mustNotExceed: 'emergency', note: 'historical/episodic — fallback may over-triage; urgent or emergency both accepted' },
 ];

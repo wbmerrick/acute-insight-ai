@@ -28,7 +28,7 @@ const CHIPS = [
 // Client-side emergency pre-screen (mirrors iSpry) so a dangerous message shows
 // the 911 card instantly, before any network round-trip.
 const MEDICAL_EMERGENCY_RE =
-  /chest (pain|pressure|tight|hurts)|crushing chest|heart attack|can'?t breathe|cannot breathe|trouble breathing|difficulty breathing|hard to breathe|short(ness)? of breath|stroke|face droop|slurred speech|overdose|poison|unconscious|passed out|fainted|fainting|seizure|severe bleeding|coughing up blood|anaphyla|throat (is )?(closing|swelling)|airway/i;
+  /chest (pain|pane|pressure|tight|hurts|hurting|aching)|chest (is|has been) (hurting|aching)|crushing chest|heart attack|can'?t breathe|cannot breathe|cannot catch my breath|(not able|unable) to (breathe|catch my breath)|trouble breathing|difficulty breathing|hard (to breathe|time breathing)|short(ness)? of breath|stroke|face droop|slurred speech|overdose|poison|unconscious|passed out|fainted|fainting|seizure|severe bleeding|coughing up blood|anaphyla|throat (is )?(closing|swelling)|airway/i;
 const CRISIS_RE =
   /suicid|kill myself|end my life|ending it all|self[- ]?harm|want to die|hurt myself|cut myself|homicid|kill (him|her|them|someone|people)/i;
 
@@ -470,11 +470,15 @@ function AceChat({ hasAccount, onNeedAccount, intakeId, onComplete, onPortal, in
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ responses, chiefComplaint, checkinId: checkin?.id, outcome: checkin?.outcome }),
       });
-      if (!res.ok) throw new Error('submit');
+      if (!res.ok) {
+        const err = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(res.status === 409 || res.status === 429 ? err.error ?? 'submit' : 'submit');
+      }
       const data = (await res.json().catch(() => ({}))) as { disposition?: Disposition; checkin?: { escalated: boolean; note: string | null } | null };
       onComplete(data.disposition, data.checkin ?? null);
-    } catch {
-      setError('Failed to submit. Please try again.');
+    } catch (e) {
+      const msg = e instanceof Error && e.message !== 'submit' ? e.message : 'Failed to submit. Please try again.';
+      setError(msg);
     } finally {
       setSubmitting(false);
     }

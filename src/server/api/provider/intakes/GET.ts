@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { db } from '../../../db/client.js';
 import { intakeSessions, user, patientProfiles } from '../../../db/schema.js';
 import { eq, desc, inArray } from 'drizzle-orm';
-import { getAuth } from '../../../../lib/auth/auth.js';
+import { requireSession } from '../../../lib/session.js';
 import { audit } from '../../../lib/audit.js';
 import { mfaRequired } from '../../../lib/dispatch.js';
 import { visiblePatientIds, providerScope } from '../../../lib/scope.js';
@@ -10,11 +10,11 @@ import { visiblePatientIds, providerScope } from '../../../lib/scope.js';
 export default async function handler(req: Request, res: Response) {
   try {
     // Verify session
-    const session = await getAuth().api.getSession({ headers: req.headers as unknown as Headers });
-    if (!session?.user) return res.status(401).json({ error: 'Unauthorized' });
+    const session = await requireSession(req, res, 'clinical');
+    if (!session) return;
 
     // Must be a provider or admin
-    const dbUser = await db.select().from(user).where(eq(user.id, session.user.id)).limit(1);
+    const dbUser = await db.select().from(user).where(eq(user.id, session.userId)).limit(1);
     if (!dbUser[0] || (dbUser[0].role !== 'provider' && !dbUser[0].isAdmin)) {
       return res.status(403).json({ error: 'Forbidden' });
     }
@@ -22,7 +22,7 @@ export default async function handler(req: Request, res: Response) {
       return res.status(403).json({ error: 'Two-step verification is required for clinician access', code: 'mfa_required' });
     }
 
-    const allowed = await visiblePatientIds(session.user.id, !!dbUser[0].isAdmin);
+    const allowed = await visiblePatientIds(session.userId, !!dbUser[0].isAdmin);
 
     // Fetch all completed intakes with patient info
     const intakesAll = await db
@@ -65,7 +65,7 @@ export default async function handler(req: Request, res: Response) {
       profile: profileMap.get(intake.patientId) ?? null,
     }));
 
-    audit(req, { action: 'provider.intakes.list', actorUserId: session.user.id, actorRole: dbUser[0].isAdmin ? 'admin' : 'provider', resourceType: 'intake', meta: { count: result.length, scope: providerScope() } });
+    audit(req, { action: 'provider.intakes.list', actorUserId: session.userId, actorRole: dbUser[0].isAdmin ? 'admin' : 'provider', resourceType: 'intake', meta: { count: result.length, scope: providerScope() } });
     res.json(result);
   } catch (error) {
     console.error(

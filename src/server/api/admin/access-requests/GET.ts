@@ -1,18 +1,13 @@
 import type { Request, Response } from 'express';
-import { desc, eq } from 'drizzle-orm';
+import { desc } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
-import { accessRequests, user } from '../../../db/schema.js';
-import { getAuth } from '../../../../lib/auth/auth.js';
+import { accessRequests } from '../../../db/schema.js';
+import { requireAdmin } from '../../../lib/dispatch.js';
 
 export default async function handler(req: Request, res: Response) {
   try {
-    const session = await getAuth().api.getSession({
-      headers: new Headers(req.headers as Record<string, string>),
-    });
-    if (!session?.user) return res.status(401).json({ error: 'Unauthorized' });
-
-    const [requester] = await db.select().from(user).where(eq(user.id, session.user.id)).limit(1);
-    if (!requester?.isAdmin) return res.status(403).json({ error: 'Forbidden — admin only' });
+    const session = await requireAdmin(req, res);
+    if (!session) return;
 
     const rows = await db
       .select()

@@ -83,11 +83,16 @@ export async function resolveCheckin(opts: {
   outcome?: 'better' | 'same' | 'worse' | null;
 }): Promise<{ escalated: boolean; note: string | null; intakeSessionId: number } | null> {
   const [c] = await db
-    .select({ id: checkins.id, intakeSessionId: checkins.intakeSessionId, status: checkins.status, outcome: checkins.outcome })
+    .select({ id: checkins.id, intakeSessionId: checkins.intakeSessionId, status: checkins.status, outcome: checkins.outcome, followupIntakeId: checkins.followupIntakeId })
     .from(checkins)
     .where(and(eq(checkins.id, opts.checkinId), eq(checkins.patientUserId, opts.patientUserId)))
     .limit(1);
   if (!c) return null;
+  // Only an open check-in can be answered. "Worse" marks it escalated at the tap, before
+  // the follow-up intake exists, so an escalated-but-unlinked one is still open. Once a
+  // follow-up is linked it is final — re-resolving re-fired escalation texts to clinicians.
+  const open = c.status === 'scheduled' || c.status === 'sent' || (c.status === 'escalated' && !c.followupIntakeId);
+  if (!open) return null;
 
   const [orig] = await db.select({ brief: intakeSessions.aiBrief }).from(intakeSessions).where(eq(intakeSessions.id, c.intakeSessionId)).limit(1);
   const origLevel = (orig?.brief as ClinicalBrief | null)?.disposition?.level ?? null;

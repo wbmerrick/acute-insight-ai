@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
-import { and, asc, eq, gte, gt, lte } from 'drizzle-orm';
+import { and, asc, gte, gt, lte } from 'drizzle-orm';
 import { db } from '../../../../db/client.js';
-import { auditEvents, user } from '../../../../db/schema.js';
-import { getAuth } from '../../../../../lib/auth/auth.js';
+import { auditEvents } from '../../../../db/schema.js';
+import { requireAdmin } from '../../../../lib/dispatch.js';
 import { audit } from '../../../../lib/audit.js';
 
 /**
@@ -28,10 +28,8 @@ function parseDay(s: string | undefined, endOfDay = false): Date | null {
 
 export default async function handler(req: Request, res: Response) {
   try {
-    const session = await getAuth().api.getSession({ headers: new Headers(req.headers as Record<string, string>) });
-    if (!session?.user) return res.status(401).json({ error: 'Unauthorized' });
-    const [me] = await db.select({ isAdmin: user.isAdmin }).from(user).where(eq(user.id, session.user.id)).limit(1);
-    if (!me?.isAdmin) return res.status(403).json({ error: 'Admin only' });
+    const session = await requireAdmin(req, res);
+    if (!session) return;
 
     const { from, to } = req.query as Record<string, string | undefined>;
     const fromD = parseDay(from);
@@ -63,7 +61,7 @@ export default async function handler(req: Request, res: Response) {
       if (rows.length < PAGE) break;
     }
     res.end();
-    audit(req, { action: 'admin.audit.export', actorUserId: session.user.id, actorRole: 'admin', resourceType: 'audit_events', meta: { rows: total, from: from ?? null, to: to ?? null } });
+    audit(req, { action: 'admin.audit.export', actorUserId: session.userId, actorRole: 'admin', resourceType: 'audit_events', meta: { rows: total, from: from ?? null, to: to ?? null } });
   } catch (error) {
     console.error(JSON.stringify({ event: 'admin.audit.export.error', error: error instanceof Error ? error.message : String(error) }));
     if (!res.headersSent) res.status(500).json({ error: 'Export failed' });

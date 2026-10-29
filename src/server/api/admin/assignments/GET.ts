@@ -2,16 +2,14 @@ import type { Request, Response } from 'express';
 import { eq, desc } from 'drizzle-orm';
 import { db } from '../../../db/client.js';
 import { patientAssignments, user } from '../../../db/schema.js';
-import { getAuth } from '../../../../lib/auth/auth.js';
+import { requireAdmin } from '../../../lib/dispatch.js';
 import { providerScope } from '../../../lib/scope.js';
 import { alias } from 'drizzle-orm/pg-core';
 
 export default async function handler(req: Request, res: Response) {
   try {
-    const session = await getAuth().api.getSession({ headers: new Headers(req.headers as Record<string, string>) });
-    if (!session?.user) return res.status(401).json({ error: 'Unauthorized' });
-    const [me] = await db.select({ isAdmin: user.isAdmin }).from(user).where(eq(user.id, session.user.id)).limit(1);
-    if (!me?.isAdmin) return res.status(403).json({ error: 'Admin only' });
+    const session = await requireAdmin(req, res);
+    if (!session) return;
     const provider = alias(user, 'provider');
     const patient = alias(user, 'patient');
     const rows = await db

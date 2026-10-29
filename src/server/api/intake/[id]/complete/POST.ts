@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { db } from '../../../../db/client.js';
 import { intakeSessions } from '../../../../db/schema.js';
 import { eq, and } from 'drizzle-orm';
-import { getAuth } from '../../../../../lib/auth/auth.js';
+import { requireSession } from '../../../../lib/session.js';
 import { aiAvailable, generateClinicalBrief } from '../../../../lib/ai.js';
 import { buildTemplateClinicalBrief } from '../../../../lib/intake-fallback.js';
 import { ACUITY_LEVELS } from '../../../../../lib/clinical-brief.js';
@@ -18,10 +18,8 @@ interface QAPair {
 
 export default async function handler(req: Request, res: Response) {
   try {
-    const session = await getAuth().api.getSession({
-      headers: new Headers(req.headers as Record<string, string>),
-    });
-    if (!session?.user) return res.status(401).json({ error: 'Unauthorized' });
+    const session = await requireSession(req, res, 'patient');
+    if (!session) return;
 
     const intakeId = Number(req.params.id);
     if (isNaN(intakeId)) return res.status(400).json({ error: 'Invalid intake ID' });
@@ -35,14 +33,24 @@ export default async function handler(req: Request, res: Response) {
     if (!Array.isArray(responses) || typeof chiefComplaint !== 'string') {
       return res.status(400).json({ error: 'responses array and chiefComplaint required' });
     }
+    if (chiefComplaint.length > 4000 || responses.length > 80) return res.status(400).json({ error: 'Intake too long' });
+    for (const r of responses) {
+      if (!r || typeof r !== 'object' || typeof (r as QAPair).question !== 'string' || typeof (r as QAPair).answer !== 'string' || ((r as QAPair).questionId != null && typeof (r as QAPair).questionId !== 'string')) {
+        return res.status(400).json({ error: 'Invalid response format' });
+      }
+      if ((r as QAPair).question.length > 2000 || (r as QAPair).answer.length > 4000) return res.status(400).json({ error: 'Response too long' });
+    }
 
     // Verify ownership before doing any work
     const [existing] = await db
       .select({ id: intakeSessions.id, status: intakeSessions.status })
       .from(intakeSessions)
-      .where(and(eq(intakeSessions.id, intakeId), eq(intakeSessions.userId, session.user.id)))
+      .where(and(eq(intakeSessions.id, intakeId), eq(intakeSessions.userId, session.userId)))
       .limit(1);
     if (!existing) return res.status(404).json({ error: 'Intake session not found' });
+    // A completed intake is a clinical record a clinician may already have read. It is
+    // never rewritten — a new concern is a new intake (and that is how the portal works).
+    if (existing.status === 'complete') return res.status(409).json({ error: 'This intake is already complete. Start a new one for anything new.' });
 
     // Deterministic brief always runs — a safety floor with a triage disposition
     // and flags. The LLM augments it into a full co-pilot brief when available,
@@ -70,7 +78,7 @@ export default async function handler(req: Request, res: Response) {
       }
     }
 
-    await db
+    const [completed] = await db
       .update(intakeSessions)
       .set({
         status: 'complete',
@@ -83,9 +91,12 @@ export default async function handler(req: Request, res: Response) {
       .where(
         and(
           eq(intakeSessions.id, intakeId),
-          eq(intakeSessions.userId, session.user.id)
+          eq(intakeSessions.userId, session.userId),
+          eq(intakeSessions.status, 'in_progress'), // first completion wins, even under concurrent submits
         )
-      );
+      )
+      .returning({ id: intakeSessions.id });
+    if (!completed) return res.status(409).json({ error: 'This intake is already complete. Start a new one for anything new.' });
 
     // Companion: this intake either answers a check-in (and may escalate) or earns one.
     let checkin: { escalated: boolean; note: string | null; intakeSessionId?: number } | null = null;
@@ -93,7 +104,7 @@ export default async function handler(req: Request, res: Response) {
       if (Number.isInteger(checkinId)) {
         checkin = await resolveCheckin({
           checkinId: Number(checkinId),
-          patientUserId: session.user.id,
+          patientUserId: session.userId,
           followupIntakeId: intakeId,
           followupBrief: brief,
           outcome: outcome ?? null,
@@ -101,20 +112,20 @@ export default async function handler(req: Request, res: Response) {
         if (checkin?.escalated && checkin.intakeSessionId) {
           void notifyClinicianOfEscalation({
             intakeSessionId: checkin.intakeSessionId,
-            patientUserId: session.user.id,
+            patientUserId: session.userId,
             followupLevel: brief.disposition.level,
             base: publicBaseUrl(req),
           });
         }
       } else {
         const reason = intakeCheckinReason(brief.disposition.level);
-        if (reason) await scheduleCheckin(intakeId, session.user.id, reason);
+        if (reason) await scheduleCheckin(intakeId, session.userId, reason);
       }
     } catch (err) {
       console.error(JSON.stringify({ event: 'intake.complete.checkin_failed', error: err instanceof Error ? err.message : String(err) }));
     }
 
-    audit(req, { action: 'intake.complete', actorUserId: session.user.id, actorRole: 'patient', resourceType: 'intake', resourceId: intakeId, patientUserId: session.user.id, meta: { acuity: brief.disposition.level, checkinId: checkinId ?? null, escalated: checkin?.escalated ?? null } });
+    audit(req, { action: 'intake.complete', actorUserId: session.userId, actorRole: 'patient', resourceType: 'intake', resourceId: intakeId, patientUserId: session.userId, meta: { acuity: brief.disposition.level, checkinId: checkinId ?? null, escalated: checkin?.escalated ?? null } });
     res.json({ ok: true, aiSummary: brief.summary, aiFlags: brief.flags, disposition: brief.disposition, checkin });
   } catch (error) {
     console.error(

@@ -36,6 +36,19 @@ export async function sendEmail(to: string, subject: string, html: string, text:
 
 // ─── Templates (pure, tested) ────────────────────────────────────────────────
 
+/** User-supplied text (a sign-up name) must never become markup in someone's inbox. */
+export function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
+}
+
+/** A display name for a greeting: escaped, trimmed, one line, short. Null when it isn't usable. */
+function greetName(name: string | null): string | null {
+  if (!name) return null;
+  const clean = name.replace(/[\r\n\t]+/g, ' ').trim().slice(0, 60);
+  if (!clean || /https?:|www\.|@/i.test(clean)) return null; // a "name" that is a link or address is not a name
+  return escapeHtml(clean);
+}
+
 function shell(title: string, body: string, cta: { label: string; url: string }, footnote: string) {
   const html = `<!doctype html><html><body style="margin:0;background:#0b0f14;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#e6edf3">
 <div style="max-width:520px;margin:0 auto;padding:40px 24px">
@@ -49,7 +62,8 @@ function shell(title: string, body: string, cta: { label: string; url: string },
   return { html, text };
 }
 
-export function verifyEmailTemplate(name: string | null, url: string) {
+export function verifyEmailTemplate(rawName: string | null, url: string) {
+  const name = greetName(rawName);
   const t = shell(
     'Confirm your email',
     `${name ? `Hi ${name}, t` : 'T'}ap below to confirm this address for your Acute Insight account.`,
@@ -59,7 +73,8 @@ export function verifyEmailTemplate(name: string | null, url: string) {
   return { subject: 'Confirm your email — Acute Insight', ...t };
 }
 
-export function resetPasswordTemplate(name: string | null, url: string) {
+export function resetPasswordTemplate(rawName: string | null, url: string) {
+  const name = greetName(rawName);
   const t = shell(
     'Reset your password',
     `${name ? `Hi ${name}, s` : 'S'}omeone asked to reset the password for this Acute Insight account. The link works for one hour.`,

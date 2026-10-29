@@ -337,6 +337,7 @@ const rlAuth = rateLimit({ name: "auth", limit: 20, windowMs: 15 * MIN, key: byI
 const rlChat = rateLimit({ name: "chat", limit: 60, windowMs: 10 * MIN });
 const rlSpeak = rateLimit({ name: "speak", limit: 60, windowMs: 10 * MIN });
 const rlRequest = rateLimit({ name: "visit-request", limit: 5, windowMs: 60 * MIN });
+const rlIntake = rateLimit({ name: "intake", limit: 30, windowMs: 60 * MIN }); // start + complete: each complete is a model call
 const rlAnswer = rateLimit({ name: "checkin-answer", limit: 20, windowMs: 60 * MIN });
 const rlAccess = rateLimit({ name: "access-request", limit: 5, windowMs: 60 * MIN, key: byIp });
 
@@ -350,8 +351,8 @@ app.put("/api/patient/profile", patient__profile__put);
 app.get("/api/patient/export", patient__export__get);
 app.post("/api/patient/delete", patient__delete__post);
 app.get("/api/provider/intakes", provider__intakes__get);
-app.post("/api/intake/start", intake__start__post);
-app.post("/api/intake/:id/complete", intake__id__complete__post);
+app.post("/api/intake/start", rlIntake, intake__start__post);
+app.post("/api/intake/:id/complete", rlIntake, intake__id__complete__post);
 app.post("/api/intake/chat", rlChat, intake__chat__post);
 app.get("/api/admin/users", admin__users__get);
 app.put("/api/admin/users/:id/role", admin__users__id__role__put);

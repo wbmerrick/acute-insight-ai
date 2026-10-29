@@ -2,14 +2,13 @@ import type { Request, Response } from 'express';
 import { db } from '../../../db/client.js';
 import { intakeSessions, visits, clinicianProfiles } from '../../../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
-import { getAuth } from '../../../../lib/auth/auth.js';
+import { requireSession } from '../../../lib/session.js';
 
 /** The patient's intakes, each with its dispatch visit (if they requested a clinician). */
 export default async function handler(req: Request, res: Response) {
   try {
-    const auth = getAuth();
-    const session = await auth.api.getSession({ headers: new Headers(req.headers as Record<string, string>) });
-    if (!session?.user) return res.status(401).json({ error: 'Unauthorized' });
+    const session = await requireSession(req, res, 'patient');
+    if (!session) return;
 
     const rows = await db
       .select({
@@ -27,7 +26,7 @@ export default async function handler(req: Request, res: Response) {
       .from(intakeSessions)
       .leftJoin(visits, eq(visits.intakeSessionId, intakeSessions.id))
       .leftJoin(clinicianProfiles, eq(clinicianProfiles.userId, visits.clinicianUserId))
-      .where(eq(intakeSessions.userId, session.user.id))
+      .where(eq(intakeSessions.userId, session.userId))
       .orderBy(desc(intakeSessions.createdAt));
 
     res.json(

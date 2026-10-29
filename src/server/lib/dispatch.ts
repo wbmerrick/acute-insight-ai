@@ -10,7 +10,7 @@ import type { Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/client.js';
 import { clinicianProfiles, user } from '../db/schema.js';
-import { getAuth } from '../../lib/auth/auth.js';
+import { requireSession } from './session.js';
 import { ACUITY_LEVELS, type Acuity } from '../../lib/clinical-brief.js';
 
 export const US_STATES = [
@@ -54,14 +54,9 @@ export interface ClinicianCtx {
  * 401/403 itself and returns null so handlers can `if (!ctx) return`.
  */
 export async function requireClinician(req: Request, res: Response): Promise<ClinicianCtx | null> {
-  const session = await getAuth().api.getSession({
-    headers: new Headers(req.headers as Record<string, string>),
-  });
-  if (!session?.user) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return null;
-  }
-  const [u] = await db.select().from(user).where(eq(user.id, session.user.id)).limit(1);
+  const session = await requireSession(req, res, 'clinical');
+  if (!session) return null;
+  const [u] = await db.select().from(user).where(eq(user.id, session.userId)).limit(1);
   if (!u || (u.role !== 'provider' && !u.isAdmin)) {
     res.status(403).json({ error: 'Clinician access required' });
     return null;
@@ -90,14 +85,27 @@ export function licensesOf(profile: { stateLicenses: unknown }): string[] {
 }
 
 export async function requirePatient(req: Request, res: Response): Promise<string | null> {
-  const session = await getAuth().api.getSession({
-    headers: new Headers(req.headers as Record<string, string>),
-  });
-  if (!session?.user) {
-    res.status(401).json({ error: 'Unauthorized' });
+  const session = await requireSession(req, res, 'patient');
+  return session ? session.userId : null;
+}
+
+/**
+ * Admin-only endpoints: signed in, is_admin, clinical idle limit, and — when
+ * REQUIRE_MFA_CLINICIANS is on — two-step verification, same as clinicians.
+ */
+export async function requireAdmin(req: Request, res: Response): Promise<{ userId: string } | null> {
+  const session = await requireSession(req, res, 'clinical');
+  if (!session) return null;
+  const [u] = await db.select({ isAdmin: user.isAdmin, twoFactorEnabled: user.twoFactorEnabled }).from(user).where(eq(user.id, session.userId)).limit(1);
+  if (!u?.isAdmin) {
+    res.status(403).json({ error: 'Admin only' });
     return null;
   }
-  return session.user.id;
+  if (mfaRequired() && !u.twoFactorEnabled) {
+    res.status(403).json({ error: 'Two-step verification is required for admin access', code: 'mfa_required' });
+    return null;
+  }
+  return { userId: session.userId };
 }
 
 export function logErr(event: string, error: unknown) {

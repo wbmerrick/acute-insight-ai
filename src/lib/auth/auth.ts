@@ -127,6 +127,10 @@ export function getAuth() {
 
     emailAndPassword: {
       enabled: true,
+      // Verification is sent but not required to sign in: a patient creates their account
+      // mid-intake and must be able to keep going. (Reviewed 2026-10-28: an account made
+      // with someone else's address gives the maker nothing of theirs; the email it sends
+      // is escaped and link-shaped names are dropped, so it can't carry a phishing payload.)
       // Reset links go out only when a sender is configured; otherwise the request is logged and no-ops.
       sendResetPassword: async ({ user: u, url }) => {
         const t = resetPasswordTemplate(u.name ?? null, url);

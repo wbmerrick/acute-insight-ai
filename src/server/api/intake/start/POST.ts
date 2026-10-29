@@ -1,19 +1,17 @@
 import type { Request, Response } from 'express';
 import { db } from '../../../db/client.js';
 import { intakeSessions } from '../../../db/schema.js';
-import { getAuth } from '../../../../lib/auth/auth.js';
+import { requireSession } from '../../../lib/session.js';
 
 export default async function handler(req: Request, res: Response) {
   try {
-    const session = await getAuth().api.getSession({
-      headers: new Headers(req.headers as Record<string, string>),
-    });
-    if (!session?.user) return res.status(401).json({ error: 'Unauthorized' });
+    const session = await requireSession(req, res, 'patient');
+    if (!session) return;
 
     const [created] = await db
       .insert(intakeSessions)
       .values({
-        userId: session.user.id,
+        userId: session.userId,
         status: 'in_progress',
         responses: [],
       })

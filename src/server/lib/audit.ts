@@ -29,8 +29,11 @@ export interface AuditInput {
  * the LAST one was written by the proxy in front of us.
  */
 export function clientIp(req: Request): string {
+  // x-real-ip is only meaningful when an edge we control sets it (Vercel does).
+  // Anywhere else a client could send it and pick its own identity.
+  const trustRealIp = !!process.env.VERCEL || process.env.TRUST_X_REAL_IP === 'true';
   const real = req.headers['x-real-ip'];
-  if (typeof real === 'string' && real.trim()) return real.trim().slice(0, 64);
+  if (trustRealIp && typeof real === 'string' && real.trim()) return real.trim().slice(0, 64);
   const xf = req.headers['x-forwarded-for'];
   const list = (Array.isArray(xf) ? xf.join(',') : xf ?? '').split(',').map((s) => s.trim()).filter(Boolean);
   const last = list[list.length - 1];

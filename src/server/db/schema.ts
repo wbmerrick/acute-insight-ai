@@ -37,6 +37,7 @@ export const session = pgTable('session', {
   userId: varchar('user_id', { length: 36 })
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
+  lastActiveAt: timestamp('last_active_at'), // server-side idle logoff (src/server/lib/session.ts)
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at')
     .defaultNow()

@@ -2,19 +2,13 @@ import type { Request, Response } from 'express';
 import { db } from '../../../../../db/client.js';
 import { user, clinicianProfiles } from '../../../../../db/schema.js';
 import { eq } from 'drizzle-orm';
-import { getAuth } from '../../../../../../lib/auth/auth.js';
+import { requireAdmin } from '../../../../../lib/dispatch.js';
 import { audit } from '../../../../../lib/audit.js';
 
 export default async function handler(req: Request, res: Response) {
   try {
-    const session = await getAuth().api.getSession({
-      headers: new Headers(req.headers as Record<string, string>),
-    });
-    if (!session?.user) return res.status(401).json({ error: 'Unauthorized' });
-
-    // Must be an admin
-    const [requester] = await db.select().from(user).where(eq(user.id, session.user.id)).limit(1);
-    if (!requester?.isAdmin) return res.status(403).json({ error: 'Forbidden — admin only' });
+    const session = await requireAdmin(req, res);
+    if (!session) return;
 
     const targetId = req.params.id;
     const { role } = req.body as { role: string };
@@ -25,7 +19,7 @@ export default async function handler(req: Request, res: Response) {
     }
 
     // Prevent demoting yourself
-    if (targetId === session.user.id) {
+    if (targetId === session.userId) {
       return res.status(400).json({ error: 'You cannot change your own role' });
     }
 
@@ -36,7 +30,7 @@ export default async function handler(req: Request, res: Response) {
     // A demoted clinician must stop receiving new-visit texts immediately.
     if (role === 'patient') await db.update(clinicianProfiles).set({ online: false, lastSeenAt: new Date() }).where(eq(clinicianProfiles.userId, targetId as string));
 
-    audit(req, { action: 'admin.role.change', actorUserId: session.user.id, actorRole: 'admin', resourceType: 'user', resourceId: String(targetId), meta: { from: target.role ?? null, to: role } });
+    audit(req, { action: 'admin.role.change', actorUserId: session.userId, actorRole: 'admin', resourceType: 'user', resourceId: String(targetId), meta: { from: target.role ?? null, to: role } });
     res.json({ ok: true, id: targetId, role });
   } catch (error) {
     console.error(JSON.stringify({ event: 'api.error', route: 'admin/users/[id]/role/PUT.ts', error: error instanceof Error ? error.message : String(error) }));

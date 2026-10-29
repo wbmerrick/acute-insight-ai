@@ -20,9 +20,19 @@ const MAX_MESSAGES = 80;
 const MAX_MESSAGE_LENGTH = 4000;
 const GUEST_TURNS = 2; // patient messages allowed before an account is required
 
-/** Count patient turns, ignoring the hidden "Visit basics" account preamble. */
+/**
+ * Count patient turns. The hidden "Visit basics" account preamble is forgiven
+ * ONCE — a prefix is client-controlled, so it can't be an unlimited exemption.
+ * (The client assembles history, so this gate is a nudge toward an account; the
+ * hard bound on model calls is the per-IP rate limit in app.ts.)
+ */
 function patientTurns(messages: ChatTurn[]): number {
-  return messages.filter((m) => m.role === 'patient' && !/^Visit basics/i.test(m.content)).length;
+  let preambles = 0;
+  return messages.filter((m) => {
+    if (m.role !== 'patient') return false;
+    if (/^Visit basics/i.test(m.content) && preambles++ === 0) return false;
+    return true;
+  }).length;
 }
 
 export default async function handler(req: Request, res: Response) {

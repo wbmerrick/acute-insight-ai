@@ -15,6 +15,13 @@
       "when": 1793228299111,
       "tag": "0001_schema_catchup",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793237788282,
+      "tag": "0002_session_last_active",
+      "breakpoints": true
     }
   ]
 }

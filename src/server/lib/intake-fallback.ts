@@ -22,10 +22,13 @@ export interface ChatTurn {
  */
 export const EMERGENCY_PATTERNS: { re: RegExp; neverSuppress?: boolean; label: string }[] = [
   // cardiac
-  { re: /\bchest (pain|pane|pains|pressure|tightness|tight|heaviness|heavy|discomfort|squeez|hurts?|hurting|aches?|aching)|\bmy chest (is )?(hurting|killing me)/i, label: 'chest pain/pressure' },
+  { re: /\bchest (pain|pane|pains|pressure|tightness|tight|heaviness|heavy|discomfort|squeez|hurts?|hurting|aches?|aching)|\b(my )?chest (is |was |has been |keeps |started |been )?(hurting|aching|killing me|sore and tight)/i, label: 'chest pain/pressure' },
   { re: /\bcrushing (chest|pain)|\belephant on my chest|\bheart attack\b/i, label: 'heart attack' },
   // breathing / airway
-  { re: /\bcan'?t (breathe?|breath good|catch my breath|get (a|enough|any) (breath|air))|\bcannot breathe?|\bnot breathing|\bstopped breathing|\bgasping\b|\bstruggling to breathe?|\bhard to breathe? (at rest|sitting|lying|laying)/i, label: 'cannot breathe' },
+  { re: /\bcan'?t (breathe?|breath good|catch my breath|get (a|enough|any) (breath|air))|\bcannot (breathe?|catch my breath)|\bnot breathing|\bstopped breathing|\bgasping\b|\bstruggling to breathe?|\bhard to breathe? (at rest|sitting|lying|laying)/i, label: 'cannot breathe' },
+  // Plain-English dyspnea. The negation word is INSIDE the match on purpose: "not able to
+  // breathe" is a symptom, and the negation-context check must see "I'm " before it, not "not ".
+  { re: /\b(not able|unable|not been able|haven'?t been able) to (breathe?|catch (my )?breath|get (a|enough|any) (breath|air))|\b(hard|difficult|tough) time (breathing|catching my breath)|\b(trouble|difficulty|difficulties|problems?) (breathing|catching my breath)|\bbreathing is (hard|difficult|getting harder|labou?red)/i, label: 'trouble breathing' },
   { re: /\b(lips?|face|fingers?|skin|nails?)[^.]{0,25}\b(blue|purple|gr[ae]y|dusky)\b|\bblue (lips|in the face)\b|\bturning blue/i, label: 'cyanosis' },
   { re: /\b(throat|toung|tounge|tongue|lips?)[^.]{0,15}\b(closing|tight|thick|swelling|swollen|swell)/i, label: 'airway swelling' },
   { re: /\banaphyla|\bepipen (used|injected)|\bused my epipen|\bhives[^.]{0,60}(tongue|toung|throat|breath|swell)/i, label: 'anaphylaxis' },
